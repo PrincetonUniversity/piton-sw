@@ -1,0 +1,18 @@
+==============================================================================
+ Instructions for OpenSPARC T2 Version 1.0 Open Boot PROM (OBP)
+==============================================================================
+
+[1] System Requirements:
+
+    - Sparc system running Solaris 9 or higher
+
+[2] Source code for OBP is included in obp directory.
+
+[3] To compile source code for OBP, type "build_obp.sh".
+    To clean previously compiled OBP, type "build_obp.sh clean".
+
+[4] The binary file openboot.bin will be created under 
+    $SIM_ROOT/obp/obp/arch/sun4v/niagara2/release directory.
+
+    You can copy openboot.bin file from this directory to
+    $SIM_ROOT/S10image directory to use it with Legion / SAM.

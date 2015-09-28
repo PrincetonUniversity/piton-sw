@@ -1,0 +1,13 @@
+copyright: Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved
+copyright: Use is subject to license terms.
+
+Fcode-Version3
+
+" SUNW,t1-fpga-snet" encode-string " compatible" property
+" snet"             encode-string " name"       property
+my-space encode-int " reg"        property
+1 encode-int " interrupts" property
+
+fload ${BP}/dev/sun4v-devices/t1-fpga-snet/methods.fth
+
+end0

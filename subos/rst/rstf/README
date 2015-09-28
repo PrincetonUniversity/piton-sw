@@ -1,0 +1,91 @@
+Overview of the RSTF workspace:  rstf = RST Format
+Russell Quong  11/2002
+
+For a more upto date copy of this information see:
+	/import/archperf/ws/rstf/rstFormat.tex
+or
+	http://ppgweb.eng/archperf/rstFormat.html
+or 
+	http://ppgweb.eng/~quong/rstFormat.html
+
+A) Purpose:
+  1) The main purpose of this WS is to define the RST file format in rstf.h.
+   Some secondary and/or deprecated definitions are in   rstf_*.h
+
+  2) A secondary purpose is to define common RST utilities/code, including
+   starter code and RST-to-RST filters.
+
+B) Guidance on updating this workspace
+  1) The file rstf.h defines RSTF.  Many other programs use this file.  So...
+    - Try to avoid changing this file if possible.
+      In the last 12 months (10/2001-10/2002), I bumped the version once.
+    - Avoid breaking backward compatibility AT ALL COSTS
+      There is considerable data in rstf 2.04-2.06 format.
+    - The safest changes involve adding new rtypes or adding more constants
+      to existing enumerations.  E.g. filling out the register constants
+      in the REGVAL_T:regtype[]
+    - There is a Java port of RSTF, in the jrst workspace.  A Perl script
+      "parses" rstf.h and makes undocumented assumptions about
+      the way rstf.h looks.  Please try to conform to the existing style
+      in the typedefs and enums.
+    - I (RQ) have tried to be stingy in using rtype values.
+  2) If you must change rstf.h, bump the version number in rstf.h
+
+C) Version numbers (VN):  Many "programs" have VN.  Here is some guidance.
+   - rstf
+       version of the RST Format.  Should not change often.
+       The first record in an RSTF trace must define the version number
+       If a new version of rstf breaks backward compatibility, increment
+       the major version.
+   - rstFilter
+       updated when a filter is added or updated.    Update freely.
+   rstracer  = (in rstracer WS)
+      Reflects which version of the rst tracer.  The version indicates
+        what bugs/idiosyncrasies exist.
+      Rstracer outputs both its own version number and the RSTF version num
+
+D) Basic programs and scripts.
+
+rstFilter.C
+  Implemements many RST to RST filters (read stdin/file , write stdout).
+  Typically you need to use several filters in a row.
+  All error messages go to stderr.
+  This code offers generic double-buffering on both input and the output,
+  making is "easier" (hah) to do transformations that must
+  look at several records.
+
+  E.g.
+    rstFilter -a filter-spec1 input-file | rstFilter -a filter-spec2 > output
+
+  For fixing up the post [Atrace->RST] files, I run the two filters:
+     ihash = add ihash values to the RST records
+     addBrTarg = fill in branch target addresses.
+
+runRSTFilt.sh:
+  convenient shell script driver for running rstFilter.  Use this.
+  E.g to fix up the post [Atrace->RST] files, 
+	runRSTFilt.sh -a 'ihash addBrTarg' [-u] raw.rst
+
+  This generates the file out.final which is the final processed RST file ready for snapping.
+  
+atrace2rst.C:
+  convert Atrace to raw RST
+
+test-atr2rst.sh:
+ test the conversion from Atrace to refined RST and shows how to do this.
+ We currently run atrace2rst and then add BR targets.
+
+mksnaps.sh:
+  sample script to create Round 1 snaps (VA only) for Aztecs from long RST files
+
+~quong/bin/rq-snap_global.sh:
+  snap the RST file
+
+  -o . -p $snapdir -n $nsnaps -s $snaplen,$actualRSTsize,4 out.final > snap.log 2>&1
+
+  put the output in .
+  put the snaps in a subdirectory $snapdir of .
+
+data-atrace:
+  some sample traces I use for testing
+  the link BMCSRC points to the source for the sort files.  

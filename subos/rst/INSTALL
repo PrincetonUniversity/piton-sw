@@ -1,0 +1,14 @@
+This file: rst/INSTALL
+
+To build and install the rst package, run "make install" at the
+top-level directory. This will build everything, create an installable
+package, and run tests.
+
+It is a good idea to run "make clean" before "make install" when
+source files have been changed.
+
+Running "make installdbg" instead of "make install" produces debug
+versions of the rst tools.
+
+We recommend running "make" only at the top level, unless you really
+know what you are doing...

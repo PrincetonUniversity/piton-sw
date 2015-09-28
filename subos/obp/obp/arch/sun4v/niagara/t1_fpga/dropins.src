@@ -1,0 +1,139 @@
+# id: @(#)dropins.src 1.4 06/11/22
+# purpose: list the dropins required by this platform
+# copyright: Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved
+# copyright: Use is subject to license terms.
+#
+#
+# Format:	key	<data>
+#		build	<command to run>
+#		depend	<file>
+#		target	<dropin-src> <dropin-name>
+#		source{	[code] terminated by }source
+#		include <file>
+#
+version2
+
+# create the code to execute fcode dropins
+source{
+caps off
+" /packages/SUNW,builtin-drivers" find-device
+
+   headerless
+   : load-driver ( str$ -- )
+      find-drop-in  if		( adr,len )
+         >r dup >r  1 byte-load	(  )
+	 r> r> free-drop-in	(  )
+      then			(  )
+   ;
+   headers
+
+   : interrupt-property ( n -- )  " interrupts" integer-property  ;
+
+   : get-fcode  ( adr1 len1 adr2 len2 -- true | false )
+      find-drop-in  if
+         2dup >r >r
+         rot min  rot swap  move
+         r> r> free-drop-in
+         true
+      else  2drop false
+      then
+   ;
+
+   headers
+
+}source
+
+build		${MAKEDI}
+
+target		bootprom.bin	bootprom
+
+depend          ${BP}/dev/sun4v-devices/vnexus/depend.mk
+target          vnexus.fc         SUNW,vnexus
+source{
+   : onboard-devices ( -- )
+      diagnostic-mode? if
+         ." Loading onboard drivers: "
+      then
+      0 0 " 100" " /" begin-package
+         " SUNW,vnexus" load-driver
+      end-package
+   ;
+}source
+
+# Fonts
+depend		${BP}/pkg/termemu/fonts.mk
+external	font.di
+
+# Sunlogo
+depend          ${BP}/pkg/sunlogo/logo.mk
+external        sun-logo.di
+
+
+# vchannel support
+depend          ${BP}/dev/sun4v-devices/vchannel/depend.mk
+target          vchannel.fc         sun4v-chan-dev
+source{
+   : SUNW,sun4v-channel-devices  ( -- )  " sun4v-chan-dev" load-driver ;
+}source
+
+# vNET support
+depend          ${BP}/dev/sun4v-devices/vnet/depend.mk
+target          vnet.fc         sun4v-vnet
+source{
+   : SUNW,sun4v-network  ( -- )   " sun4v-vnet" load-driver  ;
+}source
+
+# vDisk support
+depend          ${BP}/dev/sun4v-devices/vdisk/depend.mk
+target          vdisk.fc                sun4v-vdisk
+source{
+   : SUNW,sun4v-disk  ( -- )  " sun4v-vdisk" load-driver  ;
+}source
+
+# Virtual console
+depend          ${BP}/dev/sun4v-devices/console/depend.mk
+target          console.fc        sun4v-console
+source{
+   :  SUNW,sun4v-console ( -- )    " sun4v-console" load-driver  ;
+}source
+
+# Network boot support package
+depend		${BP}/pkg/dhcp/obptftp.mk
+external	obptftp.di
+
+# hypervisor TOD
+depend		${BP}/dev/sun4v-devices/tod/depend.mk
+target		tod.fc	sun4v-tod
+source{
+   : SUNW,sun4v-tod  ( -- )	" sun4v-tod" load-driver ;
+}source
+
+# virtual flashprom
+# WARNING - BINDING ON A "name" PROPERTY
+depend		${BP}/dev/sun4v-devices/flashprom/depend.mk
+target		flashprom.fc	sun4v-flashprom
+source{
+   : flashprom  ( -- )	" sun4v-flashprom" load-driver ;
+}source
+
+# legion disk 
+depend		${BP}/dev/sun4v-devices/legion-disk/depend.mk
+target		sim-disk.fc	legion-disk
+source{
+   : SUNW,legion-disk ( -- )	" legion-disk" load-driver ;
+   alias disk	SUNW,legion-disk
+}source
+
+# t1-fpga snet 
+depend		${BP}/dev/sun4v-devices/t1-fpga-snet/depend.mk
+target		t1-fpga-snet.fc	t1-fpga-snet
+source{
+   : SUNW,t1-fpga-snet ( -- )	" t1-fpga-snet" load-driver ;
+   alias snet	SUNW,t1-fpga-snet
+}source
+
+# finish the dropins
+source{
+device-end
+caps on
+}source

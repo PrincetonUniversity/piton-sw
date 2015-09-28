@@ -1,0 +1,11 @@
+The USB 2.0 sources present in this tree under obp/dev/usb2 are
+derived from sources provided by Firmworks under open-source
+licenses. The most recent delivery tarfile is kept in 
+       /ws/obp4.x-gate/imported_tarfiles/firmworks-usb-2006-11-09/usb2.tgz
+
+If we re-merge with a later drop of the firmworks source tree,
+we should create a new tarfile in the above directory to maintain
+those sources. Note that this tarfile contains more sources than
+we used; the uchi, network and serial drivers were not included
+in our sources, since we have no interest in them at this time.
+

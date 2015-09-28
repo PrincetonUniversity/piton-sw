@@ -1,0 +1,365 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# Hypervisor Software File: dropins.src
+# 
+# Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+# 
+#  - Do no alter or remove copyright notices
+# 
+#  - Redistribution and use of this software in source and binary forms, with 
+#    or without modification, are permitted provided that the following 
+#    conditions are met: 
+# 
+#  - Redistribution of source code must retain the above copyright notice, 
+#    this list of conditions and the following disclaimer.
+# 
+#  - Redistribution in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution. 
+# 
+#    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+# may be used to endorse or promote products derived from this software 
+# without specific prior written permission. 
+# 
+#     This software is provided "AS IS," without a warranty of any kind. 
+# ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+# INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+# MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+# ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+# DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+# OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+# FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+# DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+# ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+# SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# You acknowledge that this software is not designed, licensed or
+# intended for use in the design, construction, operation or maintenance of
+# any nuclear facility. 
+# 
+# ========== Copyright Header End ============================================
+# id: @(#)dropins.src  1.1  07/06/22 
+# purpose: 
+# copyright: Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# copyright: Use is subject to license terms.
+#
+#
+# Format:	key	<data>
+#		build	<command to run>
+#		depend	<file>
+#		target	<dropin-src> <dropin-name>
+#		source{	[code] terminated by }source
+#		include <file>
+#
+version2
+
+# create the code to execute fcode dropins
+source{
+caps off
+" /packages/SUNW,builtin-drivers" find-device
+
+   headerless
+   : load-driver ( str$ -- )
+      find-drop-in  if		( adr,len )
+         >r dup >r  1 byte-load	(  )
+	 r> r> free-drop-in	(  )
+      then			(  )
+   ;
+   headers
+
+   : interrupt-property ( n -- )  " interrupts" integer-property  ;
+
+   : get-fcode  ( adr1 len1 adr2 len2 -- true | false )
+      find-drop-in  if
+         2dup >r >r
+         rot min  rot swap  move
+         r> r> free-drop-in
+         true
+      else  2drop false
+      then
+   ;
+
+   headers
+
+}source
+
+build		${MAKEDI}
+
+target		bootprom.bin	bootprom
+
+depend          ${BP}/dev/southbridge/ontario/isa/depend.mk
+target          isa.fc         SUNW,isa
+source{
+   \ Load the ISA bridge driver
+   : class060100 ( -- )
+      " SUNW,isa" load-driver
+
+      " /pci@7c0/pci@0/pci@2/pci@0,2/sound@1" find-package if
+	 delete-device drop
+      then
+
+      " /pci@7c0/pci@0/pci@1/pci@0/sound@1" find-package if
+	 delete-device drop
+      then
+      
+      \ Per HW evaluation the bridge needs to be 'tuned' to increase the 
+      \ throughput of DMA writes to Southbridge devices.  The fix is to 
+      \ program 0x031C91CA00451870 into the pci@0 side of the bridge at offset 0x178.
+      \ Reference cr 6400117.
+      my-parent ihandle>phandle             ( phandle )
+      " reg" rot get-package-property drop  ( prop,len )
+      decode-int nip nip
+      h# 00451870 over h# 178 wbsplit d# 28 << + + " config-l!" $call-parent
+      h# 031C91CA swap h# 17c wbsplit d# 28 << + + " config-l!" $call-parent 
+   ;
+}source
+
+depend          ${BP}/dev/sun4v-devices/vnexus/depend.mk
+target          vnexus.fc         SUNW,vnexus
+source{
+   : onboard-devices ( -- )
+      diagnostic-mode? if
+         ." Loading onboard drivers: "
+      then
+      0 0 " 100" " /" begin-package
+         " SUNW,vnexus" load-driver
+      end-package
+   ;
+}source
+
+# Fonts
+depend		${BP}/pkg/termemu/fonts.mk
+external	font.di
+
+# Sunlogo
+depend          ${BP}/pkg/sunlogo/logo.mk
+external        sun-logo.di
+
+# Keyboard Translator Package
+depend          ${BP}/pkg/keyboard/translator/kbdtrans.mk
+external        kbdtrans.di
+
+# Sun USB Keyboard Tables 
+depend          ${BP}/pkg/keyboard/tables/usb/keyboard.mk
+external        usbkbds.di
+
+# vchannel support
+depend          ${BP}/dev/sun4v-devices/vchannel/depend.mk
+target          vchannel.fc         sun4v-chan-dev
+source{
+   : SUNW,sun4v-channel-devices  ( -- )  " sun4v-chan-dev" load-driver ;
+}source
+
+# vNET support
+depend          ${BP}/dev/sun4v-devices/vnet/depend.mk
+target          vnet.fc         sun4v-vnet
+source{
+   : SUNW,sun4v-network  ( -- )   " sun4v-vnet" load-driver  ;
+}source
+
+# vDisk support
+depend          ${BP}/dev/sun4v-devices/vdisk/depend.mk
+target          vdisk.fc                sun4v-vdisk
+source{
+   : SUNW,sun4v-disk  ( -- )  " sun4v-vdisk" load-driver  ;
+}source
+
+# Virtual console
+depend          ${BP}/dev/sun4v-devices/console/depend.mk
+target          console.fc        sun4v-console
+source{
+   :  SUNW,sun4v-console ( -- )    " sun4v-console" load-driver  ;
+}source
+
+# Network boot support package
+depend		${BP}/pkg/netinet/obptftp.mk
+external	obptftp.di
+
+# Sun4v PCI driver
+depend		${BP}/dev/sun4v-devices/vpci/depend.mk
+target		vpci.fc		sun4v-vpci
+buildoptions    vpci.fc:=       FTHFLAGS += [define] 64BIT-ASSIGNED?
+source{
+   : pciex ( -- )
+       " sun4v-vpci" load-driver
+   ;
+}source
+
+# vebus on fire
+depend		${BP}/dev/sun4v-devices/vebus/depend.mk
+target		vebus.fc	sun4v-ebus
+source{
+   : vebus ( -- )
+       " sun4v-ebus" load-driver
+   ;
+}source
+
+# Intel Gigabit Ethernet
+depend          ${BP}/dev/network/ophir/depend.mk
+target          ophir.fc                ophir
+source{
+   \ Use the subsystem vendor id 0x108e for Sun so we ensure that
+   \ we don't attach the Ophir driver to PCI-E cards. If we do,
+   \ it's possible that the Ophir driver could blow away the EEPROM
+   \ MAC, and the system wouldn't be able to recover the MAC.
+   : pciex8086,105e.108e.105e ( -- )
+      " ophir" load-driver
+   ;
+
+   \ Also attach to SERDES part. We are not concerned about
+   \ corrupting the EEPROM for the SERDES version, since it's
+   \ not used on plugin cards.
+   alias pciex8086,1060.8086.105e pciex8086,105e.108e.105e
+
+}source
+
+# Serial ttya
+depend          ${BP}/dev/ebus-devices/su-serial/depend.mk
+target          su-serial.fc	su-serial
+source{
+   : ebus-serial ( -- )
+      " serial" device-name
+      1 interrupt-property
+      " su16550"   encode-string 
+      " su"        encode-string encode+ " compatible" property
+      " su-serial" load-driver
+   ;
+   alias ebus-0,c2c000	ebus-serial
+   alias ebus-0,3fffff8	ebus-serial
+}source
+
+# Broadcom Gigabit Ethernet
+depend		${BP}/dev/network/bge/depend.mk
+target		bge.fc		bge
+source{
+   : pci14e4,1659 ( -- )
+        " bge" load-driver
+   ;
+   alias pci14e4,1659.14e4.1659	pci14e4,1659	\ BCM5703
+   alias pci14e4,16a7.14e4.9	pci14e4,1659	\ BCM5703?
+   alias pci14e4,1648.108e.1648 pci14e4,1659	\ BCM5704
+   alias pci14e4,1648.14e4.1648 pci14e4,1659	\ BCM5704
+   alias pci14e4,1668.108e.1668 pci14e4,1659    \ BCM5714
+   alias pci14e4,1668.14e4.1668 pci14e4,1659    \ BCM5714
+}source
+
+# virtual flashprom support
+# WARNING - BINDING ON A "name" PROPERTY
+depend		${BP}/dev/sun4v-devices/flashprom/depend.mk
+target		flashprom.fc	sun4v-flashprom
+source{
+   : flashprom  ( -- )	" sun4v-flashprom" load-driver ;
+}source
+
+# hypervisor TOD
+depend		${BP}/dev/sun4v-devices/tod/depend.mk
+target		tod.fc	sun4v-tod
+source{
+   : SUNW,sun4v-tod  ( -- )	" sun4v-tod" load-driver ;
+}source
+
+# SAS LSI 1064 driver (PCI-E version)
+# depend		${BP}/dev/scsi/adapters/lsi1064/depend.mk
+# buildoptions	lsi1064.di:= MAKEDI = ${ROOT}/bin/makedi
+# target		lsi1064.fc	pci1000,56
+# source{
+#   : pci1000,56 ( -- )
+#	" pci1000,56" load-driver
+#   ;
+#   alias pci1000,50.1000.1000   pci1000,56
+#   alias pci1000,56.1000.1000   pci1000,56
+#   alias pciex1000,50.1000.1000 pci1000,56
+#   alias pciex1000,50.1000.3010 pci1000,56
+#   alias pciex1000,56.1000.1000 pci1000,56
+#   alias pciex1000,56.1000.3010 pci1000,56
+#   alias pciex1000,58.1000.1000 pci1000,56
+#   alias pciex1000,58.1000.3010 pci1000,56
+#   alias pci1000,50.1000.3020   pci1000,56
+# }source
+
+# Dec bridge
+depend          ${BP}/dev/pci-bridge/dec21152/depend.mk
+target		dec21152.fc	class060400
+source{
+    : class060400 ( -- )
+       " class060400" load-driver  
+
+       \ broadcom magic
+       \ Lots of spurrious interrupts generated by broadcom when booting.
+       \ Broadcom said well, why don't you try clearing this undocumented
+       \ vendor specific config register, and it worked...
+       my-space " config-l@" $call-self h# 1041166 = if
+          0 my-space h# b4 + " config-l!" $call-self
+       then
+    ;
+}source
+
+# Legacy Southbridge Support below
+
+# Serial line A
+depend		${BP}/dev/southbridge/isa-devices/serial/depend.mk
+target		serial.fc	SUNW,tty
+source{
+   : isa-0,3f8 ( -- )
+      " ttya" encode-string " console" property
+      " SUNW,tty" load-driver
+      " console" delete-property
+   ;
+}source
+
+# an IDE controller
+depend		${BP}/dev/ide/pci/depend.mk
+target		ide.fc		class010100
+source{
+   : class010100 ( -- )  " class010100" load-driver ;
+   alias class01018a class010100
+   alias class01018f class010100
+   alias class0101ff class010100
+}source
+
+# onboard USB driver
+depend          ${BP}/dev/southbridge/usb/depend.mk
+target          southusb.fc          usb
+source{
+   : pci10b9,5237  ( -- )
+      1 interrupt-property
+      " usb" load-driver
+   ;
+}source
+
+depend          ${BP}/dev/usb-devices/device/depend.mk
+target          device.fc       device
+source{
+   : device  ( -- adr len true | false )  " device" get-fcode  ;
+}source
+
+depend          ${BP}/dev/usb-devices/combined/depend.mk
+target          combined.fc     combined
+source{
+   : combined  ( -- adr len true | false )  " combined" get-fcode  ;
+}source
+
+depend          ${BP}/dev/usb-devices/interface/depend.mk
+target          interface.fc    interface
+source{
+   : interface  ( -- adr len true | false )  " interface" get-fcode ;
+}source
+
+depend          ${BP}/dev/usb-devices/hub/depend.mk
+target          hub.fc          hub
+source{
+   : hub  ( -- adr len true | false )  " hub" get-fcode  ;
+}source
+
+depend          ${BP}/dev/usb-devices/kbd/depend.mk
+target          usbkbd.fc          kbd
+source{
+   : kbd  ( -- adr len true | false )  " kbd" get-fcode  ;
+}source
+
+# finish the dropins
+source{
+device-end
+caps on
+}source

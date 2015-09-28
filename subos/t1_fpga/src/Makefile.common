@@ -1,0 +1,51 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# OpenSPARC T2 Processor File: Makefile.common
+# Copyright (c) 2006 Sun Microsystems, Inc.  All Rights Reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES.
+# 
+# The above named program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public
+# License version 2 as published by the Free Software Foundation.
+# 
+# The above named program is distributed in the hope that it will be 
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public
+# License along with this work; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+# 
+# ========== Copyright Header End ============================================
+#
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
+#
+
+XILINX_TOP   = $(TOP)/xilinx
+XILINX_TOOLS = $(XILINX_TOP)/tools
+
+
+MDGEN   = $(SIM_ROOT)/hypervisor/src/support/mdgen/mdgen
+OBJCOPY = $(SIM_ROOT)/hypervisor/src/hypervisor-tools/bin/objcopy
+
+
+CCDIR = $(SUN_STUDIO)/bin
+QASDIR = $(SIM_ROOT)/hypervisor/src/hypervisor-tools/bin
+
+AS  = $(QASDIR)/qas
+CC  = $(CCDIR)/cc
+CPP = /usr/ccs/lib/cpp
+LD  = /usr/ccs/bin/ld
+RM  = /bin/rm -f
+CP  = /bin/cp -f
+
+
+ASFLAGS = -P -D_ASM -xarch=v9d -I$(TOP)/include
+
+CFLAGS = -xarch=v9 -I$(TOP)/include -errwarn=%all -xO2
+
+
+
+.KEEP_STATE:

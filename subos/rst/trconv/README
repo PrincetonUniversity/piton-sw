@@ -1,0 +1,36 @@
+
+copied from /home/klf/trconv/devel/trconv
+
+
+This is the trconv distribution, a utility for printing and converting
+execution traces.  Supported formats are: RST, Shade5, Shade6 (both
+32- and 64-bit), and Rabin's.  It contains the sources for building
+trconv.
+
+Also included is the unaspix ditribution, which trconv uses.  By
+default, typing "make" from this directory will build trconv linked
+against the Spix5 library (the unaspix distribution will be built
+automatically).  See the Makefile if you wish to build a version
+linked against the Spix6 library.
+
+NOTE: use /import/shade/v6/beta-2.0.0-32 for spix functions.
+
+After compilation is complete, type "trconv -h" for help on using
+trconv.
+
+NOTE: the local rstf.h should be compared against the official copy at
+      /import/archperf/include/rstf/rstf.h to ensure consistence. The
+      reason we don't simply link to the official copy is to keep track
+      the version of rstf.h we are using to build trconv.
+
+Contents:
+
+README		This file
+
+Makefile	The Makefile
+
+trconv.C	Support functions
+
+trconv.H	Class definitions and implementations for trace records
+
+main.C		Frontend code, supporting command line arguments

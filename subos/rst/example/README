@@ -1,0 +1,4 @@
+rst/example: example of an rst reader that counts instruction records in a trace by cpu
+
+To install, edit the Makefile to specify the correct path to the rst package, then run "make"
+

@@ -1,0 +1,137 @@
+\ ========== Copyright Header Begin ==========================================
+\ 
+\ Hypervisor Software File: niu.tok
+\ 
+\ Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+\ 
+\  - Do no alter or remove copyright notices
+\ 
+\  - Redistribution and use of this software in source and binary forms, with 
+\    or without modification, are permitted provided that the following 
+\    conditions are met: 
+\ 
+\  - Redistribution of source code must retain the above copyright notice, 
+\    this list of conditions and the following disclaimer.
+\ 
+\  - Redistribution in binary form must reproduce the above copyright notice,
+\    this list of conditions and the following disclaimer in the
+\    documentation and/or other materials provided with the distribution. 
+\ 
+\    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+\ may be used to endorse or promote products derived from this software 
+\ without specific prior written permission. 
+\ 
+\     This software is provided "AS IS," without a warranty of any kind. 
+\ ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+\ INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+\ PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+\ MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+\ ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+\ DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+\ OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+\ FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+\ DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+\ ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+\ SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+\ 
+\ You acknowledge that this software is not designed, licensed or
+\ intended for use in the design, construction, operation or maintenance of
+\ any nuclear facility. 
+\ 
+\ ========== Copyright Header End ============================================
+id: @(#)niu.tok 1.1 07/01/23
+purpose: 
+copyright: Copyright 2007 Sun Microsystems, Inc. All Rights Reserved.
+copyright: Use is subject to license terms.
+
+Fcode-version3
+
+headerless
+
+\ Certain registers are not defined in the legion simulation model for NIU.
+\ Use this to toggle between simulation mode and hardware mode.
+\ [define] legion
+
+fload ${BP}/dev/network/common/link-params.fth
+fload ${BP}/dev/utilities/misc.fth
+fload ${BP}/dev/network/neptune/niu/util.fth
+fload ${BP}/dev/network/neptune/global.fth
+fload ${BP}/dev/network/neptune/reg-defs.fth
+fload ${BP}/dev/network/neptune/util.fth
+fload ${BP}/dev/network/neptune/niu/map.fth
+fload ${BP}/dev/network/neptune/mif.fth
+fload ${BP}/dev/network/common/mif/mii-h.fth
+fload ${BP}/dev/network/common/mif/gmii-h.fth
+fload ${BP}/dev/network/neptune/bcm8704.fth
+fload ${BP}/dev/network/neptune/niu/ti.fth
+fload ${BP}/dev/network/neptune/xmac.fth
+fload ${BP}/dev/network/neptune/niu/redirect.fth
+fload ${BP}/dev/network/neptune/classifier.fth
+fload ${BP}/dev/network/neptune/core.fth
+fload ${BP}/dev/network/common/devargs.fth
+fload ${BP}/dev/network/neptune/pkg.fth
+fload ${BP}/dev/network/neptune/niu/md-access.fth
+
+" network" encode-string " name" property
+
+" tx-dma-channels" required-prop
+drop dup x@ swap /x + x@ swap encode-int rot encode-int encode+ " tx-dma-channels" property
+" rx-dma-channels" required-prop
+drop dup x@ swap /x + x@ swap encode-int rot encode-int encode+ " rx-dma-channels" property
+
+" compatible" required-prop " compatible" property
+" device-type" required-prop encode-string " device_type" property
+" phy-type" required-prop encode-string " phy-type" property
+
+" mac-addresses" required-prop 2dup
+encode-bytes " mac-addresses" property
+drop 6 encode-bytes " local-mac-address" property
+
+h# ffff.ffff 0 lxjoin constant reg-mask
+
+\ The 'reg' property for the NIU ports have 4 entries, as described
+\ by the device binding.
+\ 0: configuration entry
+\ 1: PIO region
+\ 2: VIO1 region
+\ 3: VIO2 region
+: make-reg-property ( -- )
+   0 0 encode-bytes
+   my-space en+ 0 en+ 0 enx+			\ config
+   my-space en+ 0 en+ h# 1000000 enx+		\ PIO
+   my-space en+ h# 1000000 en+ h# 8000 enx+	\ VIO1
+   my-space en+ h# 5000000 en+ h# 8000 enx+	\ VIO2
+   " reg" property
+;
+
+make-reg-property
+
+: get-interrupts ( -- ix ... i1 x )
+   my-node " interrupts" -1 md-find-prop dup if	( prop | 0 )
+      md-decode-prop ascii d = if		( val | buf,len )
+         \ d == data block, multiple interrups
+         dup /x / >r				( buf,len )( R: x )
+         begin					( buf,len' )
+            /x - 2dup + x@ -rot dup 0=		( ix ... buf,len' done? )
+         until					( ix ... buf,len' )
+         2drop r>				( ix ... i1 x )( R:  )
+      else					( prop )
+         \ v == data value, one interrupt
+         1					( i1 x )
+      then					( ix ... i1 x )
+   then						( ix ... i1 x )
+;
+
+: make-interrupt-property ( -- )
+   0 0 encode-bytes 2>r
+   get-interrupts 2r>
+   rot 0 ?do rot en+ loop
+   " interrupts" property
+;
+
+make-interrupt-property
+
+depend-load debugging? ${BP}/dev/network/neptune/niu/debug.fth
+
+
+end0

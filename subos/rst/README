@@ -1,0 +1,29 @@
+rst/README
+
+Top-level README file for the rst trace format and associated tools
+
+This directory contains:
+
+rstf/
+	rstf.h and related .o files (rstf.o, vercheck.o)
+
+rstzip2/
+	old rstzip (v2) compressor
+
+rstzip3/
+	new rstzip compressor (rstzip3)
+
+trconv/
+	trace viewer
+
+tests/
+	test suite
+
+examples/
+	sample codes that use rst tools
+
+Makefile.master
+	included by all components
+
+Makefile
+	top level makefile which builds all components

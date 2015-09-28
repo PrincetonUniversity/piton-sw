@@ -1,0 +1,12 @@
+================
+               User/                                                Branch
+ Rec # Type    Priv PC                  Disassembly                 Taken  EA 
+     0 header  : majorVer=2 minorVer=13 RST Header v2.13
+     2 strdesc : "hex digits F-0: FEDCBA9876543210"
+     3 tlb     : cpuid=593 demap=0 type=0 index=12   no=1 tag=0x00000000ffd00000 data=0xc000000000e00064 pa=0xe00000
+     4 tlb     : cpuid=0 demap=0 type=1 index=137  no=2 tag=0x0000030016054000 data=0x8000000066cd4036 pa=0x66cd4000
+     5 preg    : cpuid=1023 asiReg=128 trap_lvl=0x01 trap_type=0x0d pstate=0x0016 ( PRIV IE) primA=1432 secA=0 primD=1432 secD=0
+     6 pavadiff: cpuid=347 icontext=1432 dcontext=1432 pc_pa_va=0x0000000001300000 ea_pa_va=0x000000ff00768000 ea_valid=1
+     7 instr   : cpuid=347 h [0x00000000dcba4fcc] ldub [%fp - 0x18], %o7            [0x00000000001047e8] 
+     8 tr_instr : cpuid=347 h [0x000000004350fc00] de0fbfe8 [3141590] ea_pa INVALID
+     9 trap    : cpuid=2 async==1 tl=1 ttype=0x04c (interrupt request lvl n) pstate=0x016 ( PRIV IE) syscall=0x0000 pc=0x00000000003643b8 npc=0x00000000003643bc

@@ -1,0 +1,80 @@
+==============================================================================
+ Instructions for OpenSPARC T2 Version 1.0 Architecture and Performance 
+                                Modeling
+==============================================================================
+
+1. Download OpenSPARCT2_Arch_1.0.tar.bz2 file to your directory.  e.g. you 
+   downloaded this file to "/home/johndoe/OpenSPARCT2_SAM" directory.
+
+2. Unzip downloaded file by using following command:
+
+   bunzip2 OpenSPARCT2_Arch.1.0.tar.bz2
+
+   This step will create OpenSPARCT2_Arch.1.0.tar file.
+
+3. Extract files from tar file by using following command:
+
+   tar xvf OpenSPARCT2_Arch.1.0.tar
+
+4. Setup environment variables by editing OpenSPARCT2_SAM.cshrc file.
+
+   Please set the following variables in OpenSPARCT2_SAM.cshrc file
+   
+   SIM_ROOT             Directory location where you Extracted 
+                        the OpenSPARCT2_SAM.tar file. e.g.
+                        /home/johndoe/OpenSPARCT2_SAM
+
+   SUN_STUDIO           Directory location for Sun Studio installation
+                        e.g. /usr/dist/pkgs/sunstudio_sparc/SUNWspro
+
+5. Source the environment variable file above by using following command :
+
+   source OpenSPARCT2_SAM.cshrc
+
+   You may want to add the above command to your ~/.cshrc file, so that
+   every time you login, it will source the above file.
+
+6. This pacakge includes : 
+
+   1. sam-t2 directory : SPARC Architecture Model with SPARC 
+      Architecture Simulator (SAS)
+
+      See README.sam for more details on how run SAM, build SAS etc.
+
+   2. legion directory : Faster SPARC system simulator for Software developers
+
+      See README.legion for more details on how setup/run Legion.
+
+   3. README files : 
+	README,		README.sam,
+	README.legion,	README.hypervisor,
+	README.obp
+
+   4. S10image directory : Binary images suitable for simulation. This includes
+      Binary images of Solaris 10, Open Boot PROM, Hypervisor. All these
+      are used for simulations with SAM and Legion.
+
+   5. bin directory : Set of scripts to build OBP, Legion.
+
+   6. OpenSPARCT2_SAM.cshrc file : Setup for running SAM, Legion.
+
+   7. License files: 
+        GPLv2_License_OpenSPARCT2.txt
+        THIRDPARTYLICENSEREADME.txt
+        BINARY_SLA.txt
+        BSD+_License.txt
+
+   8. rst directory : RST is a trace format for SPARC 
+      instruction-level traces. The rst directory contains 
+      source code for trace reader and compressor/decompressor
+      utility to compress/decompress the traces (rstzip).
+      rst/README for details on how to compile it. 
+
+   9. hypervisor directory : Source code for Hypervisor.
+
+   10. obp directory : Source code for OBP.
+
+   11. t1_fpga directory: Source code for compiling prom.bin for the
+       FPGA mapped OpenSPARC T1 core. Look at README.t1_fpga for instructions
+       on how to compile the code. 
+

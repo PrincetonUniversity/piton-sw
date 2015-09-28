@@ -1,0 +1,36 @@
+===================================================================================
+ Instructions for generating PROM files for OpenSPARC T1 in FPGA implementation
+===================================================================================
+
+[1] System Requirements:
+
+    - Sparc system running Solaris 9 or higher
+
+[2] Source code for PROM files is included in $SIM_ROOT/t1_fpga 
+    directory.
+
+[3] PROM file generation depends on the following files.
+
+    $SIM_ROOT/hypervisor/src/greatlakes/ontario/t1_fpga/q.bin
+    $SIM_ROOT/obp/obp/arch/sun4v/niagara/t1_fpga/openboot.bin
+
+[4] Compile hypervisor. Look at $SIM_ROOT/README.hypervisor for instructions.
+    The following file would be generated
+
+    $SIM_ROOT/hypervisor/src/greatlakes/ontario/t1_fpga/q.bin
+
+[5] Compile obp. Make sure to source OpenSPARCT2_SAM.cshrc according to the
+    instructions in the README file so that the two environment variables
+    SIM_ROOT and SUN_STUDIO are set. Run the following two commands
+    to generate openboot.bin file.
+
+    $ cd  $SIM_ROOT/obp/obp/arch/sun4v/niagara/t1_fpga/
+    $ make
+
+[6] To compile source code for PROM files, change to the directory
+    $SIM_ROOT/t1_fpga/src and then type "make".
+
+[7] The PROM files 1c1t_prom.bin, 1c1t_obp_prom.bin, 1c4t_prom.bin
+    and 1c4t_obp_prom.bin files will be created under the directory
+    $SIM_ROOT/t1_fpga/src/xilinx/prom/
+

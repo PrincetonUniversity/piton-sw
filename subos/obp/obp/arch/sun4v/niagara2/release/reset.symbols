@@ -1,0 +1,17 @@
+# This is a machine generated file
+reset-vector: 0
+sccs-string: e0
+boot-name$: 13c
+obp-name$: 148
+guest-state-align-buffer&: 14c
+guest-state-init-string$: 160
+setup-itlb-entry: 180
+setup-dtlb-entry: 1c0
+setup-i/d-tlbs: 200
+save-reset-state: 274
+error-reset-recovery: 4e0
+puts: 550
+puthex: 584
+find-drop-in: 590
+find&copy-dropin: 648
+power-on-reset: 7b4

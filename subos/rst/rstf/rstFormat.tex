@@ -1,0 +1,1107 @@
+\documentclass[10pt]{article}
+
+\usepackage{rqdefs} \usepackage{rqfullpage} \usepackage{utopia}
+\usepackage{rqcode}
+
+%% Example ltoh commands (start with %-ltoh-) 
+%-ltoh-   title := The RS trace format, aka RST
+%-ltoh-   :{}:\gold:<font color=gold>:</>:
+%-ltoh-   :comm:\salsa:<strong>salsa</strong>::
+
+\rqfullpageD
+
+\begin{document}
+
+\rqtitle{The RST Trace format}
+\rqsubtitle{AAD Tools, last updated \today}
+
+\toc
+
+A HTML version of this document is available at
+\rqlink{http://ppgweb.eng/archperf/rstFormat.html}.  
+
+The master workspace for RST is \textff{/import/archperf/ws/rstf}.  This
+workspace contains source to generate PS and PDF versions of this
+document.  A (possibly out of date) PostScript version of this document
+is available at \texttt{/home/quong/proj/rstf/rstFormat.ps}.
+
+\section{Other Useful links}
+
+\begin{tabular}{|l|l|} \hline
+  What & URL \\ \hline
+  List of known traces & 
+   \rqlink{http://traces.eng/} \\ \hline
+  ArchTools Trace FAQ &
+    \rqlink{http://ppgweb.eng/archperf/traceFAQ.html} \\ \hline
+  The RST trace format &
+    \rqlink{http://ppgweb.eng/archperf/rstFormat.html} \\ \hline
+  The atrace tool/format &
+    \rqlink{http://muskoka.eng/\rqtilde{}bmc/atrace/} \\ \hline
+  Converting atrace to RST &
+    \rqlink{http://ppgweb.eng/\rqtilde{}quong/atrace2rst.html} \\ \hline
+  Converting bustraces to RST &
+    \rqlink{http://ppgweb.eng/\rqtilde{}quong/bustrace.html} \\ \hline
+  Instruction Trace validation & 
+    \rqlink{http://ppgweb.eng/archperf/trace-validation2002.html} \\ \hline
+  Blaze web page &
+    \rqlink{http://ppgweb.eng/archperf/blaze.html} \\ \hline
+  Blaze user guide &
+    \rqlink{http://ppgweb.eng/\rqtilde{}quong/blaze-userguide.html} \\ \hline
+  Blaze TPCC trace &
+    \rqlink{http://ppgweb.eng/\rqtilde{}quong/blaze-tpcc-try500.html} \\ \hline
+\end{tabular}
+
+The trace FAQ answers many questions on how to analyze/process RST
+traces.  Unfortunately, there are many issues that could reasonably
+belong in the trace FAQ page or this page.  We (RQ) have tried to limit
+this web page to RST format definition issues, but the need for examples
+causes this web page to overlap with the trace FAQ.
+
+\section{What is RST?}
+
+RST is short for RS Trace format, which is a format for computer
+architecture traces.  RS stands for "Really Simple" or "Russell's Simple",
+depending on who you talk to (or "to whom you talk" if you hate dangling
+particples).  An RST trace consists of fixed-length records (24 bytes)
+in which the first byte of each record, known as the \textsl{rtype},
+specifies the type.  These two properties ensure that an RST trace is
+easy to decode both now and in the future.  In particular if your old
+analyzer sees a new \textsl{rtype} it does not understand, your code can
+simply skip that record, ensuring forward compatibility.
+
+There are many different kinds of RST records types, including
+\begin{rqitemize}{0em}
+  \item instructions
+  \item events (traps, interrupts)
+  \item MMU state (changes to the TLB, PA-VA diffs)
+  \item string data
+  \item internal processor state (register dumps)
+  \item high-level evnts (process/context switchs, thread switch)
+  \item markers (timestamp, current CPU) 
+  \item state (cache/memory state)
+  \item define your own
+\end{rqitemize}
+
+Here is an example of 4 records in an RST trace: pavadiff, instr, instr,
+and trap.  Again, each record is the same size and the \textsl{rtype}
+indicates the record type.
+
+\begin{rqcode}{\small}
+   +================+
+   |rtype=PAVADIFFT |
+   | i/d contexts   |
+   | PA-VA for PC   |
+   | PA-VA for EA   |
+   +================+
+   |rtype=INSTR\_T   |
+   | flags+instr    |
+   | PC (VA)        |
+   | EA (VA)        |
+   +================+
+   |rtype=INSTR\_T   |
+   | flags+instr    |
+   | PC (VA)        |
+   | EA (VA)        |
+   +================+
+   |rtype=TRAP\_T    |
+   | trap type      |
+   | trap level     |
+   |                |
+   +================+
+\end{rqcode}
+
+
+\section{Why should I use RST?}
+
+Because RST it is simple, flexible, extensible and supported.  It has
+provisions for MP traces, traps, events (snooping, DMA, etc), VA/PA, and
+time stamps, descriptive strings, and trace patching.  Adding new types
+of data in an RST trace, is as simple as defining new rtypes.  In short,
+RST was designed to all kinds of trace data for the next 5 years.
+
+There are numerous tools based on RST.  There is an RST compressor,
+rstzip; used with gzip, we typically find compression rates of 18-40X
+and have seen compression of 200X.
+
+The \textss{rst-snapper} reads RST.  The \textss{rstgen} is a shade
+analyzer which generates RST.  The RST tracer module (
+\textss{rstracer.so} ) for \rqhttp{blaze}{} geneerates rich RST traces.
+Additionally, snaps for the new (4/2000) version of Aztecs, the cycle
+accurate simulator for Cheetah/Jubatus, use RST instructions.
+
+\section{What tools exist for RST?}
+
+The following tools exist for handling RST traces.  All binaries exist
+in \textss{/import/archperf/bin}.
+
+\begin{tabular}{|l|l|} \hline
+  Tool & Description \\ \hline
+  \textss{trv.sh} & view (un/compressed) RST trace \\ \hline
+  \textss{trconv} & view RST trace in ASCII format \\ \hline
+  \textss{rstFilter} & process an RST trace producing a new RST trace \\ \hline
+  \textss{atr2rst.sh} & script to \rqhttp{convert atrace to
+ RST}{atrace2rst.html} \\ \hline
+  \textss{rstzip2} & De/Compressor tailored for MP RST instr traces \\ \hline
+  \textss{rstzip} & De/Compressor tailored for RST instr traces (deprecated) \\ \hline
+  \textss{rstsnap} & snap an RST trace for Aztecs \\ \hline
+  \textss{rstgen} & generate an RST trace from shade (used for Spec2K)
+\\ \hline
+  \textss{rstracer.so} & Blaze module to dump/generate RST traces \\ \hline
+\end{tabular}
+
+\subsection{RST Compression}
+
+A significant, but often overlooked, benefit of RST is an excellent
+compression algorithm.  Typically, RST traces compress to about 1 bytes
+per instruction.  The compressor was implemented by Kelvin Fong.
+
+Unfortunately, there are two incompatible RST compression formats, V1
+and V2, requiring different de/compressors, \textss{rstzip} and
+\textss{rstzip2}, respectively.  Version 2 RST compression supports MP
+traces and is the preferred compression method for all RST instruction
+traces after Aug 2001.  Most RST traces before Jun 2001 were compressed
+with V1 compression (rstzip).
+
+\begin{tabular}{|l|l|l|}
+  Format & Suffix & Description \\
+  V1     & \textss{rz.gz} \textss{rsz} \textss{rsz.gz} & Original 1P format \\
+  V2     & \textss{rz2.gz} & Support for MP and value tracing \\
+\end{tabular}
+
+\subsection{Viewing an RST trace}
+
+Use \textss{trv.sh} or \textss{trconv}. This code was recently updated
+on 6/28/2000, so some flags may have changed.
+
+\begin{rqenumerate}{0em}
+  \item An example run is \textss{trv.sh -n 1000 -s 200 trace45.rz2.gz | less}.
+
+  \item An example run is \textss{trconv -n 1000 -s 20 file.rst}.
+
+  \item There is on-line help for \textss{trconv}.
+
+  \item In the \texttt{INSTR}, \texttt{PAVADIFF} and \texttt{PHYSADDR}
+records, there is a \textss{ea\_valid} field which indicates if the
+corresponding \textss{ea\_xxxx} field contains valid data.  If
+\textss{ea\_valid} is false (0) then the \textss{ea\_xxxx} field must be
+ignored.
+
+Most of my programs (atr2rst, the blaze rstracer) which generate RST
+traces put a bogus, easily recognizable value in \textss{ea\_xxxx} if
+\textss{ea\_valid} is false.
+\end{rqenumerate}
+
+\section{Getting started analyzing a trace}
+
+In a typical trace analyzer (e.g. cache simulator) two records types
+suffice for most of what you want to do.  The \textss{INSTR\_T} record
+gives you the instruction word, PC and optional EA.  The
+\textss{PAVADIFF\_T} record lets you translate the VAs into PAs.  For
+both the I and D references, the last seen \textss{PAVADIFF\_T} contains
+the current (PA-VA) difference values and the effective context used.
+
+Let's consider an example.  Consider the following output from
+\textss{trconv}:
+
+\begin{verbatim}
+  8896 pavadiff: cpuid=0icontext=0 dcontext=0 pc_pa_va=0xffffffffff400000 ea_pa_va=0xffffffffff400000 ea_valid=1
+  8897 instr   : cpuid=0 p [0x0000000001085be0] lduw [%g2 + 0xf0], %g2       [0x00000000014000f0] 
+  8898 instr   : cpuid=0 p [0x0000000001085be4] srl %g2, 0xb, %g2          
+  8899 instr   : cpuid=0 p [0x0000000001085be8] subcc %g2, 0, %g0          
+  8900 instr   : cpuid=0 p [0x0000000001085bec] bpe,a,pt %icc, 0x1085c00   T [0x0000000001085c00] 
+  8901 pavadiff: cpuid=0icontext=0 dcontext=0 pc_pa_va=0xffffffffff400000 ea_pa_va=0xfffffd5fe5c08000 ea_valid=1
+  8902 instr   : cpuid=0 p [0x0000000001085bf0] lduh [%g7 + 0x188], %g2      [0x000002a100225ec8] 
+  8903 instr   : cpuid=0 p [0x0000000001085c00] sra %g2, 0, %i1            
+  8904 instr   : cpuid=0 p [0x0000000001085c04] call 0x1032420                  T [0x0000000001032420] 
+  8905 instr   : cpuid=0 p [0x0000000001085c08] restore %g0, %g0, %g0      
+\end{verbatim}
+
+At record 8897, we have an LDUW instruction with PC=0x0000000001085be0.
+Thus the PC PA is 0x0000000001085be00 + 0xffffffffff400000.  The
+PAVADIFF also indicates the I-context is 0, meaning we are in priviledge
+mode hence executing kernel code.  (We could also determine this as the
+PC VA is in the kernel text region.)  The EA of the load is in record
+8897.  To derive PA of the LDUW, we use the
+\textss{PAVADIFF\_T::ea\_pa\_va\_diff} field.
+
+At record 8898, we have an SRL instruction with PC=0x0000000001085be4.
+We continue to use the values from the last \textss{PAVADIFF\_T} to get
+the PC PA.
+
+At record 8901, we see another \textss{PAVADIFF\_T} record, because the
+LDUH load in the next record, 8902, accesses data on a different page.
+This \textss{PAVADIFF\_T} record contains the necessary
+\textss{ea\_pa\_va\_diff} value for the following LDUH instruction.  In
+this case, the PC (PA-VA) value has not changed.
+
+The dependence on only two record types and the use of the last PAVADIFF
+record data makes processing simple.  Here is the main loop of
+\textff{readRST.C} which prints out the VA and PA of each instruction.
+
+There is C and C++ starter source code for RST readers in
+\textff{/import/archperf/ws/rstf}.
+
+\begin{verbatim}
+    ...
+    for (long long ix = 0; ix < nrecords; ix++) {
+	long long recidx = ix + skip;
+	rstf_unionT * up = &rec[ix];
+	uint8_t rtype = up->context.rtype;
+	if (rtype == CONTEXT_T) {
+	    icontext = (up->context.traplevel > 0) ? 0 : up->context.primD;
+	    dcontext = up->context.primD;
+	} else if (rtype == PAVADIFF_T) {
+	    rstf_pavadiffT * pv = & up->pavadiff;
+	    icontext = pv->icontext;
+	    dcontext = pv->dcontext;
+	    pava_pc = pv->pc_pa_va;
+	    if (pv->ea_valid) {
+		pava_ea = pv->ea_pa_va;
+	    }
+	} else if (rtype == INSTR_T) {
+	    rstf_instrT * ip = & up->instr;
+	    short ih = ip->ihash;
+	    if ( ih == IH_LDX ) {           // shade V5 ihash values
+		// instr is a LDX
+	    }
+	    iw = ip->instr;
+	    pc = ip->pc_va;
+	    pc_pa = pc + pava_pc;
+	    fprintf(out, "%4lld PC V/P %llx / %llx (IW=0x%8x)",
+		    recidx, pc, pc_pa, iw);
+	    if (ip->ea_valid) {
+		ea = ip->ea_va;
+		ea_pa = ea + pava_ea;
+		fprintf(out, "(EA V/P %llx / %llx)",
+			ea, ea_pa, iw);
+	    }
+	    fprintf(out, "\n");
+	}
+    }
+\end{verbatim}
+
+
+\section{Versions of RST}
+
+\begin{verbatim}
+  2.0 6/??/2001 Mostly the same as V1.10.  Has official MP support
+ 1.10 5/09/2001 MP support via cpuid field; better utility fn API\n\
+  1.9 4/20/2001 PREG_T: add cpuid, rename asiReg\n\
+  1.8 3/27/2001 unixcommand(), rstf_snprintf(), stdized rstf_headerT,magic\n\
+  1.7 3/26/2001 Add RECNUM_T for rst-snapper\n\
+  1.6 3/15/2001 Add support for MP (cpu-id to pavadiff, more TLB info)\n\
+  1.5 9/18/2000 Fixed Shade V6 record types (thanks Kelvin)\n\
+  1.4 9/9/2000  Added icontext and dcontext to PAVADIFF_T rec\n\
+  1.4 9/?/2000  Added major, minor numbers to HEADER_T rec\n\
+  1.3 8/25/2000 Added PATCH_T type.\n\
+  1.2 8/22/2000 Added STATUS_T type.\n\
+\end{verbatim}
+
+\subsection{Where do I get RST code?}
+
+The \textff{rstf.h} header file is at
+\textff{/import/archperf/include/rstf/rstf.h}.
+Various other RST binaries exist in \textff{/import/archperf/bin/}
+
+Source code to various RST utilities are in the Code Manager WS
+\textff{/import/archperf/ws/rstf/}.
+
+\labsec{Canonical}
+\section{Detailed specification of the RST trace type}  
+
+We present a precise specification for common record types, as a
+reference for various analyzers.  Compounding matters, different trace
+sources, produce slightly differing values even for common cases.  In
+particular, the \textss{ea\_va} field for branches has several
+interpretations.  Historical note: In my mind, when defining the
+\textss{INSTR\_T} record, there was no chance for ambiguity.  I was
+wrong.
+
+\subsection{Analyzing a canonical RST trace}
+
+The following table shows where/how to get information from an RST
+trace.  The notation \textss{ttt::fff} means to look at field
+\textss{fff} in the \textem{last} record of type \textss{ttt}.  The
+notation \textss{ppp?xxx:yyy} means use value \textss{xxx} if predicate
+\textss{ppp} is true, else use \textss{yyy}; if \textss{yyy} is missing
+then there is no valid data value.
+
+\begin{tabular}{|l|l|} \hline
+  Value of interest & Where / how \\ \hline
+  IW (instr) & \textss{I-TLB miss} ? 0x0 : \textss{INSTR\_T::instr} \\ \hline
+  PC VA & \textss{INSTR\_T::pc\_va}   \\ \hline
+  PC PA & \textss{INSTR\_T::pc\_va} + \textss{PAVADIFF\_T::pc\_pa\_va}
+(known wrong if I-TLB miss) \\ \hline
+  ld/st VA & \textss{INSTR\_T::ea\_valid ? INSTR\_T::ea\_va}   \\ \hline
+  ld/st PA & \textss{INSTR\_T::ea\_valid ? (INSTR\_T::ea\_va +
+PAVADIFF\_T::ea\_pa\_va)} (PA invalid on D-TLB miss or non-translating ASI) \\ \hline
+  PC    I context & \textss{PAVADIFF\_T::icontext} \\ \hline
+  ld/st D context & \textss{PAVADIFF\_T::dcontext} \\ \hline
+  ld/st ASI goes to mem ? & examine ASI; translating+bypass ASI's go to memory \\ \hline
+  instr is CTI ? & decode IW or look at \textss{INSTR\_T::ihash} \\ \hline
+  CTI is taken ? & \textss{INSTR\_T::bt} \\ \hline
+  taken CTI target & \textss{INSTR\_T::bt ? INSTR\_T::ea\_va} \\ \hline
+  instr is annulled ? & \textss{INSTR\_T::an} \\ \hline
+ \hline
+  ld/st ASI & \textss{Immed-ASI ? IW : PREG\_T::asireg} (Decode IW to
+determine Immed-ASI)\\ \hline
+  trap level & \textss{saw TRAP\_T ? (TRAP\_T:tl + 1) :
+PREG\_T::trap\_lvl} \\ \hline
+  enter trap  & Get a \textss{TRAP\_T} record and/or
+\textss{INSTR\_T::tr} \\ \hline
+  trap type   & \textss{TRAP\_T::ttype} \\ \hline
+  exit trap   & Get DONE / RETRY IW and/or get \textss{PREG\_T} \\ \hline
+  system call & \textss{TRAP\_T::syscall} \\ \hline
+  TLB demap   & \textss{TLB\_T::demap} is 1.
+\end{tabular}
+
+The \textss{PREG\_T} (priviledged register) record is the new name for
+badly-named \textss{CONTEXT\_T} record.  The \textss{PREG\_T} record
+encodes various hardware values.  And making things all the more
+galling, the \textss{CONTEXT\_T/PREG\_T} \textem{should not be used to
+detect context switches}.  It is deprecated as of RST format V2.05 and
+has been renamed \textss{PREG\_T}.
+
+\begin{tabular}{|l|l|} \hline
+  Register & Where / how \\ \hline
+  PSTATE & \textss{CONTEXT\_T::pstate} \\ \hline
+  ASI reg & \textss{CONTEXT\_T::asireg} \\ \hline
+  I-MMU primary context & \textss{CONTEXT\_T::primA} (non-existent for
+SPARC) \\ \hline
+  I-MMU secondary context & \textss{CONTEXT\_T::secA} (non-existent for
+SPARC) \\ \hline
+  D-MMU primary context & \textss{CONTEXT\_T::primD} \\ \hline
+  D-MMU secondary context & \textss{CONTEXT\_T::secD} \\ \hline
+\end{tabular}
+
+\subsection{Table of common cases for INSTR and PAVADIFF records}
+
+To help clarify the above information, the following table lists the
+value from \textss{INSTR\_T} and \textss{PAVADIFF\_T} fields for the
+various common cases.  We use the nomenclature \texttt{undef}=undefined,
+\textss{valid}=expected value, N/A=not used or not applicable, and
+\texttt{impdep}=implementation dependent.  In particular, pavadiff
+records are emitted on demand and a N/A entry will not trigger a
+pavadiff record.
+
+\begin{tabular}{|l|l|l|l|l|l|}
+     & \mc{3}{|c|}{\textss{INSTR\_T}} & \mc{2}{|c|}{\textss{PAVADIFF\_T}} \\
+Case & \texttt{IW} & \texttt{pc\_va} & \texttt{ea\_va} & \texttt{pavaPC} & \texttt{pavaEA} \\
+ITLB miss        & norec & norec & norec   & norec & norec \\
+non-mem, non-CTI & valid & PC VA & undef   & valid & valid \\
+memop good       & valid & PC VA & EA VA   & valid & valid \\
+memop DTLB miss  & valid & PC VA & EA VA   & valid & N/A \\
+CTI taken        & valid & PC VA & target PC & valid & N/A \\
+CTI non-taken    & valid & PC VA & \textem{impdep} & valid & N/A \\
+annul ITLB miss  & undef & PC VA & norec   & norec & norec \\
+annul instr      & valid & PC VA & N/A     & valid & N/A  \\
+\end{tabular}
+
+\subsection{Ordering of simultaneous records}
+
+When several RST records apply to a given event, we recommend the
+following ordering.  Records in the same group can be ordered
+arbitrarily; in practice, only Our guiding strategy is to make it easy
+for an RST trace consumer to process the information.  Generally, we try
+to put \textss{INSTR\_T} record last, unless there is a
+\textss{REGVAL\_T} record containing values produced by the instr.
+
+\begin{tabular}{|l|l|}
+  Group 1 & \textss{CPU\_T} \\
+  Group 2 & \textss{PREG\_T}, \textss{REGVAL\_T} with postInstr=0 \\
+  Group 3 & \textss{TRAP\_T}, \textss{TRAPEXIT\_T} \\
+  Group 4 & \textss{PAVADIFF\_T} \\
+  Group 5 & \textss{INSTR\_T} \\
+  Group last & \textss{REGVAL\_T} with postInstr=1 \\
+\end{tabular}
+
+If \textss{REGVAL\_T::postInstr} is set, then the values are those
+present after the instruction has executed.
+
+\swallow{
+arch specific
+  algorithm for I context changes in MM
+  TLB field
+  ihash fn
+}
+
+\subsection{Common errors}
+
+To detect a context switch, examine \textss{PAVADIFF\_T::icontext},
+\textsl{do not use a \textss{CONTEXT\_T} record}.
+\textss{PAVADIFF\_T::icontext} and \textss{PAVADIFF\_T::dcontext} give
+the effective I and D contexts being used, which is correct to the best
+of my knowledge.
+
+On a ASI LD/ST using an immediate ASI, do not use the
+\textss{CONTEXT\_T::asireg} field, as this field contains the contents
+of the ASI register.
+
+The \textss{TLB\_T::valid} bit is meaning less.  To determine if a TLB
+line is valid, instead, look at the valid bit in the TLB TTE data.
+
+\subsection{Clarification and the blaze RST tracer}
+
+We cover several ambiguous corner cases in this section. We also
+describe what the blaze V1.x and V2.x RST tracer does in these cases.
+
+\begin{rqitemize}{0em}
+  \item {}[Annulled instr - I-TLB hit]
+  The VA PC, PA PC and IW are all valid.  The blaze RST tracer emits an
+  instruction record with the annulled bit set.
+
+  \item {}[Annulled instr - with ITLB miss] If there is an I-TLB miss on
+  an annulled instruction, \textsl{only the VA PC is valid}.  Because we
+  cannot determine the PC PA, we cannot even fetch the IW.
+
+(The blaze RST tracer) On an annulled instr that misses the I-TLB, we
+emit an IW=0 (illegal trap) and blithely let the previous PAVADIFF
+remain.  While this PC PAVADIFF is technically wrong, we deemed it it
+less intrusive than generating a PAVADIFF just to flag that we have an
+unknow PC PA.  (I had tried emitting a special PAVADIFF, but have since
+retracted this approach.)  Additionally, trace analyzers that do care
+about the PC PA of an annulled instruction should be smart enough to
+suppress the I-TLB miss.
+
+  \item {}[Memory ops with a D-TLB miss]
+
+  A memop that has a D-TLB miss will appear twice in the trace.  The
+  sequence will be $(i)$ memop-try-1 + DTLB miss, $(ii)$ D-TLB miss handler
+  with possible complications like TSB miss and/or page fault, $(iii)$
+  memop try-2 which succeeds.  On a D-TLB miss, the
+  PA EA will be unknown on the first try.
+
+(The blaze RST tracer) On a D-TLB miss, we first emit an RST trap
+record indicating the D-TLB miss and then it emits instr record for the
+memop.  The RST instruction record for the memop has its trap bit set.
+That's it.  In particular, we do not emit a PAVADIFF record, as we rely
+on the trace consumer to detect the DTLB miss and squash the memop.
+
+  \item {}[EA for untaken branches] 
+If a CTI instr is not taken (an untaken branch), we know we shall fall
+through to next PC.  In this case, \textss{INSTR\_T::ea\_valid} is 0,
+and \textss{INSTR\_T::ea\_va} \textsl{is unspecified}.  For blaze and
+atrace-based RST traces, \textss{INSTR\_T::ea\_va = PC +8}; for
+shade-based RST traces, \textss{INSTR\_T::ea\_va = taken-target-PC}.
+
+  \item {} [PSTATE.AM = 1] If the AM bit is one, all virtual addresses
+are limited to 32 bits.  The \textss{INSTR\_T::ea\_va} field must
+contain a 32-bit value; namely the upper 32 bits of the 64-bit
+\textss{ea\_va} field must be zero.
+
+  \item {}[PA EA only applies to mem ops]
+Although \textss{INSTR\_T::ea\_va} holds both $(i)$ memory addresses and
+$(ii)$ CTI target, you must use \textss{PAVADIFF\_T::ea\_pa\_va} value
+only for memory operations.  The RST spec forbids using PAVADIFF to get
+the PA of a CTI/branch target, because $(a)$ you can get the PA PC from
+the actual target instruction itself and $(b)$ at the time of the
+CTI/branch, the PA PC may not be known as we may incur an I-MMU miss.
+
+  \item {}[TLB demap operation] On a TLB demap operation, we record the
+  VA and context of the TLB entry that is demapped.  We do not record
+  the TTE\_data of the entry being demapped.  (There was a bug where the
+  \textss{TLB\_T::demap} was not being set.)
+
+  \item {}[LD/ST ASI to non-memory (e.g. to an MMU register)] For all
+loads and stores, even load/store ASI instructions,
+\textss{INSTR\_T::ea\_valid = 1} and \textss{INSTR\_T::ea\_va} holds
+the virtual address.  Some of the ld/st ASI have a meaningful virtual
+addresses, e.g. \textss{ASI\_UDB\_INTR\_W} or
+\textss{ASI\_DTLB\_DATA\_TAG\_REG}, so the \textss{INSTR\_T::ea\_va}
+must contain the effective address.
+
+For non-translating ASI's, the downstream trace analyzer must not
+generate a PA, which puts the burden of knowing whether to generate a PA
+on the trace analyzer.  The ASI's obey the following breakdown, where
+[aa,bb] is the range inclusive of aa and bb, namely $aa \le x \le bb$.
+
+\begin{tabular}{|l|l|} \hline
+  Range & How to get PA from VA \\ \hline
+  {}[0x04,0x11] [0x18,0x19] [0x24,0x2c] & Translate via MMU \\
+  {}[0x70,0x73] [0x78,0x79] [0x80,0xff] & Translate via MMU \\ \hline
+  {}[0x14,0x15] [0x1c,0x1d] & Bypass.  PA=VA \\ \hline
+  {}[0x45,0x6f] [0x76,0x77] [0x7e,0x7f] & Non-translating (no PA) \\ \hline
+\end{tabular}
+
+The following tables lists some common translating ASI's.
+
+\begin{tabular}{|l|l|}
+  Value & ASI name  \\
+  0X04 & NUCLEUS  \\
+  0X0C & NUCLEUS\_LITTLE \\
+  0X10 & AS\_IF\_USER\_PRIMARY  \\
+  0X11 & AS\_IF\_USER\_SECONDARY \\
+  0X80 & PRIMARY (the default ASI for all loads) \\
+  0X81 & SECONDARY \\
+  0X82 & PRIMARY\_NO\_FAULT \\
+  0X83 & SECONDARY\_NO\_FAULT \\
+  0X88 & PRIMARY\_LITTLE \\
+  0X89 & SECONDARY\_LITTLE \\
+  0XE0 & BLK\_COMMIT\_PRIMARY \\
+  0XE1 & BLK\_COMMIT\_SECONDARY \\
+  0XF0 & BLK\_PRIMARY \\
+  0XF1 & BLK\_SECONDARY \\
+\end{tabular}
+
+\end{rqitemize}
+
+\labsec{PAVA}
+\subsection{VA to PA translation}
+
+The RST format is designed to capture both VA and PAs.  There are
+several overlapping ways to specify the necessary information.  As of
+11/2001, the defacto standard is the \texttt{PAVADIFF} method and as
+such, you may safely assume \textss{PAVADIFF\_T} records always exist.
+(As of 3/2001, blaze, atrace and shade based RST traces all use
+PAVADIFF\_T records).  
+
+\textsl{PAVADIFF method:} A standard method is to use \texttt{PAVADIFF}
+records, which captures the (PA-VA) values for the I-TLB and D-TLB.  In
+a \texttt{PAVADIFF} record, the \textss{pc\_pa\_va} field contains the
+difference of (PA-VA) for the PC of the next \texttt{INSTR} record.  If
+the INSTR is a \texttt{load} or \texttt{store} (but not a
+\texttt{branch/call/jump} ), then the \textss{ea\_pa\_va} field of the
+\texttt{PAVADIFF} record holds the (PA-VA) for the EA, which is how the
+D-TLB would translate that EA.  Here is how the trace might look.
+
+As of RST V1.9 (4/2001), there is a separate \texttt{PAVADIFF} record
+for each CPU.  The CPU ID is contained in \texttt{PAVADIFF\_T::cpuid}.
+
+{\footnotesize
+\begin{verbatim}
+     3 pavadiff: context=571 cpu=0 pc_pa_va=0x00000002c0800000 ((ea_pa_va=0xffffffffffffffff)) ea_valid=0
+     4 instr    : u [0x000000010050f144] srl %i1, 0, %i0                   
+     5 instr    : u [0x000000010050f148] or %g3, %g2, %g2                  
+     6 instr    : u [0x000000010050f14c] sll %i0, 2, %g3                   
+     7 pavadiff: context=571 pc_pa_va=0x00000002c0800000 ea_pa_va=0x00000002c0800000 ea_valid=1
+     8 instr    : u [0x000000010050f150] ldsw [%g3 + %g2], %g3             [0x000000010050e390] 
+     9 instr    : u [0x000000010050f154] jmpl %g3 + %g2, %g0             T 
+    10 instr    : u [0x000000010050f158] nop                               
+\end{verbatim}
+}
+
+Note for a control-transfter instruction (e.g \texttt{br/call/jmpl} etc)
+which jumps to a target PC, \texttt{targPC}, you must "wait" until you
+see the target INSTR record to determine the PA for \texttt{targPC}.  If
+\texttt{targPC} is on a different page with a different (PA-VA) value
+than the current PC, there will be a PAVADIFF record before the target
+instruction, if necessary.
+
+\begin{rqcode}{ }
+  PAVADIFF pc\_pa\_va=diffaa
+  ...
+  PCaa     br targPC		// targPC is on a different page
+  PCaa+4   delay slot instr
+
+  PAVADIFF pc\_pa\_va=diffbb	// new value for PA-VA for targPC.
+  targPC   target instruction   // PA of targPC = (targPC + diffbb)
+\end{rqcode}
+
+There are two common ways of using PAVADIFF records.  With
+\textsl{on-change}, I generate PAVADIFF records only the (PA-VA) values
+change for either the PC or the EA.  If the \textss{ea\_valid} field is
+false (0), then the previous \textss{ea\_pa\_va} value is still assumed
+to be correct.  One caveat, it is possible for the (PA-VA) values to be the same for
+different (TLB) pages, in which case, you may not see PAVADIFF record
+even when we cross pages.
+
+Another possible use of PAVADIFF records is on a \textsl{every-instr}
+basis, in which PAVADIFF record precedes every instr, which nearly
+doubles the trace size.  Nobody in their right mind does this as of
+1/2001.
+
+\textsl{TLB method:} The conceptually preferred (but practically
+difficult) method is to have \texttt{TLB} records which describe all the
+necessary mappings before they are used.  Whenever a TLB line is
+changed, a corresponding TLB records appears in the trace.  Also, in an
+RST trace from blaze, the entire TLB is dumped at the beginning of the
+trace.  As of RST V1.9, a TLB record contians the TLB unit (e.g. Cheetah
+has two I-TLBS units) and the CPU to which it applies.
+
+Despite its compactness, TLB records cannot be used universally for
+VA-to-PA translation.  The TLB method for tramslation is the most
+compact, because the TLB records should be relatively infrequent in a
+trace.  However, to get PA's, your analyzer program must simulate a TLB,
+which has proven to be difficult, slow and hence extremely unpopular.
+And in many cases, (e.g. when the trace is from atrace or shade), TLB
+information is unavailable, so TLB records will be missing.
+
+Here is sample output from a RST trace from the blaze \textss{rstracer}
+module.  Records 9-4014 (roughly 2048 I-TLB + 2048 D-TLB) are the
+initial TLB values.  At record 4649, we replace I-TLB entry 1090.  Here
+\texttt{type=0} means I-TLB.  The \texttt{demap=0} field means that this
+entry is being added to the TLB, which also replaces any previous entry.
+
+{\footnotesize
+\begin{verbatim}
+     1 string   : string=date=00-06-26
+     2 string   : string=host=bigc
+     3 string   : string=ramsize=1024M
+
+     4 string   : string=tlbsize=2048
+     5 string   : string=nwins=8
+     6 string   : string=cpufreq=600000000
+     7 string   : string=mpsteps=200
+     8 cpu      : cpu=0 timestamp=0x45a318a1df
+     9 tlb      : demap=0 type=0 valid=0 index=0    state=0x0000 context=0x0000 tag=0x00000000ffd00000 data=0xa000000000e00064 pa=0xe00000
+    10 tlb      : demap=0 type=0 valid=0 index=1    state=0x0000 context=0x0000 tag=0x00000000ffd10000 data=0xa000000000e10064 pa=0xe10000
+  ...
+  ... 
+  4103 tlb      : demap=0 type=1 valid=1 index=2046 state=0x0000 context=0x110f tag=0x00000003a68b310f data=0xe00010000c000032 pa=0x
+c000000
+  4104 tlb      : demap=0 type=1 valid=0 index=2047 state=0x0000 context=0x1115 tag=0x00000003a9fc7115 data=0xe000000008c00032 pa=0x
+8c00000
+  4105 cpu      : cpu=1077781320 timestamp=0x45a318a1df
+  4106 context  : asi=0x0082 last_context=0x0120 trap_lvl=0x00 trap_type=0x00 pstate=0x0012 primA=0x0000 secA=0x0000 primD=0x0120 se
+cD=0x0120
+  4107 instr    : u [0x000000010087ec18] add %i1, %o2, %o0                 
+  4108 instr    : u [0x000000010087ec1c] ldub [%o2 + %o4], %g3             [0x0000000101b7a7ba] 
+  4109 instr    : u [0x000000010087ec20] subcc %g3, %g2, %g0               
+  4110 instr    : u [0x000000010087ec24] bple,a,pn %icc, 0x10087ec30     T [0x000000010087ec30]
+  ...
+  ...
+  4648 instr    : p [0x0000000010000cb4] nop                               an 
+  4649 tlb      : demap=0 type=0 valid=0 index=1090 state=0x0000 context=0x0120 tag=0x0000000100b2a120 data=0x8000000003756020 pa=0x
+3756000
+  4650 instr    : p [0x0000000010000cb8] stxa %g5, [%g0 + %g0]0x54         
+  4651 context  : asi=0x0082 last_context=0x0000 trap_lvl=0x00 trap_type=0x00 pstate=0x0012 primA=0x0000 secA=0x0000 primD=0x0120 se
+cD=0x0120
+  4652 instr    : p [0x0000000010000cbc] retry                           T [0x0000000100b2bed0] 
+  4653 instr    : p [0x0000000100b2bed0] or %g0, %o0, %g2                  
+\end{verbatim}
+}
+
+\textsl{PHYSADDR method:} The last brute force method is to put a
+PHYSADDR record before every instr record.  The PHYSADDR record contains
+the PA for the following PC and the EA, if appropriate.
+
+\subsection{VA to PA translation historical notes}
+
+For many months, I (RQ) was convinced the TLB method was the correct way
+to handle VA-PA translation.  How difficult could simulating a TLB be?
+The PAVADIFF was meant to be a stop-gap, until correct TLB simulators
+were written.  I was wrong.  Very wrong.
+
+In retrospect, the use of PAVADIFF records has greatly simplified RST
+trace processing.  Even now (03/2002), two years after the initial
+discussion, finding a correct TLB simulator (e.g. one that agrees with
+the PAVADIFF recors) remains elusive.  Special "thanks" to the MM team,
+especially Sudi K, for steadfastly being unable to use TLB records,
+forcing PAVADIFF records to become the standard.
+
+\subsection{Underlying philosophy}
+
+You should be able to glean most of what you want to know from just
+\textss{INSTR\_T}, \textss{PAVADIFF\_T} and \textss{TRAP\_T} records.
+
+((to be finished))
+
+The \textss{TLB\_T} records let you do your own VA to PA translation
+were extremely unpopular and have been superceded in practice by
+\textss{PAVADIFF\_T} records.
+
+\textss{CONTEXT\_T} records were originally meant to be much more useful.
+
+\section{The blaze RST trace}
+
+While each individual RST record type is fairly unambigious, how the
+records are put together is implementation dependent.  
+
+In a \textss{TRAP\_T} record, the HW state is that \textbf{before} the
+trap is taken.  Thus, a trap from user code will show \textss{TL=0}.
+
+If executing an instr causes a trap, say a D-TLB miss, you will see the
+instr (with the \textss{tr} bit set) and then trap.  If fetching an
+instr causes a trap (e.g. IMMU miss), you will not see the instruction
+until after the trap returns.
+
+If there is a write to the \textss{PSTATE} or the \textss{TL} registers,
+the new values are shown in a \textss{CONTEXT\_T} record.
+
+\subsection{Information in the RST header}
+
+As of 4/2001 (V1.4), the blaze \textss{rstracer} module spits out
+copious information about the configuration.  Before that, a more modest
+modicum of information was spit out.  As of Version 1.4, we get the
+following series of records at the start of a trace.
+
+\begin{verbatim}
+  $ trv.sh -n 24 /import/arch-trace03/blaze/tpcc-try8/try8-t6.rsz 
+RST trace format (stdin)
+================
+               User/                                                Branch
+ Rec # Type    Priv PC                  Disassembly                 Taken  EA 
+     0 header  : majorVer=1 minorVer=8 RST Header v1.8
+     1 strdesc : "Blaze [ rstracer.so ]"
+     2 strdesc : "rstracer=V1.4"
+     6 strdesc : "rstracer [compiled against Blz3.48 - Excal 5.8 RW MP ||Disk API=[Trace,Timing]]"
+     8 strdesc : "date=2001-04-05_01:51:56"
+     9 strdesc : "host=bigc"
+    10 strdesc : "<blazeinfo>"
+    13 strdesc : "blz::version=3.49 - Excal 5.8 RW MP ||Disk API=[Trace,Timing]"
+    14 strdesc : "blz::ncpus=1"
+    15 strdesc : "blz::ram=1024M    "
+    16 strdesc : "blz::tlbsize=2048"
+    17 strdesc : "blz::mmutype=spitfire"
+    18 strdesc : "blz::cpufreq=200000000"
+    19 strdesc : "blz::sysfreq=10000000"
+    20 strdesc : "blz::diskdelay=800000"
+    21 strdesc : "blz::nwins=8"
+    22 strdesc : "blz::mpsteps=2"
+    23 strdesc : "</blazeinfo>"
+\end{verbatim}
+
+\section{Where is the source for RST?}
+
+The current source is in \textss{/import/archperf/pkgs/rstf/latest/}.
+
+\begin{tabular}{|l|l|} \hline
+  file & Description \\ \hline
+  \rqhttp{\textss{rstf.h}}{file:/import/archperf/pkgs/rstf/latest/rstf.h} & the RST
+format \\ \hline
+  \rqhttp{\textss{rstf.c}}{file:/import/archperf/pkgs/rstf/latest/rstf.c} & a few utility routines and some test code \\ \hline
+\end{tabular}
+
+\section{I want to process an RST trace, where do I start?}
+
+A simple, sample C++ skeleton to read an RST trace file at
+\textss{/import/archperf/pkgs/rstf/latest/readRST.C}.
+
+A simple, sample ANSI C skeleton to read an RST trace file at
+\textss{/import/archperf/pkgs/rstf/latest/readRST-ansiC.c}.  I "thank"
+Anders who found the C++ skeleton impenetrable, and so spent several
+hours doing numerous moronic things getting this code to work.
+
+Finally, the file \textss{/import/archperf/ws/rstf/rstFilter.h}
+contains a more realistic (i.e. complicated) example of RST processing
+in which we read an RST trace, adding/modifying/deleting records, and
+generate a new RST trace.  This code double buffers both input and
+output to guarantee that we can always access/modify the previous K
+records at both the input and output.  (In contrast, if you use a single
+buffer and you just happen to fill (flush) the input (output) buffer,
+you cannot access or modify the previous record).
+
+\subsection{The actual RST code}
+
+Here are the corresponding record definitions directly from
+\textss{rstf.h}.  The code on this web page maybe a bit out of date, so
+check the source \rqlink{/import/archperf/pkgs/rstf/latest/rstf.h}.
+
+\begin{verbatim}
+typedef struct {
+    uint8_t     rtype;		/* value = INSTR_T */
+    unsigned  notused : 1;	/* not used */
+    unsigned  ea_valid : 1;	/* ea_va field is valid */
+    unsigned  tr : 1;		/* trap occured 1=yes */
+    unsigned  notused2 : 1;	/* not used */
+    unsigned  pr : 1;		/* priviledged or user  1=priv */
+    unsigned  bt : 1;		/* branch/trap taken, cond-move/st done, like Shade6 */
+    unsigned  an : 1;		/* 1=annulled (instr was not executed) */
+    unsigned  reservedCompress : 1;  /* used by rstzip compression */
+    uint16_t    ihash;		/* ihash value (optional) */
+    uint32_t    instr;		/* instruction word (opcode, src, dest) */
+    uint64_t    pc_va;		/* VA */
+    uint64_t    ea_va;		/* Eff addr VA */
+} rstf_instrT;
+
+typedef struct {
+    uint8_t     rtype;		/* value = PAVADIFF_T */
+    unsigned    ea_valid : 1;	/* does ea_pa contain a valid address */
+    unsigned    cpuid    : 7;	
+    uint16_t    notused16;	/* (deprecated) context used for these diffs */
+    uint16_t    icontext;	/* I-context used for these diffs */
+    uint16_t    dcontext;	/* only valid if ea_valid is true, */
+    uint64_t    pc_pa_va;	/* (PA-VA) of PC */
+    uint64_t    ea_pa_va;	/* (PA-VA) of EA for ld/st (not branches), if ea_valid is true */
+} rstf_pavadiffT;
+
+typedef struct {
+    uint8_t     rtype;		/* value = TRAP_T */
+    unsigned  is_async : 1 ;	/* asynchronous trap ? */
+    unsigned  unused : 3 ;	/* unused */
+    unsigned  tl : 4 ;		/* trap level in the trap handler */
+    uint16_t    ttype;		/* trap type for V9, only 9 bits matter */
+
+    uint16_t    pstate;		/* Pstate register in the trap, only 9 bits */
+    uint16_t    syscall;	/* If a system call, the syscall # */
+
+    uint64_t    pc;
+    uint64_t    npc;
+} rstf_trapT;
+\end{verbatim}
+
+\section{System calls}
+
+Depending on the tracing harness, system call information maybe present
+in the trace.  E.g. in \textss{RST/blaze}, system call information is
+present.  
+
+A system call consists of a (software) trap instruction to trap TRNUM,
+with the \texttt{\%g1} register containing the system call number.
+There is one trap number for 32-bit and a second trap for 64-bit system
+calls.
+
+\begin{tabular}{|l|l|}
+  TRNUM & system call \\
+  \texttt{0x108} & 32 bit system call \\
+  \texttt{0x140} & 64 bit system call \\
+\end{tabular}
+
+See the C header file \textff{/usr/include/sys/syscall.h} for the system
+call numbers.  Thus \textss{2=fork}, \textss{5=open}, and
+\textss{173=pread}.  The header file \textff{/usr/include/sys/trap.h}
+has the 32-bit trap number.  (I forgot where I found the 64-bit system
+call trap.)
+
+Thus, a system call will appear as a \textss{TRAP\_T} record with the
+\textss{ttype} field set to either \textss{0x108} or \textss{0x140} and
+the \textss{syscall} field holding system call index.  For example, in
+this blaze TPCC trace snippet (\textss{t5sds}), the trap record at 86034
+indicates a system call (pread) is being made at instruction record
+86035.
+
+\begin{verbatim}
+ 86032 instr   : cpuid=0 u [0xffffffff7dfa34d8] stx %o0, [%sp + 0x87f]  [0xffffffff7fff0910] 
+ 86033 instr   : cpuid=0 u [0xffffffff7dfa34dc] or %g0, 0xad, %g1          
+ 86034 trap    : cpuid=0 is_async=0 async==0 tl=0 ttype=0x140 pstate=0x012 syscall=0x00ad 
+ 86035 instr   : cpuid=0 p [0xffffffff7dfa34e0] ta %icc, %g0 + 0x40 T [0x0000000001002800] tr 
+\end{verbatim}
+
+\section{Trace format design}
+
+\subsection{How do I encode state (such as warmed cache state) in RST?}
+
+In short, do not do this.  RST is designed for capturing a dynamic
+sequence of events (instructions, TLB activity, etc) from an computer
+system.
+
+If you need to heterogenous information in a single trace, create a
+\rqhttp{unatrace}{http://smeeng.eng/\rqtilde{}quong/unawrap.html}, which
+is a general purpose trace \textsl{wrapper} format.  Aztecs snaps, which
+consist of [cache + TLB + branch predictor warming + RST instruction
+traces] use the unawrap format.
+
+\subsection{Design tradeoffs in RST}
+
+Any trace format must be a balance of the following design tradeoffs,
+because not all properties can be achieved simultaneously.  We evaluate
+RST against various criterion.
+
+\begin{tabularx}{\linewidth}{|l|l|l|X|} \hline
+  Goal & RST grade & Conflicts with & Description \\ \hline
+  Simple & A & Size & Trace format should be easy to use.  RST uses a
+fixed size record so it is easy to skip N records.  RST has a common
+rtype byte so decoding a record is very easy.  \\ \hline
+  Size & D & Simplicity & Information density should be high, as traces
+are often very large.  RST requires about 30 bytes per instruction
+(PA+VA, PC+EA, TLB, traps events).  We believe an separate compression
+phase can be used to reduce the RST size (use of a beta quality
+compressor and gzip reduced the size of RST by approx 5-10X).  \\ \hline
+  Flexible & A & Size & A trace should be able to hold different types
+of data.  A trace format which uses a fixed-record type severely
+restricts flexibility, because every record must have a field for every
+type.  We avoid this in RST by having a different record types in RST.
+  \\ \hline
+\end{tabularx}
+
+Other RST design notes.  (1) The RST trace instruction record was
+designed to hold an instruction word (32-bit), instruction record
+(64-bit PC) and memory effective address (64-bit EA) and other overhead
+such as the \textss{rtype} byte.  This lead to the 24-byte record size.
+
+\section{Patching for Aztecs}
+
+\begin{verbatim}
+  1418 instr   : u [0x000000010048e9b8] add %g4, 1, %g4                   tr 
+  1419 patch   : isbegin=1 rewindrecs=0 id=1 length=2 descr=atrPCdAZ
+  1420 instr   : u [0x000000010048e9bc] jmpl %g2 + 0, %g1               T [0x0000000078404780] 
+  1421 instr   : u [0x000000010048e9c0] nop                               
+  1422 patch   : isbegin=0 rewindrecs=0 id=1 length=2 descr=atrPCdAZ
+  1423 context : asi=0x0000 last_context=0x0000 trap_lvl=0x00 trap_type=0x00 pstate=0x0000 primA=0x0000 secA=0x0000 primD=0x0000 secD=
+0x0000
+  1424 pavadiff: context=0 pc_pa_va=0x00000003673c0000 ((ea_pa_va=0xffffffffffffffff)) ea_valid=0
+  1425 instr   : u [0x0000000078404780] save %sp, -0xb0, %sp              
+\end{verbatim}
+
+\section{FAQ}
+
+\subsection{There is a TRAP record and a tr bit in the instruction record.  What is the difference?}
+
+The trap record contains many values including the trap type, trap
+level, PC, NPC, pstate register and the system call number (\%g1
+register) on a syscall trap.
+
+The \textss{tr} bit in the instruction simply indicates if a trap
+occurred during this instruction.  The tr bit is necessary to clearly
+distinguish when a trap occurs.
+
+\section{The rstf workspace}
+
+\subsection{Purpose}
+
+\begin{rqenumerate}{0em}
+  \item The main purpose of this WS is to define the RST file format in
+  \textff{rstf.h}.
+   Some secondary and/or deprecated definitions are in
+   \textff{rstf\_*.h}
+
+  \item A secondary purpose is to define common RST utilities/code, including
+   starter code and RST-to-RST filters.
+\end{rqenumerate}
+
+\subsection{Guidance on updating this workspace}
+
+The file \textff{rstf.h} defines the RST file format.  The file format
+consist of the rtype definitions and the fields within each record.
+\textbf{Many} other programs use \textff{rstf.h}.  So....
+
+\begin{rqitemize}{0em}
+  \item Try to avoid changing this file if possible.
+    In the last 12 months (10/2001-10/2002), I have bumped the minor
+    version once.
+  \item Avoid breaking backward compatibility \textbf{AT ALL COSTS}.
+    There is considerable data in \texttt{rstf} 2.04-2.06 format.
+  \item The safest changes involve adding new rtypes or adding more constants
+    to existing enumerations.  E.g. filling out the register constants
+    in the \textss{REGVAL\_T:regtype[]}
+  \item There is a Java port of \texttt{rstf}, in the (to be released
+  12/2002) \textss{jrst} workspace.  A Perl script in \textss{jrst}
+  "parses" \textff{rstf.h} and makes undocumented assumptions about
+  the way \textff{rstf.h} looks.  Please try to conform to the
+  existing style in the typedefs and enums.
+
+  \item I (RQ) have tried to be stingy in using \textss{rtype} values.
+    I have unofficially reserved bits 7 and 6 of the rtype as a hedge for
+    (two rounds of) sweeping changes to RST in the distant future if it
+    comes to that.  Thus, i strongly recommend only using rtypes from
+    2-63.
+\end{rqitemize}
+
+If you must change \textff{rstf.h}, bump the version number in
+\textff{rstf.h}  
+
+\subsection{Version numbers}
+
+Many programs or code snippets have version numbers.  The big rule about
+version numbers is that given an RST trace and full knowledge about the
+history of the programs involved in producing the trace, you must (or
+should) be able to determine what idiosyncrasies exist in that trace.
+Note, you do \textem{not} know what version of the program were involved
+producing the trace.
+
+As an example, you are given the trace \textss{try8-t24.rz.gz} from
+6/2001, which was produced by \textss{blaze V3} and \textss{rstracer}.
+You are given the phone numbers of all the developers involved in
+tracing at Sun, so you can obtain the history of all programs involved.
+What are the issues, if any, of this trace from a data format and
+correctness standpoint?  First you have to determine which components
+(or programs) were involved in this trace.  Running \textss{trv.sh -n
+40} on this trace we see
+
+\begin{flushleft}
+ 0 header  : majorVer=1 minorVer=10 RST Header v1.10\\
+ 4 strdesc : "  rstracer=V1.8"\\
+ 8 strdesc : "  compiled against Blz 3.64 - Excal 5.8 LL RW MP ||Disk API=[Trace,Timing]"\\
+24 strdesc : "blz::version=3.65 - Excal 5.8 LL RW MP ||Disk API=[Trace,Timing]"\\
+\end{flushleft}
+
+Thus this is a RSTF v1.10 trace and \textss{blaze V3.65} and the
+\textss{rstracer V1.8} were involved.  You call up their developers and
+get the details of these programs from the dawn of time until now and
+have an understanding of the trace issues.
+
+Thus, here are the strong recommendations regarding version numbers and
+traces.
+
+\begin{rqenumerate}{0em}
+  \item An RST trace must contain the version numbers of all programs
+  involved in producing the trace.  In the case of
+  \textss{try8-t24.rz.gz}, this trace has the version numbers of
+  \textss{rstf}, \textss{rstracer} and \textss{blaze}.
+
+  \item The version number of each component (or program) must indicate 
+  that state of that component.  I.e. if something is changed, the
+  version number of that component must be changed.
+
+  \item There must be a record of known bugs for each component for each
+  version number.  
+\end{rqenumerate}
+
+Here are some examples of version numbers.
+
+\begin{tabularx}{\linewidth}{|l|X|}
+  Code & Description/philosopy of version numbers \\
+   rstf & Version of the RST Format records.  Should not change often. \\
+       & The first record in an RSTF trace must define the version number
+       If a new version of RSTF breaks backward compatibility (e.g. the
+       format for PAVADIFF changes), increment
+       the major version.  And this should happen once every never.  \\
+  rstFilter & updated when a filter is added or updated. Update freely.  \\
+  rstracer & (in rstracer WS)
+     Reflects which version of the rst tracer.  The version indicates
+     what bugs/idiosyncrasies exist.  Note that the RST trace produced
+     by \textss{rstracer} contains both the rstracer version number and
+     the RSTF version num.
+\end{tabularx}
+
+\subsection{Basic programs and scripts in the rstf workspace}
+
+The master workspace for RST is \textff{/import/archperf/ws/rstf}.
+It should be open to all to do a bringover, aka world bringover-able.
+If you need to do a putback to this workspace, talk to someone in Arch
+Tools, say \textss{lren@eng}.
+
+\subsubsection{trv.sh}
+
+Look at RST files (compressed or not) in ASCII.  (Replaces rstunzip and
+trconv).  Runs a PAGER ( \textss{more} or \textss{less} ) if output is a
+terminal.  \textem{Use this program}.
+
+\subsubsection{rstFilter.C}
+
+Implemements many (30+) RST-to-RST filters (read stdin/file , write
+stdout).  Typically you need to use several filters in a row.  All error
+messages go to stderr.  This code offers generic double-buffering on
+both input and the output, making is "easier" (hah) to do
+transformations that must look at several records.
+
+\subsubsection{runRSTFilt.sh}
+
+Convenient shell script driver for running \textss{rstFilter}.  Use
+this.
+
+\begin{rqcode}{ }
+  // by hand
+rstFilter -a filter1 input-file | rstFilter -a filter2 | rstFilter -a
+filter3 > output
+
+  // using runRSTFilt.sh
+runRSTFilt -a 'filter1 filter2 filter3' > output
+  // Same as above but generate ASCII dumps of all intermediate files, too
+runRSTFilt -u -a 'filter1 filter2 filter3' > output
+
+  // E.g to clean up the raw outout from atrace2rst [Atrace->RST] files,
+runRSTFilt.sh -a 'ihash addBrTarg' [-u] raw.rst > clean.rst
+\end{rqcode}
+
+\subsubsection{atr2rst.sh, atrace2rst.C and dumpatr}
+
+The script \textss{atr2rst.sh} = runs \texttt{atrace2rst} and does some
+post processing to clean up the RST.  The 64-bit executable
+\textss{atrace2rst} converts an atrace to raw RST.  The post processing
+adds ihash values and branch targets among other things.
+\textss{Dumpatr} is a hard link to atrace2rst; it is the same as running
+\textss{atrace2rst -a}.
+
+\subsubsection{snapForAztecs.sh}
+
+Generate snaps suitable for aztecs.  Snaps the RST file and then runs a
+horrific combination of RST filters on the result and then compresses
+the results.  Even the author does not want to look at this script.
+
+\section{History}
+
+The RST format and this document was started and then maintained by R
+Quong through 11/2002.
+
+\end{document}

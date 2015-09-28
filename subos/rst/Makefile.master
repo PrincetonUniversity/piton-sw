@@ -1,0 +1,106 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# OpenSPARC T2 Processor File: Makefile.master
+# Copyright (c) 2006 Sun Microsystems, Inc.  All Rights Reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES.
+# 
+# The above named program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public
+# License version 2 as published by the Free Software Foundation.
+# 
+# The above named program is distributed in the hope that it will be 
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public
+# License along with this work; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+# 
+# ========== Copyright Header End ============================================
+# Makefile.master
+# Top level makefile options for rst tools
+
+S1S8 = /import/datools/vendor/forte/s1s8/SUNWspro
+CC = $(S1S8)/bin/cc
+CCC = $(S1S8)/bin/CC
+
+APDIR = /import/archperf
+RSTDIR=$(APDIR)/pkgs/rst/latest
+SHADE_DIR=/import/shade/v6/latest-$(HOST3264)
+
+# install DIR relative to the sub directories
+INSTALL_DIR = $(TOP_DIR)/pkg
+
+INSTALL_TARG = 32opt
+
+BUILD_DIR = $(TOP_DIR)/build
+OBJ_DIR = $(BUILD_DIR)/$(TARG)
+
+CCLARGEFILE:sh  = getconf LFS_CFLAGS    # for large file support
+
+CFLAGS_BASE = -mt -xtarget=ultra3 -dalign $(INCLUDES)
+
+CFLAGS32 = -xarch=v8plus $(CCLARGEFILE)
+CFLAGS64 = -xarch=v9
+
+CFLAGSDBG = -g
+CFLAGSOPT = -xO4
+
+CFLAGSAMD64 = -xarch=amd64 -mt -xO4 -KPIC $(INCLUDES) -DARCH_AMD64
+
+CFLAGS64OPT = $(CFLAGS_BASE) $(CFLAGS64) $(CFLAGSOPT)
+CFLAGS32OPT = $(CFLAGS_BASE) $(CFLAGS32) $(CFLAGSOPT)
+CFLAGS64DBG = $(CFLAGS_BASE) $(CFLAGS64) $(CFLAGSDBG)
+CFLAGS32DBG = $(CFLAGS_BASE) $(CFLAGS32) $(CFLAGSDBG)
+
+# don't need to redefine CCFLAGS/CXXFLAGS - just CFLAGS
+CCFLAGS = $(CFLAGS)
+CXXFLAGS = $(CFLAGS)
+
+# path to include files - keep in mind the build dir structure
+# component dir is rstf, rstzip etc. Contains build dirs
+# build dir is 32g/64g/32opt/64opt etc.
+# root dir is the rst workspace dir
+
+# we get include files from component dir first, then from
+# other components in root dir
+INCLUDES = -I$(CUR_DIR) -I$(CUR_DIR)/.. -I$(CUR_DIR)/../..
+
+# path to search for source files. we typically build inside
+# build-specific subdirectories 32g, 64opt etc. from sources at
+# the main component directory.
+# VPATH = .:..
+
+# Dependence rules
+%amd64 := CFLAGS=$(CFLAGSAMD64)
+%amd64 := AS=/usr/ccs/bin/as
+%amd64 := ASFLAGS=-P -xarch=amd64 -KPIC -DARCH_AMD64
+%amd64 := HOST3264=64
+
+%amd64 := BUILDTAG=amd64
+%amd64 := S1S8=/usr/dist/share/sunstudio_i386/SUNWspro
+%amd64 := ZLIB=
+%amd64 := SPIXINC=-I/import/archperf/pkgs/spix/1.1/x64/inc
+%amd64 := SPIXLIB=-L/import/archperf/pkgs/spix/1.1/x64/lib -lspix_sparc
+%amd64 := RSTZIP3_LIBS=$(SPIXLIB) -lz
+
+
+%32g := CFLAGS=$(CFLAGS32DBG)
+%64g := CFLAGS=$(CFLAGS64DBG)
+%32opt := CFLAGS=$(CFLAGS32OPT)
+%64opt := CFLAGS=$(CFLAGS64OPT)
+
+%32g := HOST3264=32
+%32opt := HOST3264=32
+%64g := HOST3264=64
+%64opt := HOST3264=64
+
+%32g := BUILDTAG=32g
+%64g := BUILDTAG=64g
+%32opt := BUILDTAG=32opt
+%64opt := BUILDTAG=64opt
+
+default:
+	@echo must specify one or more of: 32g 32opt 64g 64opt amd64
+

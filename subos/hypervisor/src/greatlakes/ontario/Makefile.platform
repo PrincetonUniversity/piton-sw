@@ -1,0 +1,246 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# Hypervisor Software File: Makefile.platform
+# 
+# Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+# 
+#  - Do no alter or remove copyright notices
+# 
+#  - Redistribution and use of this software in source and binary forms, with 
+#    or without modification, are permitted provided that the following 
+#    conditions are met: 
+# 
+#  - Redistribution of source code must retain the above copyright notice, 
+#    this list of conditions and the following disclaimer.
+# 
+#  - Redistribution in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution. 
+# 
+#    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+# may be used to endorse or promote products derived from this software 
+# without specific prior written permission. 
+# 
+#     This software is provided "AS IS," without a warranty of any kind. 
+# ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+# INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+# MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+# ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+# DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+# OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+# FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+# DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+# ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+# SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# You acknowledge that this software is not designed, licensed or
+# intended for use in the design, construction, operation or maintenance of
+# any nuclear facility. 
+# 
+# ========== Copyright Header End ============================================
+#
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
+#
+# ident	"@(#)Makefile.platform	1.17	07/06/07 SMI"
+#
+
+TOP = ../../..
+
+PLATFORM = ontario
+
+include ../../Makefile.family
+##############################################
+#
+# Platform configuration
+#
+PLAT_OPTIONS =
+#
+# Workarounds
+#
+# Items prefixed with DESUPPORT_NIAGARA_1x should be disabled by setting
+# the make variable DESUPPORT_NIAGARA_1x once Niagara 1.x parts are flushed.
+#
+# DESUPPORT_NIAGARA_1x=YES	# Leave unset until 1.x parts obsolete
+
+# Reset/Config doesn't properly initialize tick/stick
+PLAT_OPTIONS += -DRESETCONFIG_BROKENTICK
+
+# Enable DRAM and L2$ scrubbers in hypervisor
+PLAT_OPTIONS += -DRESETCONFIG_ENABLEHWSCRUBBERS
+
+# Niagara erratum #39: Halted strand not re-awakened by interrupt
+$(DESUPPORT_NIAGARA_1x)PLAT_OPTIONS += -DNIAGARA_ERRATUM_39
+
+# Niagara erratum #40: Locked TLB entry #63 gets replaced (now a "feature")
+PLAT_OPTIONS += -DNIAGARA_ERRATUM_40
+
+# Niagara erratum #41: Reserved Supervisor or User SPU stxa can silently abort SPU op
+PLAT_OPTIONS += -DNIAGARA_ERRATUM_41
+
+# Niagara erratum #43: Partial_raw Load after Block_Init_Store Hangs Thread
+$(DESUPPORT_NIAGARA_1x)PLAT_OPTIONS += -DNIAGARA_ERRATUM_43
+
+# Fire erratum 2.0-18: Need to workaround deadlock
+PLAT_OPTIONS += -DFIRE_ERRATUM_20_18
+
+# PLX erratum: Need to check for link training errors and abort
+#              Depends on FIRE_ERRATUM_20_18
+PLAT_OPTIONS += -DPLX_ERRATUM_LINK_HACK
+
+# Workaround to add intr_cookie APIs to INTR API Group v1.0
+PLAT_OPTIONS += -DSOLARIS_ERRATUM_6496266
+
+# LDoms 1.0 Erratum; to avoid the unreliable reset caused by the PLX8532AA
+# PCI-E switch chips on Ontario systems, we force a power-cycle when resetting
+# the last domain in the system - which should as defined by best practices
+# be the control domain.
+PLAT_OPTIONS += -DLDOMS_1_0_ERRATUM_POWER_CYCLE
+
+# Solaris 'px' driver implementation of VPCI 1.1 support is broken.
+PLAT_OPTIONS += -DSOLARIS_ERRATUM_6538898
+
+##############################################
+
+RESET = ../dumbreset
+
+TRAP_SRCS = traptable.s traps_common.s
+TRAP_OBJS = $(TRAP_SRCS:.s=.o)
+
+Q_SRCS = main.s setup.s mmu.s l2subr.s \
+	chipsubr.s mmu_common.s	\
+	vpci_fire.s vpci_errs.s cpu_errs.s \
+	svc.s svc_common.s svcinternal.s svc_vbsc.s ssi.s \
+	intr.s intr_ontario.s subr.s hcall.s \
+	hcall_core.s hcall_diag.s hcall_intr.s hcall_soft_state.s \
+	hcall_ncs.s hcall_vpci.s hcall_cpu.s hcall_groups.s \
+	hcall_mmu.s hcall_niagara.s \
+	vdev_intr.s vdev_console.s vdev_simdisk.s vdev_snet.s \
+	vpci_msi.s \
+	cyclic.s errs_common.s \
+	heartbeat.s ldc.s hvctl.s hv_common_cmds.s \
+	bootload.s
+
+Q_OBJS = $(Q_SRCS:.s=.o)
+
+PLATFORMC_LINT_SRCS =			\
+	$(PLATFORM_SRC)/config.c	\
+	$(PLATFORM_SRC)/init_ontario.c	\
+	$(PLATFORM_SRC)/res_fire_pcie.c	
+
+PLATFORMC_SRCS = 	\
+	config.c	\
+	init_ontario.c	\
+	res_fire_pcie.c	
+
+QC_SRCS =		\
+	mdsup.c		\
+	reconf.c	\
+	res_guest.c	\
+	res_memory.c	\
+	res_vcpu.c	\
+	res_ldc.c	\
+	res_console.c	\
+	res_mau.c	\
+	res_pcie.c	\
+	init.c		\
+	hvcontrol.c	\
+	support.c	\
+	$(FAMILYC_SRCS)	\
+	$(PLATFORMC_SRCS)
+
+QC_OBJS = $(QC_SRCS:.c=.o)
+
+RESET_SRCS = reset.s
+RESET_OBJS = $(RESET_SRCS:.s=.o)
+
+OBJS = begin.o $(TRAP_OBJS) $(Q_OBJS) $(QC_OBJS) version.o end.o
+
+$(OBJS): offsets.h
+
+VERSION_SRC = $(FAMILY_SRC)/version.s
+BEGIN_SRC = $(FAMILY_SRC)/begin.s
+END_SRC = $(FAMILY_SRC)/end.s
+
+version.o: $(VERSION_SRC)
+	@echo "Version: $(QVERSION)"
+	$(AS) $(ASFLAGS) -DVERSION="\"$(QVERSION)\"" -DINFO="\"$(QINFO)\"" $< -o $@ $(FAMILY_SRC)/version.s
+
+begin.o: $(BEGIN_SRC)
+
+end.o: $(END_SRC)
+
+versioninfo:
+	@echo "Version: $(QVERSION)"
+
+q.bin: q
+	$(OBJCOPY) -O binary q q.bin
+	@what q.bin
+	@ls -l q.bin
+
+q: chkasm $(OBJS) $(FAMILY_SRC)/mapfile.q
+	$(LD) -o $@ -e start_master -dn -z defs -M $(FAMILY_SRC)/mapfile.q $(OBJS)
+	@size q
+
+q.dis: q0
+	dis q0 > $@
+
+q0: $(Q_OBJS) $(FAMILY_SRC)/mapfile.q0
+	$(LD) -o $@ -e start_master -dn -z defs -M $(FAMILY_SRC)/mapfile.q0 $(OBJS)
+
+reset.bin: reset
+	$(OBJCOPY) -O binary reset reset.bin
+
+reset: $(RESET_OBJS) $(RESET)/mapfile
+	$(LD) -o $@ -e start_reset -dn -z defs -M $(RESET)/mapfile $(RESET_OBJS)
+
+# This would work but only dumps the .text, nothing else
+#	elfdump -N .text -w q.bin q
+
+offsets.h: $(PLATFORM_SRC)/offsets.in
+	@grep "^#" $(PLATFORM_SRC)/offsets.in > offsets-n1.c
+	$(CC) -xdebugformat=stabs $(CFLAGS) $(CPPFLAGS) -g -S -o offsets-n1.s offsets-n1.c
+	@grep -v "^#" $(PLATFORM_SRC)/offsets.in > offsets.tmp
+	$(STABS) -t genassym -m lp64 offsets.tmp < offsets-n1.s | \
+		 egrep -v '[0-f]+ c-enum' > offsets.h
+	@$(RM) offsets-n1.c offsets-n1.s offsets.tmp
+
+offsets.chk: $(PLATFORM_SRC)/offsets.in
+	@grep "^#" $(PLATFORM_SRC)/offsets.in > offsetschk-n1.c
+	$(CC) -xdebugformat=stabs $(CFLAGS) $(CPPFLAGS) -g -S -o offsetschk-n1.s offsetschk-n1.c
+	@grep -v "^#" $(PLATFORM_SRC)/offsets.in > offsetschk.tmp
+	$(STABS) -t asmcheck -m lp64 offsetschk.tmp < offsetschk-n1.s | \
+		 egrep -v '[0-f]+ c-enum' > offsets.chk
+	@$(RM) offsetschk-n1.c offsetschk-n1.s offsetschk.tmp
+
+chkasm :: offsets.chk
+	$(ASCHK) -u -s -n offsets.chk $(PLATFORM_SRC)/*.s $(FAMILY_SRC)/*.s $(RESET)/*.s $(COMMON_SRC)/*.s
+
+LINT_SRCS += $(FAMILYC_LINT_SRCS) $(PLATFORMC_LINT_SRCS)
+
+lint :: offsets.h
+	$(LINT) $(LINT_FLAGS) $(ALL_INC) $(PLAT_OPTIONS) $(LINT_SRCS)
+
+
+%.o:	$(PLATFORM_SRC)/%.s
+	$(COMPILE.s) -o $@ $<
+
+%.o:	$(FAMILY_SRC)/%.s
+	$(COMPILE.s) -o $@ $<
+
+%.o:	$(COMMON_SRC)/%.s
+	$(COMPILE.s) -o $@ $<
+
+%.o:	$(PLATFORM_SRC)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(FAMILY_SRC)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(COMMON_SRC)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(RESET)/%.s
+	$(COMPILE.s) -o $@ $<
+

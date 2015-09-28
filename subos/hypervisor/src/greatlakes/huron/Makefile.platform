@@ -1,0 +1,249 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# Hypervisor Software File: Makefile.platform
+# 
+# Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+# 
+#  - Do no alter or remove copyright notices
+# 
+#  - Redistribution and use of this software in source and binary forms, with 
+#    or without modification, are permitted provided that the following 
+#    conditions are met: 
+# 
+#  - Redistribution of source code must retain the above copyright notice, 
+#    this list of conditions and the following disclaimer.
+# 
+#  - Redistribution in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution. 
+# 
+#    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+# may be used to endorse or promote products derived from this software 
+# without specific prior written permission. 
+# 
+#     This software is provided "AS IS," without a warranty of any kind. 
+# ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+# INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+# MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+# ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+# DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+# OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+# FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+# DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+# ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+# SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# You acknowledge that this software is not designed, licensed or
+# intended for use in the design, construction, operation or maintenance of
+# any nuclear facility. 
+# 
+# ========== Copyright Header End ============================================
+#
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
+#
+# ident	"@(#)Makefile.platform	1.9	07/07/25 SMI"
+#
+
+TOP = ../../..
+
+PLATFORM = huron
+
+include ../../Makefile.family
+
+##############################################
+#
+# Platform configuration
+#
+PLAT_OPTIONS = -DSUPPORT_NIAGARA2_1x -DFALLS_FPGA
+
+#
+# Workarounds
+#
+
+# Reset/Config doesn't properly initialize tick/stick
+PLAT_OPTIONS += -DRESETCONFIG_BROKENTICK
+# Tick Index is not set correctly in D-SFAR on TICKCMP/STICKCMP CEs
+PLAT_OPTIONS += -DERRATA_TICK_INDEX
+
+# Workaround to add intr_cookie APIs to INTR API Group v1.0
+PLAT_OPTIONS += -DSOLARIS_ERRATUM_6496266
+
+# Solaris assumes the fault-address on a TSB miss is page-aligned
+#  c.f. 6376362
+PLAT_OPTIONS += -DTSBMISS_ALIGN_ADDR
+
+# LDoms 1.0 Erratum; to avoid the unreliable reset caused by the PLX8532AA
+# PCI-E switch chips on Ontario systems, we force a power-cycle when resetting
+# the last domain in the system - which should as defined by best practices
+# be the control domain.
+
+# Solaris 'px' driver implementation of VPCI 1.1 support is broken.
+PLAT_OPTIONS += -DSOLARIS_ERRATUM_6538898
+
+# The data in the Tick Copare Array diagnostic registers may be incorrect
+# erratum 197
+PLAT_OPTIONS += -DTCA_ECC_ERRATA
+
+# A read of a ASR/PR/HPR register causes the ECC in an IRF register
+# to be checked. If we have an IRFC in the register which is checked
+# we get another error trap.
+# erratum 199
+PLAT_OPTIONS += -DIRF_ECC_ERRATA
+
+# The store ACK counter in the SPU can overflow. To make this less likely
+# to happen, we stop the CWQ during MAU store operations.
+# erratum 192
+PLAT_OPTIONS += -DERRATA_192
+
+########################################
+
+RESET = ../dumbreset/
+
+TRAP_SRCS = traptable.s traps_common.s
+TRAP_OBJS = $(TRAP_SRCS:.s=.o)
+
+Q_SRCS = main.s setup.s mmu.s l2subr.s \
+	chipsubr.s mmu_common.s \
+	vpci_piu.s vpiu_errs.s \
+	hcall_ncs.s rng.s \
+	svc_common.s svcinternal.s svc_vbsc.s ssi.s errs_common.s errors_subr.s \
+	intr.s intr_huron.s subr.s hcall.s \
+	hcall_core.s hcall_diag.s hcall_intr.s hcall_soft_state.s \
+	hcall_vpci.s hcall_cpu.s hcall_groups.s \
+	hcall_mmu.s hcall_niagara2.s \
+	heartbeat.s ldc.s hvctl.s hv_common_cmds.s \
+	errors_cmp.s errors_mmu.s errors_l2_cache.s errors_l1_cache.s \
+	errors_common.s errors_traps.s errors_soc.s \
+	error_tables.s errors_ssi.s niu.s \
+	fpga_uart.s vdev_intr.s vdev_console.s bootload.s cwq.s \
+	vdev_simdisk.s cyclic.s vpci_msi.s instr_emul.s
+
+Q_OBJS = $(Q_SRCS:.s=.o)
+
+PLATFORMC_LINT_SRCS =	\
+	$(PLATFORM_SRC)/config.c	\
+	$(PLATFORM_SRC)/init_huron.c	\
+	$(PLATFORM_SRC)/res_piu_pcie.c
+
+PLATFORMC_SRCS =	\
+	config.c	\
+	init_huron.c	\
+	res_network.c	\
+	res_niu_network.c	\
+	res_piu_pcie.c
+
+QC_SRCS =		\
+	mdsup.c		\
+	reconf.c	\
+	res_guest.c	\
+	res_memory.c	\
+	res_vcpu.c	\
+	res_ldc.c	\
+	res_console.c	\
+	res_mau.c	\
+	res_cwq.c	\
+	res_pcie.c	\
+	init.c		\
+	hvcontrol.c	\
+	support.c	\
+	$(FAMILYC_SRCS)	\
+	$(PLATFORMC_SRCS)
+
+QC_OBJS = $(QC_SRCS:.c=.o)
+
+RESET_SRCS = reset.o
+RESET_OBJS = $(RESET_SRCS:.s=.o)
+
+OBJS = begin.o $(TRAP_OBJS) $(PLAT_OBJS) $(Q_OBJS) $(QC_OBJS) version.o end.o
+
+all :: reset.bin q.bin
+
+$(OBJS): offsets.h
+
+VERSION_SRC = $(FAMILY_SRC)/version.s
+BEGIN_SRC = $(FAMILY_SRC)/begin.s
+END_SRC = $(FAMILY_SRC)/end.s
+
+version.o: $(VERSION_SRC)
+	@echo "Version: $(QVERSION)"
+	$(AS) $(ASFLAGS) -DVERSION="\"$(QVERSION)\"" -DINFO="\"$(QINFO)\"" $< -o $@ $(FAMILY_SRC)/version.s
+
+begin.o: $(BEGIN_SRC)
+
+end.o: $(END_SRC)
+
+versioninfo:
+	@echo "Version: $(QVERSION)"
+
+q.bin: q
+	$(OBJCOPY) -O binary q q.bin
+	@what q.bin
+	@ls -l q.bin
+
+q: chkasm $(OBJS) $(FAMILY_SRC)/mapfile.q
+	$(LD) -o $@ -e start_master -dn -z defs -M $(FAMILY_SRC)/mapfile.q $(OBJS)
+	@size q
+
+q.dis: q0
+	dis q0 > $@
+
+q0: $(Q_OBJS) $(FAMILY_SRC)/mapfile.q0
+	$(LD) -o $@ -e start_master -dn -z defs -M $(FAMILY_SRC)/mapfile.q0 $(OBJS)
+
+reset.bin: reset
+	$(OBJCOPY) -O binary reset reset.bin
+
+reset: $(RESET_OBJS) $(RESET)/mapfile
+	$(LD) -o $@ -e start_reset -dn -z defs -M $(RESET)/mapfile $(RESET_OBJS)
+
+
+# This would work but only dumps the .text, nothing else
+#	elfdump -N .text -w q.bin q
+
+offsets.h: $(PLATFORM_SRC)/offsets.in
+	@grep "^#" $(PLATFORM_SRC)/offsets.in > offsets-n2.c
+	$(CC) -xdebugformat=stabs $(CFLAGS) $(CPPFLAGS) -g -S -o offsets-n2.s offsets-n2.c
+	@grep -v "^#" $(PLATFORM_SRC)/offsets.in > offsets.tmp
+	$(STABS) -t genassym -m lp64 offsets.tmp < offsets-n2.s | \
+		egrep -v '[0-f]+ c-enum' > offsets.h
+	@$(RM) offsets-n2.c offsets-n2.s offsets.tmp
+
+offsets.chk: $(PLATFORM_SRC)/offsets.in
+	@grep "^#" $(PLATFORM_SRC)/offsets.in > offsetschk-n2.c
+	$(CC) -xdebugformat=stabs $(CFLAGS) $(CPPFLAGS) -g -S -o offsetschk-n2.s offsetschk-n2.c
+	@grep -v "^#" $(PLATFORM_SRC)/offsets.in > offsetschk.tmp
+	$(STABS) -t asmcheck -m lp64 offsetschk.tmp < offsetschk-n2.s | \
+		 egrep -v '[0-f]+ c-enum' > offsets.chk
+	@$(RM) offsetschk-n2.c offsetschk-n2.s offsetschk.tmp
+
+chkasm :: offsets.chk
+	$(ASCHK) -u -s -n offsets.chk $(PLATFORM_SRC)/*.s $(FAMILY_SRC)/*.s $(RESET)/*.s $(COMMON_SRC)/*.s
+
+LINT_SRCS += $(FAMILYC_LINT_SRCS) $(PLATFORMC_LINT_SRCS)
+
+lint ::
+	$(LINT) $(LINT_FLAGS) $(ALL_INC) $(PLAT_OPTIONS) $(LINT_SRCS)
+
+
+%.o:	$(PLATFORM_SRC)/%.s
+	$(COMPILE.s) -o $@ $<
+
+%.o:	$(FAMILY_SRC)/%.s
+	$(COMPILE.s) -o $@ $<
+
+%.o:	$(COMMON_SRC)/%.s
+	$(COMPILE.s) -o $@ $<
+
+%.o:	$(PLATFORM_SRC)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(FAMILY_SRC)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(COMMON_SRC)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(RESET)/%.s
+	$(COMPILE.s) -o $@ $<

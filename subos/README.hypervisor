@@ -1,0 +1,20 @@
+==============================================================================
+ Instructions for OpenSPARC T2 Version 1.0 Hypervisor
+==============================================================================
+
+[1] System Requirements:
+
+    - Sparc system running Solaris 9 or higher
+
+[2] Source code for Hypervisor is included in $SIM_ROOT/hypervisor 
+    directory.
+
+[3] To compile source code for Hypervisor, change directory
+    to hypervisor/src and then type "make install".
+
+[4] The binary files q.bin and reset.bin will be created under 
+    $SIM_ROOT/hypervisor/src/greatlakes/huron/legion directory.
+
+    You can copy q.bin and reset.bin from this directory to 
+    $SIM_ROOT/S10image directory to use with Legion or SAM.
+

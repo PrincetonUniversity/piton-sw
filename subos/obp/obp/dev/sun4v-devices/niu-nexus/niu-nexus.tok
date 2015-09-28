@@ -1,0 +1,154 @@
+\ ========== Copyright Header Begin ==========================================
+\ 
+\ Hypervisor Software File: niu-nexus.tok
+\ 
+\ Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+\ 
+\  - Do no alter or remove copyright notices
+\ 
+\  - Redistribution and use of this software in source and binary forms, with 
+\    or without modification, are permitted provided that the following 
+\    conditions are met: 
+\ 
+\  - Redistribution of source code must retain the above copyright notice, 
+\    this list of conditions and the following disclaimer.
+\ 
+\  - Redistribution in binary form must reproduce the above copyright notice,
+\    this list of conditions and the following disclaimer in the
+\    documentation and/or other materials provided with the distribution. 
+\ 
+\    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+\ may be used to endorse or promote products derived from this software 
+\ without specific prior written permission. 
+\ 
+\     This software is provided "AS IS," without a warranty of any kind. 
+\ ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+\ INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+\ PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+\ MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+\ ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+\ DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+\ OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+\ FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+\ DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+\ ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+\ SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+\ 
+\ You acknowledge that this software is not designed, licensed or
+\ intended for use in the design, construction, operation or maintenance of
+\ any nuclear facility. 
+\ 
+\ ========== Copyright Header End ============================================
+id: @(#)niu-nexus.tok 1.1 07/01/23
+purpose: 
+copyright: Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved
+copyright: Use is subject to license terms.
+
+fcode-version3
+
+headerless
+
+fload ${BP}/dev/utilities/misc.fth
+fload ${BP}/dev/utilities/shifter.fth
+fload ${BP}/dev/utilities/cif.fth
+fload ${BP}/dev/sun4v-devices/utilities/property-access.fth
+
+h# 2000                 value pagesize
+alias mmu-pagesize pagesize
+
+\ Where we find the bootprom driver resources.
+: builtin-drivers " SUNW,builtin-drivers" ;
+
+defer claim	0 " claim" do-cif is claim
+defer release	0 " release" do-cif is release
+
+external
+
+: dma-alloc ( size -- vaddr ) mmu-pagesize over max swap 0 claim  ;
+: dma-free  ( vaddr size -- ) swap  release  ;
+: dma-sync ( virt-addr dev-addr size -- ) 3drop ;
+: dma-map-in ( virt size cache? -- dma-virt ) 2drop >physical drop ;
+: dma-map-out ( virt dma-virt size -- ) 3drop ;
+
+: map-in ( phys.lo phys.hi len -- vaddr ) 
+   \ The following code assumes that there are only
+   \ two entries in the 'ranges' property: one for
+   \ port 0 with a register base of 0x81.0000.0000
+   \ and one for port 1 with a register base of 
+   \ 0x81.0200.0000. If the 'ranges' property
+   \ ever changes, this code will have to be updated
+   >r if h# 2000000 + then h# 80000081 0 lxjoin r>
+   " map-in" $call-parent 
+;
+
+: map-out ( vaddr len -- ) " map-out" $call-parent ;
+
+" niu" encode-string " name" property
+
+external
+
+2 encode-int " #address-cells" property
+2 encode-int " #size-cells" property
+" compatible" make-prop drop
+" device-type" required-prop drop encode-string " device_type" property
+
+: enx+ ( xdr,len x -- xdr,len ) xlsplit swap >r en+ r> en+ ;
+
+: parse-int ( adr len  -- pa.hi ) parse-2int nip ;
+
+: encode-unit ( pa.lo pa.hi -- adr,len )
+      nip
+      push-hex
+      <#  u#s u#>
+      pop-base
+;
+
+: decode-unit ( adr len -- pa.lo pa.hi )
+   parse-int 0 swap
+;
+
+: open true ;
+: close ;
+
+0 0 encode-bytes
+0 my-space lxjoin enx+                  0 enx+          \ cfg-handle
+" reg" property
+
+\ 'ranges' property has two entries, one for each port:
+\ 00000000 00000000 80000081 00000000 00000000 05008000
+\ 00000001 00000000 80000081 02000000 00000000 05008000
+0 encode-int 0 en+ h# 80000081 en+ 0 en+ 0 en+ h# 5008000 en+
+1 en+ 0 en+ h# 80000081 en+ h# 2000000 en+ 0 en+ h# 5008000 en+
+" ranges" property
+
+: builtin-drivers	( -- str$ )
+   " /packages/SUNW,builtin-drivers"
+;
+
+: builtin-phandle@  	( -- phandle true | false ) 
+   builtin-drivers find-package
+;
+
+: start-port-node ( port -- ) 0 swap encode-unit 0 0 2swap new-device set-args ;
+
+: probe-network-nodes ( -- )
+   my-node							( node )
+   begin							( node )
+      " network" md-find-node ?dup				( node true | false )
+   while							( node )
+      dup " port" ascii v md-find-prop			( node prop )
+      md-decode-prop drop					( node port )
+      start-port-node						( node )
+      dup " compatible" -1 md-find-prop				( node prop )
+      md-decode-prop drop decode-string 2swap 2drop builtin-phandle@ drop find-method if	( node acf| )
+         catch if						( node )
+            cmn-warn[ " Problem attaching siu child driver" ]cmn-end
+         then							( node )
+      then							( node )
+      finish-device						( node )
+   repeat							( node )
+;
+
+probe-network-nodes
+
+end0

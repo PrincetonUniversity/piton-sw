@@ -1,0 +1,155 @@
+\ ========== Copyright Header Begin ==========================================
+\ 
+\ Hypervisor Software File: vebus.tok
+\ 
+\ Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+\ 
+\  - Do no alter or remove copyright notices
+\ 
+\  - Redistribution and use of this software in source and binary forms, with 
+\    or without modification, are permitted provided that the following 
+\    conditions are met: 
+\ 
+\  - Redistribution of source code must retain the above copyright notice, 
+\    this list of conditions and the following disclaimer.
+\ 
+\  - Redistribution in binary form must reproduce the above copyright notice,
+\    this list of conditions and the following disclaimer in the
+\    documentation and/or other materials provided with the distribution. 
+\ 
+\    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+\ may be used to endorse or promote products derived from this software 
+\ without specific prior written permission. 
+\ 
+\     This software is provided "AS IS," without a warranty of any kind. 
+\ ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+\ INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+\ PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+\ MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+\ ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+\ DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+\ OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+\ FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+\ DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+\ ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+\ SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+\ 
+\ You acknowledge that this software is not designed, licensed or
+\ intended for use in the design, construction, operation or maintenance of
+\ any nuclear facility. 
+\ 
+\ ========== Copyright Header End ============================================
+id: @(#)vebus.tok 1.4 07/06/22
+purpose: Sun4v ebus node
+copyright: Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+copyright: Use is subject to license terms.
+
+Fcode-version3
+
+h# 10 buffer: unit$
+h# 20 buffer: device$
+
+: en+ ( xdr,len int -- xdr,len )  encode-int encode+  ;
+
+: enx+ ( xdr,len x -- xdr,len )   xlsplit  swap >r en+ r> en+  ;
+
+external
+
+my-args decode-int nip nip constant my-node
+
+: open ( -- true )  true ;
+
+: close	( -- )  ;
+
+: encode-unit ( pa.lo pa.hi -- adr,len )  
+   swap <# u#s drop ascii , hold u#s u#> unit$ pack count
+;
+
+: decode-unit ( adr len -- pa.lo pa.hi )  parse-2int ;
+
+headerless
+
+: required-prop ( name$ -- val )
+   2dup my-node -rot ascii v md-find-prop ?dup if
+      md-decode-prop drop nip nip
+   else
+[ifndef] RELEASE
+      cmn-fatal[ " Missing MD property: %s " ]cmn-end
+[else]
+      2drop
+[then]
+   then
+;
+
+
+" ebus" 		name
+" SUNW,sun4v-ebus" 	encode-string 	" compatible"     property
+2 			encode-int	" #address-cells" property
+1 			encode-int	" #size-cells"    property
+
+" membase"        required-prop constant mem-base
+" memsize"        required-prop constant mem-size
+
+0 0 encode-bytes 0 en+ 0 en+ mem-base enx+ mem-size en+ " ranges" property
+
+0 0 encode-bytes 0 my-space lxjoin enx+ 0 enx+ " reg" property
+
+external
+
+: map-in  ( pa.lo pa.hi size -- va )  
+   >r lxjoin mem-base + xlsplit r> " map-in" $call-parent 
+;
+
+: map-out ( virtual size -- )  " map-out" $call-parent ;
+
+headerless
+
+fload ${BP}/dev/utilities/swapped-access.fth
+fload ${BP}/dev/utilities/probe.fth
+fload ${BP}/dev/ebus/ebus.fth
+fload ${BP}/dev/sun4v-devices/utilities/md-parse.fth
+
+: build-ebus
+   setup-swapped-fcodes
+   build-probed-nodes
+   restore-fcodes
+;
+
+\ For each child, add an entry into the probe table.
+: add-child ( node -- )
+   >r						(  )( R: node )
+   r@ " parent-device-path" md-get-required-prop drop ( $parent )
+   find-package if is my-interrupt-parent then	(  )
+   r@ " child-unit-address" md-get-required-prop 2drop ( addr )
+   dup x@ swap /x + x@				( my-space my-addr )
+   true						( my-space my-addr probe? )
+   r@ " child-interrupt" md-get-required-prop drop	( my-space my-addr probe? intr )
+   r> " parent-interrupt" md-get-required-prop drop ( my-space my-addr probe? intr ino )
+   " " probe-table!				(  )
+;
+
+\ Build the ebus probe table by scanning the fwd links from the ebus node
+\ in the MD.
+: build-ebus-probe-table ( -- )
+   0 begin						( node )
+      " wart" md-find-node ?dup 			( node node| )
+   while						( node| )
+      dup " device-type" ascii s md-find-prop ?dup if	( node prop| )
+         md-decode-prop drop " vebus" $= if		( node )
+            ['] add-child over md-applyto-fwds		( node )
+            dup " #interrupt-cells" md-get-required-prop drop ( node x1 )
+            encode-int " #interrupt-cells" property	( node )
+            " interrupt-map-mask" md-get-required-prop drop ( data,len )
+            encode-md-prop-data				( prop,len )
+            " interrupt-map-mask" property		(  )
+            exit					(  )
+         then						( node )
+      then						( node )
+   repeat						( node )
+;
+
+build-ebus-probe-table
+build-ebus
+
+
+end0

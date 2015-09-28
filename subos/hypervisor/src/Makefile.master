@@ -1,0 +1,239 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# Hypervisor Software File: Makefile.master
+# 
+# Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+# 
+#  - Do no alter or remove copyright notices
+# 
+#  - Redistribution and use of this software in source and binary forms, with 
+#    or without modification, are permitted provided that the following 
+#    conditions are met: 
+# 
+#  - Redistribution of source code must retain the above copyright notice, 
+#    this list of conditions and the following disclaimer.
+# 
+#  - Redistribution in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution. 
+# 
+#    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+# may be used to endorse or promote products derived from this software 
+# without specific prior written permission. 
+# 
+#     This software is provided "AS IS," without a warranty of any kind. 
+# ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+# INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+# MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+# ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+# DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+# OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+# FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+# DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+# ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+# SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# You acknowledge that this software is not designed, licensed or
+# intended for use in the design, construction, operation or maintenance of
+# any nuclear facility. 
+# 
+# ========== Copyright Header End ============================================
+#
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
+#
+# ident	"@(#)Makefile.master	1.16	07/06/07 SMI"
+#
+
+#COMPMT :sh =case "`/usr/bin/domainname`" in \
+       *East*) echo /ws/onnv-tools-burpen;; *) echo /ws/onnv-tools;; esac
+#COMPDIR = $(COMPMT)/SUNWspro
+COMPDIR = ${SUN_STUDIO}
+SPRODIR = $(COMPDIR)
+QTOOLS = $(TOP)/hypervisor-tools
+QBINDIR = $(QTOOLS)/bin
+
+
+STABS = $(QBINDIR)/stabs
+ASCHK = $(QBINDIR)/aschk
+OBJCOPY = $(QBINDIR)/objcopy
+AS = $(QBINDIR)/qas
+SAS = $(QBINDIR)/sas
+CC = $(SPRODIR)/bin/cc
+LINT= $(SPRODIR)/bin/lint
+CPP = /usr/ccs/lib/cpp
+LD = /usr/ccs/bin/ld
+MDGEN = $(QBINDIR)/mdgen-v1
+INS = /usr/sbin/install
+RM = /usr/bin/rm -f
+
+BUILD_ISA :sh= uname -p
+
+PROTODIR = $(TOP)/../proto
+
+PROTO_INC = $(PROTODIR)/include
+PROTO_LIB = $(PROTODIR)/$(BUILD_ISA)/lib
+PROTO_BIN = $(PROTODIR)/$(BUILD_ISA)/bin
+PROTO_PLAT = $(PROTODIR)/$(PLATFORM)/$(VARIANT)
+PROTO_PLAT_INC = $(PROTODIR)/$(PLATFORM)/include
+PROTO_GUEST_BIN = $(PROTODIR)/sun4v/
+
+SUN_INC = $(TOP)/include
+COMMON_INC = $(TOP)/common/include
+FAMILY_INC = $(TOP)/$(FAMILY)/common/include
+PLATFORM_INC = $(TOP)/$(FAMILY)/$(PLATFORM)/include
+COMMON_SRC = $(TOP)/common/src
+FAMILY_SRC = $(TOP)/$(FAMILY)/common/src
+PLATFORM_SRC = $(TOP)/$(FAMILY)/$(PLATFORM)/src
+OBJ_DIR =  $(TOP)/$(FAMILY)/$(PLATFORM)/$(VARIANT)
+
+INCFLAGS = -I$(PLATFORM_INC) -I$(FAMILY_INC) -I$(COMMON_INC) -I$(SUN_INC)
+CFLAGS += -v $(INCFLAGS)
+
+.KEEP_STATE:
+
+TARGET = all
+
+TARGETS = all install clean clobber lint
+
+all	:=	TARGET = all
+clean   :=      TARGET = clean
+clobber :=      TARGET = clobber
+install :=      TARGET = install
+lint	:=      TARGET = lint
+
+
+$(TARGETS) :: $(SUBDIRS)
+
+install :: all
+
+.PARALLEL:
+.NO_PARALLEL: $(SUBDIRS) .PHONY
+
+$(SUBDIRS) ::
+	@cd $@ && pwd && $(MAKE) $(TARGET)
+
+INS.file =	$(RM) $@; $(INS) -s -m 644 -f $(@D) $<
+INS.execfile =	$(RM) $@; $(INS) -s -m 644 -f $(@D) $<
+INS.dir =	$(INS) -s -d -m 755 $@
+
+$(PROTO_LIB) $(PROTO_INC) $(PROTO_BIN) $(PROTO_PLAT) $(PROTO_GUEST_BIN) $(PROTO_PLAT_INC):
+	$(INS.dir)
+
+$(PROTO_PLAT)/%: % $(PROTO_PLAT)
+	$(INS.file)
+
+$(PROTO_PLAT_INC)/%: % $(PROTO_PLAT_INC)
+	$(INS.file)
+
+$(PROTO_LIB)/%: % $(PROTO_LIB)
+	$(INS.file)
+
+$(PROTO_INC)/%: % $(PROTO_INC)
+	$(INS.file)
+
+$(PROTO_BIN)/%: % $(PROTO_BIN)
+	$(INS.file)
+
+$(PROTO_GUEST_BIN)/%: % $(PROTO_GUEST_BIN)
+	$(INS.file)
+
+# Source browsing
+CSDIR	= $(TOP)
+CSDIRS	= $(TOP)/
+CSPATHS	= $(CSDIRS:%=$(CSDIR)/%)
+CSINCS	= -I$(TOP)
+CSCOPE	= cscope
+CTAGS	= ctags
+CSFLAGS	= -b
+CTFLAGS	= -wt
+
+.PRECIOUS:	cscope.out
+
+cscope.out: cscope.files FRC
+	${CSCOPE} ${CSFLAGS}
+
+cscope.files: FRC
+	@-$(RM) cscope.files cscope.files.raw
+	echo "$(CSINCS)" > cscope.files
+	-find $(CSDIRS) -name SCCS -prune -o \
+	    -type d -name '.del-*' -prune -o -type f \
+	    \( -name '*.[csh]' -o -name 'Makefile*' -o -name '*.il*' \) \
+	    -print > cscope.files.raw
+	-grep -v Makefile cscope.files.raw >> cscope.files
+	-grep Makefile cscope.files.raw >> cscope.files
+	-$(RM) cscope.files.raw
+	@wc -l cscope.files
+
+tags: tags.list FRC
+	${CTAGS} ${CTFLAGS} `cat tags.list`
+
+tags.list: cscope.files
+	@$(RM) tags.list
+	grep '\.[chs]$$' cscope.files > tags.list
+
+clean ::
+	$(RM) *.o *.ln offsets.h offsets.chk files.s
+
+clobber :: clean
+	$(RM) q q.bin q0 reset reset.bin
+	$(RM) cscope.* tags tags.list
+
+.PHONY : lintplus lintall
+
+# set the errors to report when running 'make lint'
+# all code should be clean with respect to this set
+LERRS0 = -erroff=%all
+LERRS1 = ,no%E_FUNC_VAR_UNUSED,no%E_FUNC_NO_RET_VAL
+LERRS2 = ,no%E_LABEL_NOT_USED,no%E_FUNC_SET_NOT_USED,no%E_NOP_IF_STMT
+LERRS3 = ,no%E_NO_IMPLICIT_DECL_ALLOWED,no%E_EXPR_NULL_EFFECT
+LERRS4 = ,no%E_CASE_FALLTHRU,no%E_USE_BEFORE_SET,no%E_EQUALITY_NOT_ASSIGNMENT
+LERRS5 = ,no%E_VAR_USED_BEFORE_SET,no%E_LOOP_EMPTY
+
+# add some extra potentially interesting errors to report when running
+# 'make lintplus'
+# code is not required to be clean with respect to these errors
+LPLUS1 = ,no%E_USE_BEFORE_SET_PSB,no%E_ASGN_RESET,no%E_ASGN_NEVER_USED
+LPLUS2 = ,no%E_P_REF_NULL_PSBL,no%E_P_REF_UNINI_PSBL,no%E_P_USE_UNINI_PSBL
+LPLUS3 = ,no%E_P_WRT_NULL_PSBL,no%E_BAD_FORMAT_ARG_TYPE,no%E_STATIC_UNUSED
+
+lintplus := LERRSPLUS = $(LPLUS1)$(LPLUS2)$(LPLUS3)
+
+#
+# Future:	For now we only enable a small subset of the error checking.
+# 		We need to scrub the code and allow more checks for
+# 		lint checking to be really useful.
+#
+LINTERRS = $(LERRS0)$(LERRS1)$(LERRS2)$(LERRS3)$(LERRS4)$(LERRS5)$(LERRSPLUS)
+
+# report all errors plus security related ones when running 'make lintall'
+lintall := LINTERRS = -errsecurity=extended
+
+lintplus : lint
+
+lintall : lint
+
+
+LINT_SRCS =	$(COMMON_SRC)/hvcontrol.c	\
+		$(COMMON_SRC)/init.c		\
+		$(COMMON_SRC)/mdsup.c		\
+		$(COMMON_SRC)/reconf.c		\
+		$(COMMON_SRC)/res_console.c	\
+		$(COMMON_SRC)/res_guest.c	\
+		$(COMMON_SRC)/res_ldc.c		\
+		$(COMMON_SRC)/res_mau.c		\
+		$(COMMON_SRC)/res_memory.c	\
+		$(COMMON_SRC)/res_pcie.c	\
+		$(COMMON_SRC)/res_vcpu.c	\
+		$(COMMON_SRC)/support.c
+
+LINT_FLAGS	=-D__sparcv9 -Xarch=v9 -Nlevel=4 -errtags -errchk=%all -h
+LINT_FLAGS	+= -Xc99
+LINT_FLAGS	+= -c
+LINT_FLAGS	+= $(CPPFLAGS)
+LINT_FLAGS	+= $(LINTERRS)
+
+.KEEP_STATE:
+
+FRC:

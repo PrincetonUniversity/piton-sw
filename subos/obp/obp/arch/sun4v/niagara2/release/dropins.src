@@ -1,0 +1,213 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# Hypervisor Software File: dropins.src
+# 
+# Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+# 
+#  - Do no alter or remove copyright notices
+# 
+#  - Redistribution and use of this software in source and binary forms, with 
+#    or without modification, are permitted provided that the following 
+#    conditions are met: 
+# 
+#  - Redistribution of source code must retain the above copyright notice, 
+#    this list of conditions and the following disclaimer.
+# 
+#  - Redistribution in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution. 
+# 
+#    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+# may be used to endorse or promote products derived from this software 
+# without specific prior written permission. 
+# 
+#     This software is provided "AS IS," without a warranty of any kind. 
+# ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+# INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+# MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+# ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+# DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+# OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+# FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+# DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+# ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+# SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# You acknowledge that this software is not designed, licensed or
+# intended for use in the design, construction, operation or maintenance of
+# any nuclear facility. 
+# 
+# ========== Copyright Header End ============================================
+# id: @(#)dropins.src 1.1 07/04/30
+# purpose: list the dropins required by this platform
+# copyright: Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# copyright: Use is subject to license terms.
+#
+#
+# Format:	key	<data>
+#		build	<command to run>
+#		depend	<file>
+#		target	<dropin-src> <dropin-name>
+#		source{	[code] terminated by }source
+#		include <file>
+#
+version2
+
+# create the code to execute fcode dropins
+source{
+caps off
+" /packages/SUNW,builtin-drivers" find-device
+
+   headerless
+   : load-driver ( str$ -- )
+      find-drop-in  if		( adr,len )
+         >r dup >r  1 byte-load	(  )
+	 r> r> free-drop-in	(  )
+      then			(  )
+   ;
+   headers
+
+   : interrupt-property ( n -- )  " interrupts" integer-property  ;
+
+   : get-fcode  ( adr1 len1 adr2 len2 -- true | false )
+      find-drop-in  if
+         2dup >r >r
+         rot min  rot swap  move
+         r> r> free-drop-in
+         true
+      else  2drop false
+      then
+   ;
+
+   headers
+
+}source
+
+build		${MAKEDI}
+
+target		bootprom.bin	bootprom
+
+depend          ${BP}/dev/sun4v-devices/vnexus/depend.mk
+target          vnexus.fc         SUNW,vnexus
+source{
+   : onboard-devices ( -- )
+      diagnostic-mode? if
+         ." Loading onboard drivers: "
+      then
+      0 0 " 100" " /" begin-package
+         " SUNW,vnexus" load-driver
+      end-package
+   ;
+}source
+
+# Fonts
+depend		${BP}/pkg/termemu/fonts.mk
+external	font.di
+
+# Sunlogo
+depend          ${BP}/pkg/sunlogo/logo.mk
+external        sun-logo.di
+
+# Network boot support package
+depend		${BP}/pkg/dhcp/obptftp.mk
+external	obptftp.di
+
+# legion disk 
+depend		${BP}/dev/sun4v-devices/legion-disk/depend.mk
+target		sim-disk.fc	legion-disk
+source{
+   : disk ( -- )	" legion-disk" load-driver ;
+}source
+
+# legion NVRAM
+depend		${BP}/dev/sun4v-devices/legion-nvram/depend.mk
+target		sim-nvram.fc	legion-nvram
+source{
+   : nvram ( -- )  " legion-nvram" load-driver ;
+}source
+
+# virtual flashprom support
+depend		${BP}/dev/sun4v-devices/flashprom/depend.mk
+target		flashprom.fc	sun4v-flashprom
+source{
+   : flashprom ( -- )	" sun4v-flashprom" load-driver ;
+}source
+
+# virtual console 
+depend		${BP}/dev/sun4v-devices/console/depend.mk
+target		console.fc	sun4v-console
+source{
+   :  SUNW,sun4v-console ( -- )	" sun4v-console" load-driver  ;
+}source
+
+# vchannel support
+depend          ${BP}/dev/sun4v-devices/vchannel/depend.mk
+target          vchannel.fc         sun4v-chan-dev
+source{
+   : SUNW,sun4v-channel-devices  ( -- )  " sun4v-chan-dev" load-driver ;
+}source
+
+# vNET support
+depend          ${BP}/dev/sun4v-devices/vnet/depend.mk
+target          vnet.fc         sun4v-vnet
+source{
+   : SUNW,sun4v-network  ( -- )   " sun4v-vnet" load-driver  ;
+}source
+
+# vDisk support
+depend          ${BP}/dev/sun4v-devices/vdisk/depend.mk
+target          vdisk.fc                sun4v-vdisk
+source{
+   : SUNW,sun4v-disk  ( -- )  " sun4v-vdisk" load-driver  ;
+}source
+
+# hypervisor TOD
+depend		${BP}/dev/sun4v-devices/tod/depend.mk
+target		tod.fc	sun4v-tod
+source{
+   : SUNW,sun4v-tod ( -- )	" sun4v-tod" load-driver ;
+}source
+
+# Sun4v PCI FCode driver
+depend		${BP}/dev/sun4v-devices/vpci/depend.mk
+target		vpci.fc		sun4v-vpci
+buildoptions    vpci.fc:=	FTHFLAGS += [define] 64BIT-ASSIGNED?
+source{
+   : pciex ( -- )
+       " sun4v-vpci" load-driver   
+   ;
+}source
+
+# Niagara2 performace counter driver
+depend		${BP}/dev/sun4v-devices/n2/perf-cntr/depend.mk
+target		perf-cntr.fc		sun4v-perf-cnt
+source{
+   : SUNW,n2piu-pr ( -- )
+      " sun4v-perf-cnt" load-driver
+   ;
+}source
+
+# Niagara2 NIU nexus driver
+depend		${BP}/dev/sun4v-devices/niu-nexus/depend.mk
+target		niu-nexus.fc	niu-nexus
+source{
+   : SUNW,niumx ( -- )
+      " niu-nexus" load-driver
+   ;
+}source
+
+# Niagara2 NIU network device driver
+depend		${BP}/dev/network/neptune/niu/depend.mk
+target		niu.fc		niu-network
+source{
+   : SUNW,niusl ( -- )
+      " niu-network" load-driver
+   ;
+}source
+
+# finish the dropins
+source{
+device-end
+caps on
+}source

@@ -1,0 +1,412 @@
+# ========== Copyright Header Begin ==========================================
+# 
+# Hypervisor Software File: dropins.src
+# 
+# Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+# 
+#  - Do no alter or remove copyright notices
+# 
+#  - Redistribution and use of this software in source and binary forms, with 
+#    or without modification, are permitted provided that the following 
+#    conditions are met: 
+# 
+#  - Redistribution of source code must retain the above copyright notice, 
+#    this list of conditions and the following disclaimer.
+# 
+#  - Redistribution in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution. 
+# 
+#    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+# may be used to endorse or promote products derived from this software 
+# without specific prior written permission. 
+# 
+#     This software is provided "AS IS," without a warranty of any kind. 
+# ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+# INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+# PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+# MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+# ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+# DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+# OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+# FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+# DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+# ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+# SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# You acknowledge that this software is not designed, licensed or
+# intended for use in the design, construction, operation or maintenance of
+# any nuclear facility. 
+# 
+# ========== Copyright Header End ============================================
+# @(#)dropins.src 1.2 07/08/06
+# purpose: 
+# copyright: Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# copyright: Use is subject to license terms.
+#
+#
+# Format:	key	<data>
+#		build	<command to run>
+#		depend	<file>
+#		target	<dropin-src> <dropin-name>
+#		source{	[code] terminated by }source
+#		include <file>
+#
+version2
+
+message Remove old hardware support from code!
+# Because we are putting Niagara2 support back into the common 
+# sources before we decomission support for P1.0 hardware, we 
+# must still support the old Southbridge device, and all the 
+# hacks that went with it. Eventually, we can remove the following:
+#  - IDE driver
+#  - ISA driver
+#  - PCI bridge hack
+#  - 'no-device' method
+# Also, there is a hack in the sun4v pci FCode driver to workaround
+# Niagara2 erratum 106. That can be removed when we stop supporting
+# version 1.0 Niagara2 chips.
+
+# create the code to execute fcode dropins
+source{
+caps off
+" /packages/SUNW,builtin-drivers" find-device
+
+   headerless
+   : load-driver ( str$ -- )
+      find-drop-in  if		( adr,len )
+         >r dup >r  1 byte-load	(  )
+	 r> r> free-drop-in	(  )
+      then			(  )
+   ;
+
+   \ This is what we do if a device is probed, but we don't
+   \ want to create a device node for it.
+   \ The "delete-device" is just a list monkey that removes
+   \ the specified phandle from its parent's list of children.
+   \ There is no deallocation of resources, and the phandle
+   \ continues to point to a valid device.
+   \
+   \ Remove this method when we no longer support P1.0 hardware
+   : no-device ( flag -- )
+      if 
+	 current-device delete-device drop
+	 -1 throw
+      then
+   ;
+
+   : interrupt-property ( n -- )  " interrupts" integer-property  ;
+
+   : get-fcode  ( adr1 len1 adr2 len2 -- true | false )
+      find-drop-in  if
+         2dup >r >r
+         rot min  rot swap  move
+         r> r> free-drop-in
+         true
+      else  2drop false
+      then
+   ;
+
+   headers
+
+}source
+
+build		${MAKEDI}
+
+target		bootprom.bin	bootprom
+
+depend          ${BP}/dev/sun4v-devices/vnexus/depend.mk
+target          vnexus.fc         SUNW,vnexus
+source{
+   : onboard-devices ( -- )
+      diagnostic-mode? if
+         ." Loading onboard drivers: "
+      then
+      0 0 " 100" " /" begin-package
+         " SUNW,vnexus" load-driver
+      end-package
+   ;
+}source
+
+# Fonts
+depend		${BP}/pkg/termemu/fonts.mk
+external	font.di
+
+# Sunlogo
+depend          ${BP}/pkg/sunlogo/logo.mk
+external        sun-logo.di
+
+# Keyboard Translator Package
+depend          ${BP}/pkg/keyboard/translator/kbdtrans.mk
+external        kbdtrans.di
+
+# Sun USB Keyboard Tables
+depend          ${BP}/pkg/keyboard/tables/usb/keyboard.mk
+external        usbkbds.di
+
+# Network boot support package
+depend		${BP}/pkg/netinet/obptftp.mk
+external	obptftp.di
+
+# Sun4v PCI FCode driver
+depend		${BP}/dev/sun4v-devices/vpci/depend.mk
+target		vpci.fc		sun4v-vpci
+buildoptions    vpci.fc:=	FTHFLAGS += [define] 64BIT-ASSIGNED?
+buildoptions    vpci.fc:=	FTHFLAGS += [define] N2-ERRATUM-106
+source{
+   : pciex ( -- )
+       " sun4v-vpci" load-driver   
+   ;
+}source
+
+# vebus on huron
+depend		${BP}/dev/sun4v-devices/vebus/depend.mk
+target		vebus.fc	sun4v-ebus
+source{
+   : vebus ( -- )
+       " sun4v-ebus" load-driver
+   ;
+}source
+
+# Serial ttya
+depend          ${BP}/dev/ebus-devices/su-serial/depend.mk
+target          su-serial.fc	su-serial
+source{
+   : ebus-serial ( -- )
+      " serial" device-name
+      1 interrupt-property
+      " su16550"   encode-string 
+      " su"        encode-string encode+ " compatible" property
+      " su-serial" load-driver
+   ;
+   alias ebus-0,ca0000	ebus-serial
+}source
+
+# Niagara2 performace counter driver
+depend		${BP}/dev/sun4v-devices/n2/perf-cntr/depend.mk
+target		perf-cntr.fc		sun4v-perf-cnt
+source{
+   : SUNW,n2piu-pr ( -- )
+      " sun4v-perf-cnt" load-driver
+   ;
+}source
+
+# Niagara2 NIU nexus driver
+depend		${BP}/dev/sun4v-devices/niu-nexus/depend.mk
+target		niu-nexus.fc	niu-nexus
+source{
+   : SUNW,niumx ( -- )
+      " niu-nexus" load-driver
+   ;
+}source
+
+# Intel Gigabit Ethernet
+depend          ${BP}/dev/network/ophir/depend.mk
+target          ophir.fc                ophir
+source{
+   \ Use the subsystem vendor id 0x108e for Sun so we ensure that
+   \ we don't attach the Ophir driver to PCI-E cards. If we do,
+   \ it's possible that the Ophir driver could blow away the EEPROM
+   \ MAC, and the system wouldn't be able to recover the MAC.
+   : pciex8086,105e.108e.105e ( -- )
+      " ophir" load-driver
+   ;
+
+}source
+
+# Niagara2 NIU network device driver
+depend		${BP}/dev/network/neptune/niu/depend.mk
+target		niu.fc		niu-network
+source{
+   : SUNW,niusl ( -- )
+      " niu-network" load-driver
+   ;
+}source
+
+# virtual flashprom support
+depend		${BP}/dev/sun4v-devices/flashprom/depend.mk
+target		flashprom.fc	sun4v-flashprom
+source{
+   : flashprom ( -- )	" sun4v-flashprom" load-driver ;
+}source
+
+# virtual console 
+depend		${BP}/dev/sun4v-devices/console/depend.mk
+target		console.fc	sun4v-console
+source{
+   :  SUNW,sun4v-console ( -- )	" sun4v-console" load-driver  ;
+}source
+
+# vchannel support
+depend          ${BP}/dev/sun4v-devices/vchannel/depend.mk
+target          vchannel.fc         sun4v-chan-dev
+source{
+   : SUNW,sun4v-channel-devices  ( -- )  " sun4v-chan-dev" load-driver ;
+}source
+
+# vNET support
+depend          ${BP}/dev/sun4v-devices/vnet/depend.mk
+target          vnet.fc         sun4v-vnet
+source{
+   : SUNW,sun4v-network  ( -- )   " sun4v-vnet" load-driver  ;
+}source
+
+# vDisk support
+depend          ${BP}/dev/sun4v-devices/vdisk/depend.mk
+target          vdisk.fc                sun4v-vdisk
+source{
+   : SUNW,sun4v-disk  ( -- )  " sun4v-vdisk" load-driver  ;
+}source
+
+# hypervisor TOD
+depend		${BP}/dev/sun4v-devices/tod/depend.mk
+target		tod.fc	sun4v-tod
+source{
+   : SUNW,sun4v-tod ( -- )	" sun4v-tod" load-driver ;
+}source
+
+# SAS LSI 1064 driver (PCI-E version)
+# depend          ${BP}/dev/scsi/adapters/lsi1064/depend.mk
+# buildoptions    lsi1064.di:= MAKEDI = ${ROOT}/bin/makedi
+#	target          lsi1064.fc      pci1000,56
+# source{
+#   : pci1000,56 ( -- )
+#        " pci1000,56" load-driver
+#   ;
+#   alias pci1000,50.1000.1000   pci1000,56
+#   alias pci1000,56.1000.1000   pci1000,56
+#   alias pciex1000,50.1000.1000 pci1000,56
+#   alias pciex1000,50.1000.3010 pci1000,56
+#   alias pciex1000,56.1000.1000 pci1000,56
+#   alias pciex1000,56.1000.3010 pci1000,56
+#   alias pciex1000,58.1000.1000 pci1000,56
+#   alias pciex1000,58.1000.3010 pci1000,56
+#   alias pciex1000,58.1000.3080 pci1000,56
+#   alias pci1000,50.1000.3020   pci1000,56
+# }source
+
+# Dec bridge
+depend          ${BP}/dev/pci-bridge/dec21152/depend.mk
+target		dec21152.fc	class060400
+source{
+    : class060400 ( -- )
+\ The pci-express bridge that shows up as the "parent" to all the southbridge 
+\ devices actually disables Legacy IO if the IO base/limit are set to decode
+\ that range (0 - fff).  So we need to setup all the parent bridges EXCEPT
+\ the southbridge to decode that range.  We also don't want anyone else to be
+\ allocated those resources.  So we put those resources on the free list, and
+\ then allocate them right before we load the southbridge driver.
+\
+\ This hack can be removed when we no longer support p1.0 hardware
+\
+\ This trick depends on
+\ 1. IO address are allocated from 0 up
+\ 2. No IO devices are probed before the southbridge. 
+
+      my-space " config-l@" $call-parent h# 524910b9 = if  \ SOUTHBRIDGE
+         my-space h# 100.0000 or h# 1000 h# 1000 " resource-alloc" 
+         $call-parent drop
+      then
+
+       " class060400" load-driver  
+    ;
+}source
+
+# onboard IDE controller
+# Remove the IDE driver with P1.0 support
+depend          ${BP}/dev/ide/pci/depend.mk
+# buildoptions	ide.fc:= FTHFLAGS += [define] M1575-workarounds
+target          ide.fc          class010100
+source{
+   : class010100 ( -- )
+      " class010100" load-driver
+   ;
+   alias class01018a class010100
+   alias class01018f class010100
+}source
+
+# Legacy interface controller
+# Remove the Isa driver (and driver source code) with P1.0 support
+depend          ${BP}/dev/southbridge/huron/isa/depend.mk
+target          isa.fc          pci10b9,1575
+# The following flag toggles between using sideband interrupts
+# and virtual wire INTX messages for the Southbridge
+buildoptions	isa.fc:= FTHFLAGS += [define] INTX-MESSAGES?
+source{
+   : pci10b9,1575  ( -- )
+      " pci10b9,1575" load-driver
+      -1 no-device		\ delete the node after init
+    ;
+    alias  pci10b9,1575.10b9.1575  pci10b9,1575
+ 
+}source
+
+# Existing *LEGACY* on-board USB controller. Only on P0 Huron. Remove when
+# P0 no longer needs to be supported.
+source{
+   : pci10b9,5237  ( -- )
+      \ Set "USB Reset Mux" bit in the ULI 1575 to ensure that
+      \ software induced controller resets are handled correctly
+      h# 46 " config-b@" $call-parent 8 or h# 46 " config-b!" $call-parent
+      " ohci" load-driver
+   ; 
+   alias pci10b9,5237.10b9.5237  pci10b9,5237
+}source
+
+# ===== USB2 driver block. Ends at ====== #
+# onboard USB 1.0 driver
+depend          ${BP}/dev/usb2/hcd/ohci/depend.mk
+target          ohci.fc          ohci
+source{
+   : pci1033,35  ( -- )
+      " ohci" load-driver
+   ;
+   alias pci1033,35.1033.35 pci1033,35
+}source
+
+# onboard USB 2.0 driver
+depend          ${BP}/dev/usb2/hcd/ehci/depend.mk
+buildoptions	ehci.fc:= FTHFLAGS += [define] set-usb20-char
+target          ehci.fc          ehci
+source{
+   : pci1033,e0  ( -- )
+      " ehci" load-driver
+   ;
+   alias pci1033,e0.1033.e0 pci1033,e0
+}source
+
+
+depend          ${BP}/dev/usb2/device/device/depend.mk
+target          usbdevice.fc          usbdevice
+source{
+   : usbdevice  ( -- adr len true | false )  " usbdevice" get-fcode  ;
+   alias device usbdevice
+}source
+
+depend          ${BP}/dev/usb2/device/hub/depend.mk
+target          hub.fc          hub
+source{
+   : hub  ( -- adr len true | false )  " hub" get-fcode  ;
+   alias usb,class9 hub
+}source
+
+depend          ${BP}/dev/usb2/device/keyboard/depend.mk
+target          usbkbd.fc          usbkbd
+source{
+   : usbkbd  ( -- adr len true | false )  " usbkbd" get-fcode  ;
+   alias usbif,class3.1.1 usbkbd
+}source
+
+depend          ${BP}/dev/usb2/device/storage/depend.mk
+target          usbstorage.fc          usbstorage
+source{
+   : usbstorage  ( -- adr len true | false )  " usbstorage" get-fcode  ;
+   alias usbif,class8 usbstorage
+}source
+# ===== End USB2 driver block. ====== #
+
+# finish the dropins
+source{
+device-end
+caps on
+}source

@@ -1,0 +1,509 @@
+/*
+ * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
+/*
+ * The machine description files are derived from machine description
+ * binaries in OpenSPARC T2 legion simulation directory.
+ */
+
+#include "xilinx_t1_system_config.h"
+
+node root  root {
+
+        content-version  = "1.0";
+        fwd  -> memory;
+        fwd  -> cpus;
+        fwd  -> phys_io;
+        fwd  -> platform;
+        fwd  -> openboot;
+        fwd  -> virtual-devices;
+        reset-reason  = 0x0;
+        fwd  -> maus;
+        fwd  -> cwqs;
+        md-generation#  = 0x1;
+        fwd  -> channel-endpoints;
+}
+
+
+node cache  cache {
+
+        level  = 0x1;
+        type  = { "instn" };
+        line-size  = 0x20;
+        size  = 0x4000;
+        associativity  = 0x4;
+        back  -> exec-unit;
+        fwd  -> cache_2;
+}
+
+
+node cache  cache_1 {
+
+        level  = 0x1;
+        type  = { "data" };
+        line-size  = 0x10;
+        size  = 0x2000;
+        associativity  = 0x4;
+        back  -> exec-unit_1;
+        fwd  -> cache_2;
+}
+
+
+node tlb  tlb {
+
+        level  = 0x1;
+        type  = { "instn" };
+        entries  = 0x40;
+        associativity  = 0x0;
+        page-size-list  = 0x2b;
+        back  -> exec-unit;
+}
+
+
+node tlb  tlb_1 {
+
+        level  = 0x1;
+        type  = { "data" };
+        entries  = 0x80;
+        associativity  = 0x0;
+        page-size-list  = 0x2b;
+        back  -> exec-unit_1;
+}
+
+
+node exec-unit  exec-unit {
+
+        type  = { "ifetch" };
+        back  -> cpu;
+        fwd  -> cache;
+        fwd  -> tlb;
+}
+
+
+node exec-unit  exec-unit_1 {
+
+        type  = { "integer" , "integer-load" , "integer-store" , "fp-load" , "fp-store" };
+        back  -> cpu;
+        fwd  -> cache_1;
+        fwd  -> tlb_1;
+}
+
+
+node cpu  cpu {
+
+        id  = 0x0;
+        pid  = 0x0;
+        serial#  = 0x0;
+        isalist  = { "sparcv9" , "sparcv8plus" , "sparcv8" , "sparcv8-fsmuld" , "sparcv7" , "sparc" };
+        clock-frequency  = T1_FPGA_STICK_FREQ;
+        compatible  = { "SUNW,UltraSPARC-T1" , "SUNW,sun4v-cpu" , "sun4v" };
+        nwins  = 0x8;
+        mmu-type  = "sun4v";
+        q-cpu-mondo-#bits  = 0x8;
+        q-dev-mondo-#bits  = 0x8;
+        q-resumable-#bits  = 0x8;
+        q-nonresumable-#bits  = 0x8;
+        mmu-max-#tsbs  = 0x4;
+        mmu-#context-bits  = 0xd;
+        mmu-#shared-contexts  = 0x2;
+        mmu-page-size-list  = 0x2b;
+        mmu-#va-bits  = 0x30;
+        back  -> cpus;
+        fwd  -> exec-unit;
+        fwd  -> exec-unit_1;
+        fwd  -> exec-unit_2;
+}
+
+
+node exec-unit  exec-unit_2 {
+
+        type  = { "fp" };
+        back  -> cpu;
+}
+
+
+node cpus  cpus {
+
+        fwd  -> cpu;
+        back  -> root;
+}
+
+
+node cache  cache_2 {
+
+        level  = 0x2;
+        type  = { "instn" , "data" };
+        line-size  = 0x40;
+        size  = 0x300000;
+        associativity  = 0xC;
+        back  -> cache_1;
+        back  -> cache;
+}
+
+
+node phys_io  phys_io {
+
+        back  -> root;
+        fwd  -> iodevice;
+}
+
+
+node iodevice  iodevice {
+
+        back  -> phys_io;
+        name  = "pci";
+        pseudonym  = "pci";
+        disabled  = 0x0;
+        device-type  = "pciex";
+        compatible  = { "SUNW,sun4v-pci" };
+        cfg-handle  = 0x0;
+        address-ranges  = { 0x00 , 0x00 , 0x00 , 0xc8 , 0x10 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x10 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0xca , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x7f , 0xff , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0xcc , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x03 , 0xff , 0xff , 0x00 , 0x00 };
+        virtual-dma  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x80 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x80 , 0x00 , 0x00 , 0x00 };
+        ino-bitmap  = 0xf;
+        probe-list  = "0";
+        msi-address-ranges  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x7f , 0xff , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x01 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x03 , 0x00 , 0x00 , 0x00 , 0x00 , 0xff , 0xff , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x01 , 0x00 , 0x00 };
+        #msi  = 0x100;
+        msi-data-mask  = 0xff;
+        msi-ranges  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x01 , 0x00 };
+        msi-eq-size  = 0x80;
+        msix-data-width  = 0x20;
+        #msi-eqs  = 0x24;
+        msi-eq-to-devino  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x24 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x18 };
+        interrupts  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x3f , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x3e };
+        #interrupt-cells  = 0x1;
+        interrupt-map-mask  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0xff , 0xf0 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x07 };
+        bus-ranges  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0xff };
+        fwd  -> interrupt-map-entry;
+        fwd  -> interrupt-map-entry_1;
+        fwd  -> interrupt-map-entry_2;
+        fwd  -> interrupt-map-entry_3;
+}
+
+
+node interrupt-maps  interrupt-maps {
+
+        back  -> openboot;
+        fwd  -> interrupt-map;
+}
+
+
+node interrupt-map  interrupt-map {
+
+        back  -> interrupt-maps;
+        dev  = "/pci@0";
+        parent  = "/pci@0";
+        intr-cells  = 0x1;
+        intr-mask  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0xff , 0xf0 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x07 };
+        interrupts  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x3f , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x3e };
+        fwd  -> interrupt;
+        fwd  -> interrupt_1;
+        fwd  -> interrupt_2;
+        fwd  -> interrupt_3;
+}
+
+
+node interrupt  interrupt {
+
+        back  -> interrupt-map;
+        intr  = 0x1;
+        ino  = 0x14;
+        addr  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+}
+
+
+node interrupt  interrupt_1 {
+
+        back  -> interrupt-map;
+        intr  = 0x2;
+        ino  = 0x15;
+        addr  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+}
+
+
+node interrupt  interrupt_2 {
+
+        back  -> interrupt-map;
+        intr  = 0x3;
+        ino  = 0x16;
+        addr  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+}
+
+
+node interrupt  interrupt_3 {
+
+        back  -> interrupt-map;
+        intr  = 0x4;
+        ino  = 0x17;
+        addr  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+}
+
+
+node interrupt-map-entry  interrupt-map-entry {
+
+        child-unit-address  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+        child-interrupt  = 0x1;
+        parent-interrupt  = 0x14;
+        parent-device-path  = "/pci@0";
+        back  -> iodevice;
+}
+
+
+node interrupt-map-entry  interrupt-map-entry_1 {
+
+        child-unit-address  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+        child-interrupt  = 0x2;
+        parent-interrupt  = 0x15;
+        parent-device-path  = "/pci@0";
+        back  -> iodevice;
+}
+
+
+node interrupt-map-entry  interrupt-map-entry_2 {
+
+        child-unit-address  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+        child-interrupt  = 0x3;
+        parent-interrupt  = 0x16;
+        parent-device-path  = "/pci@0";
+        back  -> iodevice;
+}
+
+
+node interrupt-map-entry  interrupt-map-entry_3 {
+
+        child-unit-address  = { 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x02 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 , 0x00 };
+        child-interrupt  = 0x4;
+        parent-interrupt  = 0x17;
+        parent-device-path  = "/pci@0";
+        back  -> iodevice;
+}
+
+
+node openboot  openboot {
+
+        back  -> root;
+        fwd  -> interrupt-maps;
+        fwd  -> devalias;
+        fwd  -> variables;
+}
+
+
+node variables  variables {
+
+        back  -> openboot;
+        fcode-debug?  = "true";
+        boot-device  = "vdisk";
+        auto-boot?  = "false";
+}
+
+
+node virtual-devices  virtual-devices {
+
+        back  -> root;
+        name  = "virtual-devices";
+        cfg-handle  = 0x100;
+        probe-list  = 0x1f;
+        compatible  = { "SUNW,sun4v-virtual-devices" };
+        device-type  = "virtual-devices";
+        fwd  -> virtual-device;
+        fwd  -> channel-devices;
+        fwd  -> virtual-device_4;
+        fwd  -> virtual-device_5;
+}
+
+
+node mblock  mblock {
+
+        base  = T1_FPGA_GUEST_MEMBASE;
+        size  = T1_FPGA_GUEST_MEMSIZE;
+        back  -> memory;
+}
+
+
+node memory  memory {
+
+        memory-generation-id#  = 0x0;
+        fwd  -> mblock;
+        back  -> root;
+}
+
+
+node platform  platform {
+
+	banner-name = "Sun Fire T1000";
+	name = "SUNW,Sun-Fire-T1000";
+        watchdog-resolution  = 0x3e8;
+        watchdog-max-timeout  = 0x757b12c00;
+        max-cpus  = 0x20;
+        mac-address  = 0x00E0815F2CAB;
+        hostid  = 0x83f9edf0;
+        serial#  = 0xab4130;
+        stick-frequency  = T1_FPGA_STICK_FREQ;
+        back  -> root;
+        domaining-enabled  = 0x1;
+}
+
+
+node maus  maus {
+
+}
+
+
+node cwqs  cwqs {
+
+}
+
+
+node virtual-device  virtual-device {
+
+        back  -> virtual-devices;
+        name  = "console";
+        device-type  = "serial";
+        intr  = 0x1;
+        ino  = 0x11;
+        channel#  = 0x0;
+        cfg-handle  = 0x1;
+        compatible  = { "qcn" , "SUNW,sun4v-console" };
+}
+
+
+node devalias  devalias {
+
+        back  -> openboot;
+        vdisk  = "/virtual-devices/disk@0";
+        snet  = "/virtual-devices/network@0";
+        ttya  = "/virtual-devices/console@1";
+        nvram  = "/virtual-devices/nvram@3";
+        ttyb  = "/virtual-devices/console@4";
+        scsi  = "/pci@7c0/scsi@1";
+        disk  = "/pci@7c0/scsi@1/disk@0";
+        virtual-console  = "/virtual-devices/console@1";
+}
+
+
+node channel-devices  channel-devices {
+
+        back  -> virtual-devices;
+        name  = "channel-devices";
+        device-type  = "channel-devices";
+        compatible  = { "SUNW,sun4v-channel-devices" };
+        cfg-handle  = 0x200;
+        fwd  -> virtual-device_1;
+        fwd  -> virtual-device_2;
+        fwd  -> virtual-device_3;
+}
+
+
+node channel-endpoints  channel-endpoints {
+
+        back  -> root;
+        fwd  -> channel-endpoint;
+        fwd  -> channel-endpoint_1;
+        fwd  -> channel-endpoint_2;
+}
+
+
+node channel-endpoint  channel-endpoint {
+
+        back  -> channel-endpoints;
+        id  = 0x2;
+        tx-ino  = 0x4;
+        rx-ino  = 0x5;
+}
+
+
+node virtual-device  virtual-device_1 {
+
+        back  -> channel-devices;
+        compatible  = { "SUNW,sun4v-channel" };
+        device-type  = "serial";
+        name  = "virtual-channel";
+        cfg-handle  = 0x0;
+        fwd  -> virtual-device-port;
+        fwd  -> virtual-device-port_1;
+}
+
+
+node virtual-device-port  virtual-device-port {
+
+        back  -> virtual-device_1;
+        name  = "vldc-port";
+        id  = 0x0;
+        fwd  -> channel-endpoint_1;
+        vldc-svc-name  = "hvctl";
+}
+
+
+node channel-endpoint  channel-endpoint_1 {
+
+        back  -> channel-endpoints;
+        id  = 0x0;
+        tx-ino  = 0x0;
+        rx-ino  = 0x1;
+        back  -> virtual-device-port;
+}
+
+
+node virtual-device-port  virtual-device-port_1 {
+
+        back  -> virtual-device_1;
+        name  = "vldc-port";
+        id  = 0x1;
+        fwd  -> channel-endpoint_2;
+        vldc-svc-name  = "ldom-primary";
+}
+
+
+node channel-endpoint  channel-endpoint_2 {
+
+        back  -> channel-endpoints;
+        id  = 0x1;
+        tx-ino  = 0x2;
+        rx-ino  = 0x3;
+        back  -> virtual-device-port_1;
+}
+
+
+node virtual-device  virtual-device_2 {
+
+        back  -> channel-devices;
+        compatible  = { "SUNW,sun4v-console-concentrator" };
+        device-type  = "vcc";
+        name  = "virtual-console-concentrator";
+        cfg-handle  = 0x0;
+}
+
+
+node virtual-device  virtual-device_3 {
+
+        back  -> channel-devices;
+        compatible  = { "SUNW,sun4v-disk-server" };
+        device-type  = "vds";
+        name  = "virtual-disk-server";
+        cfg-handle  = 0x0;
+}
+
+
+node virtual-device  virtual-device_4 {
+
+        back  -> virtual-devices;
+        name  = "disk";
+        fcode-driver-name  = "disk-virtual-device";
+        my-space  = 0x0;
+        intr  = 0x0;
+        ino  = 0x0;
+        cfg-handle  = 0x0;
+}
+
+
+node virtual-device  virtual-device_5 {
+
+        back  -> virtual-devices;
+        name  = "snet";
+        fcode-driver-name  = "net-virtual-device";
+        my-space  = 0x0;
+        intr  = 0x0;
+        ino  = T1_FPGA_SNET_INO;
+        cfg-handle  = 0x2;
+}

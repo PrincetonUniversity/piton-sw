@@ -1,0 +1,1415 @@
+\ ========== Copyright Header Begin ==========================================
+\ 
+\ Hypervisor Software File: offsets.in
+\ 
+\ Copyright (c) 2006 Sun Microsystems, Inc. All Rights Reserved.
+\ 
+\  - Do no alter or remove copyright notices
+\ 
+\  - Redistribution and use of this software in source and binary forms, with 
+\    or without modification, are permitted provided that the following 
+\    conditions are met: 
+\ 
+\  - Redistribution of source code must retain the above copyright notice, 
+\    this list of conditions and the following disclaimer.
+\ 
+\  - Redistribution in binary form must reproduce the above copyright notice,
+\    this list of conditions and the following disclaimer in the
+\    documentation and/or other materials provided with the distribution. 
+\ 
+\    Neither the name of Sun Microsystems, Inc. or the names of contributors 
+\ may be used to endorse or promote products derived from this software 
+\ without specific prior written permission. 
+\ 
+\     This software is provided "AS IS," without a warranty of any kind. 
+\ ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES, 
+\ INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
+\ PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN 
+\ MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR 
+\ ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR 
+\ DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN 
+\ OR ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR 
+\ FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE 
+\ DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, 
+\ ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF 
+\ SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+\ 
+\ You acknowledge that this software is not designed, licensed or
+\ intended for use in the design, construction, operation or maintenance of
+\ any nuclear facility. 
+\ 
+\ ========== Copyright Header End ============================================
+\
+\ Copyright 2007 by Sun Microsystems, Inc.  All rights reserved.
+\ Use is subject to license terms.
+\
+\ offsets.in: input file to produce offsets.h using the stabs program
+\
+#pragma	ident	"@(#)offsets.in	1.12	07/08/01 SMI"
+
+#ifndef _OFFSETS_H
+#define	_OFFSETS_H
+#endif
+
+#include <sys/htypes.h>
+#include <sun4v/mmu.h>
+#include <traps.h>
+#include <mmu.h>
+#include <cache.h>
+#include <error_defs.h>
+#include <vpiu_errs_defs.h>
+#include <hypervisor.h>
+#include <svc.h>
+#include <vdev_ops.h>
+#include <vdev_intr.h>
+#include <piu.h>
+#include <svc_vbsc.h>
+#include <ncs.h>
+#include <rng.h>
+#include <cyclic.h>
+#include <vcpu.h>
+#include <mau.h>
+#include <cwq.h>
+#include <strand.h>
+#include <guest.h>
+#include <ldc.h>
+#include <hvctl.h>
+#include <md.h>
+#include <pcie.h>
+#include <config.h>
+#include <fpga.h>
+#include <vdev_simdisk.h>
+
+#include <md/md_impl.h>
+
+nametable	NAMETABLE_SIZE
+
+config	CONFIG_SIZE
+	membase		CONFIG_MEMBASE
+	memsize		CONFIG_MEMSIZE
+	physmemsize	CONFIG_PHYSMEMSIZE
+	reloc		CONFIG_RELOC
+	parse_hvmd	CONFIG_PARSE_HVMD
+	active_hvmd	CONFIG_ACTIVE_HVMD
+	guests		CONFIG_GUESTS
+	mblocks		CONFIG_MBLOCKS
+	vcpus		CONFIG_VCPUS
+	strands		CONFIG_STRANDS
+	vstate		CONFIG_VSTATE
+	ldcb_pa		CONFIG_LDCB_PA
+	pcie_busses	CONFIG_PCIE_BUSSES
+	strand_startset	CONFIG_STRAND_STARTSET
+	hv_ldcs		CONFIG_HV_LDCS
+	sp_ldcs		CONFIG_SP_LDCS
+	sp_ldc_max_cid	CONFIG_SP_LDC_MAX_CID
+	hvuart_addr	CONFIG_HVUART_ADDR
+	tod		CONFIG_TOD
+	todfrequency	CONFIG_TODFREQUENCY
+	sys_hwtw_mode	CONFIG_SYS_HWTW_MODE
+	stickfrequency	CONFIG_STICKFREQUENCY
+	dummytsbp	CONFIG_DUMMYTSB
+	guests_dtnode	CONFIG_GUESTS_DTNODE
+	cpus_dtnode	CONFIG_CPUS_DTNODE
+	hv_ldcs_dtnode	CONFIG_HV_LDCS_DTNODE
+	sp_ldcs_dtnode	CONFIG_SP_LDCS_DTNODE
+	ldcb_dtnode	CONFIG_LDCB_DTNODE
+	svc		CONFIG_SVCS
+	vintr		CONFIG_VINTR
+	devs_dtnode	CONFIG_DEVS_DTNODE
+	svcs_dtnode	CONFIG_SVCS_DTNODE
+	error_svch	CONFIG_ERROR_SVCH
+	vbsc_dbgerror	CONFIG_VBSC_DBGERROR
+	vbsc_svch	CONFIG_VBSC_SVCH
+	error_lock	CONFIG_ERRORLOCK
+	hdnametable	CONFIG_HDNAMETABLE
+	memscrub_max	CONFIG_MEMSCRUB_MAX
+	intrtgt		CONFIG_INTRTGT
+	devinstancesp	CONFIG_DEVINSTANCES
+	erpt_pa		CONFIG_ERPT_PA
+	erpt_size	CONFIG_ERPT_SIZE
+	sram_erpt_buf_inuse CONFIG_SRAM_ERPT_BUF_INUSE
+	cyclic_maxd	CONFIG_CYCLIC_MAXD
+	ce_blackout	CONFIG_CE_BLACKOUT
+	ce_poll_time	CONFIG_CE_POLL_TIME
+	single_strand_lock CONFIG_SINGLE_STRAND_LOCK
+	strand_present	CONFIG_STPRES
+	strand_active	CONFIG_STACTIVE
+	strand_idle	CONFIG_STIDLE
+	strand_halt	CONFIG_STHALT
+	print_spinlock	CONFIG_PRINT_SPINLOCK
+	errs_to_send	CONFIG_ERRS_TO_SEND
+	heartbeat_cpu	CONFIG_HEARTBEAT_CPU
+	hvctl_hv_seq	CONFIG_HVCTL_HV_SEQ
+	hvctl_zeus_seq	CONFIG_HVCTL_ZEUS_SEQ
+	hvctl_major	CONFIG_HVCTL_MAJOR
+	hvctl_minor	CONFIG_HVCTL_MINOR
+	hvctl_state	CONFIG_HVCTL_STATE
+	hvctl_rand_num	CONFIG_HVCTL_RAND_NUM
+	hvctl_ibuf	CONFIG_HVCTL_IBUF
+	hvctl_obuf	CONFIG_HVCTL_OBUF
+	hvctl_ip	CONFIG_HVCTL_IP
+	hvctl_ldc	CONFIG_HVCTL_LDC
+	hvctl_ldc_lock  CONFIG_HVCTL_LDC_LOCK
+	del_reconf_gid  CONFIG_DEL_RECONF_GID
+	scrub_sync	CONFIG_SCRUB_SYNC
+	fpga_status_lock CONFIG_FPGA_STATUS_LOCK
+	l2scrub_interval	CONFIG_L2SCRUB_INTERVAL
+	l2scrub_entries		CONFIG_L2SCRUB_ENTRIES
+	config_m	CONFIG_MCONFIG
+
+mau	MAU_SIZE
+	pid		MAU_PID
+	state		MAU_STATE
+	handle		MAU_HANDLE
+	ino		MAU_INO
+	cpuset		MAU_CPUSET
+	store_in_progr	MAU_STORE_IN_PROGR
+	enable_cwq	MAU_ENABLE_CWQ
+	cpu_active	MAU_CPU_ACTIVE
+	queue		MAU_QUEUE
+	ihdlr		MAU_IHDLR
+
+cwq	CWQ_SIZE
+	pid		CWQ_PID
+	state		CWQ_STATE
+	handle		CWQ_HANDLE
+	ino		CWQ_INO
+	cpuset		CWQ_CPUSET
+	cpu_active	CWQ_CPU_ACTIVE
+	queue		CWQ_QUEUE
+	ihdlr		CWQ_IHDLR
+
+rng	RNG_SIZE
+	lock		RNG_LOCK
+	ctl		RNG_CTL
+
+rwindow	RWINDOW_SIZE
+
+vcpu_trapstate	VCPUTRAPSTATE_SIZE
+	tpc		VCTS_TPC
+	tnpc		VCTS_TNPC
+	tstate		VCTS_TSTATE
+	tt		VCTS_TT
+	htstate		VCTS_HTSTATE
+
+vcpu_globals	VCPU_GLOBALS_SIZE
+	g	VCPU_GLOBALS_G
+
+vcpustate	VCPUSTATE_SIZE
+	tl		VS_TL
+	trapstack	VS_TRAPSTACK
+	gl		VS_GL
+	globals		VS_GLOBALS
+	tba		VS_TBA
+	y		VS_Y
+	asi		VS_ASI
+	softint		VS_SOFTINT
+	pil		VS_PIL
+	gsr		VS_GSR
+	tick		VS_TICK
+	stick		VS_STICK
+	stickcompare	VS_STICKCOMPARE
+	scratchpad	VS_SCRATCHPAD
+	cwp		VS_CWP
+	wstate		VS_WSTATE
+	cansave		VS_CANSAVE
+	canrestore	VS_CANRESTORE
+	otherwin	VS_OTHERWIN
+	cleanwin	VS_CLEANWIN
+	wins		VS_WINS
+	globals		VS_GLOBALS
+	cpu_mondo_head	VS_CPU_MONDO_HEAD
+	cpu_mondo_tail	VS_CPU_MONDO_TAIL
+	dev_mondo_head	VS_DEV_MONDO_HEAD
+	dev_mondo_tail	VS_DEV_MONDO_TAIL
+	error_resumable_head	VS_ERROR_RESUMABLE_HEAD
+	error_resumable_tail	VS_ERROR_RESUMABLE_TAIL
+	error_nonresumable_head	VS_ERROR_NONRESUMABLE_HEAD
+	error_nonresumable_tail	VS_ERROR_NONRESUMABLE_TAIL
+
+vcpu	VCPU_SIZE
+	guest		CPU_GUEST
+	root		CPU_ROOT
+	strand		CPU_STRAND
+	res_id		CPU_RES_ID
+	strand_slot	CPU_STRAND_SLOT
+	vid		CPU_VID
+	parttag		CPU_PARTTAG
+	maup		CPU_MAU
+	cwqp		CPU_CWQ
+	start_pc	CPU_START_PC
+	start_arg	CPU_START_ARG
+	rtba		CPU_RTBA
+	mmu_area	CPU_MMU_AREA
+	mmu_area_ra	CPU_MMU_AREA_RA
+	pending_senders	CPU_PENDING_SENDERS
+	cpuq_base	CPU_CPUQ_BASE
+	cpuq_size	CPU_CPUQ_SIZE
+	cpuq_mask	CPU_CPUQ_MASK
+	cpuq_base_ra	CPU_CPUQ_BASE_RA
+	devq_lock	CPU_DEVQ_LOCK
+	devq_base	CPU_DEVQ_BASE
+	devq_size	CPU_DEVQ_SIZE
+	devq_mask	CPU_DEVQ_MASK
+	devq_base_ra	CPU_DEVQ_BASE_RA
+	devq_shdw_tail	CPU_DEVQ_SHDW_TAIL
+	errqnr_base	CPU_ERRQNR_BASE
+	errqnr_size	CPU_ERRQNR_SIZE
+	errqnr_mask	CPU_ERRQNR_MASK
+	errqnr_base_ra	CPU_ERRQNR_BASE_RA
+	errqr_base	CPU_ERRQR_BASE
+	errqr_size	CPU_ERRQR_SIZE
+	errqr_mask	CPU_ERRQR_MASK
+	errqr_base_ra	CPU_ERRQR_BASE_RA
+	status		CPU_STATUS
+	command		CPU_COMMAND
+	lastpoke	CPU_CMD_LASTPOKE
+	arg0		CPU_CMD_ARG0
+	arg1		CPU_CMD_ARG1
+	arg2		CPU_CMD_ARG2
+	arg3		CPU_CMD_ARG3
+	arg4		CPU_CMD_ARG4
+	arg5		CPU_CMD_ARG5
+	arg6		CPU_CMD_ARG6
+	arg7		CPU_CMD_ARG7
+	vintr		CPU_VINTR
+	ntsbs_ctx0	CPU_NTSBS_CTX0
+	ntsbs_ctxn	CPU_NTSBS_CTXn
+	tsbds_ctx0	CPU_TSBDS_CTX0
+	tsbds_ctxn	CPU_TSBDS_CTXn
+	mmustat_area	CPU_MMUSTAT_AREA
+	mmustat_area_ra	CPU_MMUSTAT_AREA_RA
+	rng		CPU_RNG
+	svcregs		CPU_SVCREGS
+	scr		CPU_SCR
+	ttrace_buf_size	CPU_TTRACEBUF_SIZE
+	ttrace_buf_ra	CPU_TTRACEBUF_RA
+	ttrace_buf_pa	CPU_TTRACEBUF_PA
+	ttrace_offset	CPU_TTRACE_OFFSET
+	ldc_intr_pend	CPU_LDC_INTR_PEND
+	ldc_endpoint	CPU_LDC_ENDPOINT
+	state_save_area	CPU_STATE_SAVE_AREA
+	launch_with_retry	CPU_LAUNCH_WITH_RETRY
+	util		CPU_UTIL
+
+\#define CPU_SCR0	(CPU_SCR + (0 * CPU_SCR_INCR))
+\#define CPU_SCR1	(CPU_SCR + (1 * CPU_SCR_INCR))
+\#define CPU_SCR2	(CPU_SCR + (2 * CPU_SCR_INCR))
+\#define CPU_SCR3	(CPU_SCR + (3 * CPU_SCR_INCR))
+
+vcpu_util	VCPU_UTIL_SIZE
+	stick_last	VCUTIL_STICK_LAST
+	yield_count	VCUTIL_YIELD_COUNT
+	yield_start	VCUTIL_YIELD_START
+
+\#define CPU_UTIL_STICK_LAST	(CPU_UTIL + VCUTIL_STICK_LAST)
+\#define CPU_UTIL_YIELD_COUNT	(CPU_UTIL + VCUTIL_YIELD_COUNT)
+\#define CPU_UTIL_YIELD_START	(CPU_UTIL + VCUTIL_YIELD_START)
+
+sched_slot	SCHED_SLOT_SIZE
+	action		SCHED_SLOT_ACTION
+	arg		SCHED_SLOT_ARG
+
+hvctl_header	HVCTL_HEADER_SIZE
+	op		HVCTL_HEADER_OP
+
+hvctl_msg	HVCTL_MSG_SIZE
+	hdr		HVCTL_MSG_HDR
+	msg		HVCTL_MSG_MSG
+
+hvm_sched	HVM_SCHED_SIZE
+	vcpup		HVM_SCHED_VCPUP
+
+hvm_scrub	HVM_SCRUB_SIZE
+	start_pa	HVM_SCRUB_START_PA
+	len		HVM_SCRUB_START_LEN
+
+hvm_guestcmd	HVM_GUESTCMD_SIZE
+	vcpup		HVM_GUESTCMD_VCPUP
+	arg		HVM_GUESTCMD_ARG
+
+hvm_stopguest	HVM_STOPGUEST_SIZE
+	guestp		HVM_STOPGUEST_GUESTP
+
+hvm		HVM_SIZE
+	cmd		HVM_CMD
+	from_strandp	HVM_FROM_STRANDP
+	args		HVM_ARGS
+
+xcall_mbox	XCALL_MBOX_SIZE
+	command		XCMB_COMMAND
+	mondobuf	XCMB_MONDOBUF
+
+mini_stack	MINI_STACK_SIZE
+	ptr		MINI_STACK_PTR
+	val		MINI_STACK_VAL
+
+pcie_device	PCIE_DEVICE_SIZE
+	res		PCIE_DEVICE_RES
+	guestp		PCIE_DEVICE_GUESTP
+
+strand	STRAND_SIZE
+	configp			STRAND_CONFIGP
+	id			STRAND_ID
+	current_slot		STRAND_CURRENT_SLOT
+	slot			STRAND_SLOT
+	xc_mb			STRAND_XCALL_MBOX
+	hv_txmondo		STRAND_HV_TXMONDO
+	hv_rxmondo		STRAND_HV_RXMONDO
+	scrub_basepa		STRAND_SCRUB_BASEPA
+	scrub_size		STRAND_SCRUB_SIZE
+	mini_stack		STRAND_MINI_STACK
+	scr			STRAND_SCR
+	ue_tmp1			STRAND_UE_TMP1
+	ue_tmp2			STRAND_UE_TMP2
+	ue_tmp3			STRAND_UE_TMP3
+	ue_globals      	STRAND_UE_GLOBALS
+	err_seq_no		STRAND_ERR_SEQ_NO
+	err_flag		STRAND_ERR_FLAG
+	strand_diag_buf		STRAND_DIAG_BUF
+	strand_sun4v_rprt_buf	STRAND_SUN4V_RPRT_BUF
+	strand_err_table_entry	STRAND_ERR_TABLE_ENTRY
+	strand_err_isfsr	STRAND_ERR_ISFSR
+	strand_err_dsfsr	STRAND_ERR_DSFSR
+	strand_err_dsfar	STRAND_ERR_DSFAR
+	strand_err_desr		STRAND_ERR_DESR
+	strand_err_dfesr	STRAND_ERR_DFESR
+	strand_err_return_addr	STRAND_ERR_RETURN_ADDR
+	io_prot			STRAND_IO_PROT
+	io_error		STRAND_IO_ERROR
+	nrpending		STRAND_NRPENDING
+	rerouted_cpu		STRAND_REROUTED_CPU
+	rerouted_ehdl		STRAND_REROUTED_EHDL
+	rerouted_addr		STRAND_REROUTED_ADDR
+	rerouted_stick		STRAND_REROUTED_STICK
+	rerouted_attr		STRAND_REROUTED_ATTR
+	abort_pc		STRAND_ABORT_PC
+	err_globals_saved	STRAND_ERR_GLOBALS_SAVED
+	trapstate		STRAND_FAIL_TRAPSTATE
+	trapglobals		STRAND_FAIL_TRAPGLOBALS
+	fail_gl			STRAND_FAIL_GL
+	fail_tl			STRAND_FAIL_TL
+	mra			STRAND_MRA
+	strand_stack		STRAND_STACK
+	cyclic			STRAND_CYCLIC
+
+\#define STRAND_SCR0    (STRAND_SCR + (0 * STRAND_SCR_INCR))
+\#define STRAND_SCR1    (STRAND_SCR + (1 * STRAND_SCR_INCR))
+\#define STRAND_SCR2    (STRAND_SCR + (2 * STRAND_SCR_INCR))
+\#define STRAND_SCR3    (STRAND_SCR + (3 * STRAND_SCR_INCR))
+
+\#define STRAND_FP_TMP1            STRAND_UE_TMP1
+\#define STRAND_FP_TMP2            STRAND_UE_TMP2
+\#define STRAND_FP_TMP3            STRAND_UE_TMP3
+\#define STRAND_ERR_ESR_INCR       STRAND_ERR_ISFSR_INCR
+
+\#define CPU_SCR0	(CPU_SCR + (0 * CPU_SCR_INCR))
+\#define CPU_SCR1	(CPU_SCR + (1 * CPU_SCR_INCR))
+\#define CPU_SCR2	(CPU_SCR + (2 * CPU_SCR_INCR))
+\#define CPU_SCR3	(CPU_SCR + (3 * CPU_SCR_INCR))
+\#define ENDOFSTACK	(STACK_VAL_INCR * (STACKDEPTH + 1))
+\#define TOP		(CPU_STACK + STACK_TOP)
+
+mapping	MAPPING_SIZE
+	_map_entry_aligned	MAPPING_ENTRY_ALIGNED
+	icpuset		MAPPING_ICPUSET
+	dcpuset		MAPPING_DCPUSET
+
+map_entry_aligned
+	_map_data	MAP_ENTRY_ALIGNED_DATA
+
+map_data
+	va		MAP_DATA_VA
+	tte		MAP_DATA_TTE
+
+\#define MAPPING_VA (MAPPING_ENTRY_ALIGNED + MAP_ENTRY_ALIGNED_DATA + MAP_DATA_VA)
+\#define MAPPING_TTE (MAPPING_ENTRY_ALIGNED + MAP_ENTRY_ALIGNED_DATA + MAP_DATA_TTE)
+
+stack	STACK_SIZE
+	top		STACK_TOP
+	val		STACK_VAL
+
+\#define BANK_SHIFT	6
+
+\#define CPU_EVBSC_L2_AFSR(n) CPU_VBSC_ERPT + EVBSC_L2_AFSR + (n * EVBSC_L2_AFSR_INCR)
+
+\#define CPU_EVBSC_L2_AFAR(n) CPU_VBSC_ERPT + EVBSC_L2_AFAR + (n * EVBSC_L2_AFAR_INCR)
+
+\#define CPU_EVBSC_DRAM_AFSR(n) CPU_VBSC_ERPT + EVBSC_DRAM_AFSR + (n * EVBSC_DRAM_AFSR_INCR)
+
+\#define CPU_EVBSC_DRAM_AFAR(n) CPU_VBSC_ERPT + EVBSC_DRAM_AFAR + (n * EVBSC_DRAM_AFAR_INCR)
+
+\#define CPU_EVBSC_DRAM_CNTR(n) CPU_VBSC_ERPT + EVBSC_DRAM_CNTR + (n * EVBSC_DRAM_CNTR_INCR)
+
+\#define CPU_EVBSC_DRAM_LOC(n) CPU_VBSC_ERPT + EVBSC_DRAM_LOC + (n * EVBSC_DRAM_LOC_INCR)
+
+\#define CPU_EVBSC_DCACHE_DATA(n) DCACHE_DATA + (n * DCACHE_DATA_INCR)
+
+\#define CPU_EVBSC_ICACHE_DIAG_DATA(n) DIAG_BUF_ICACHE + ICACHE_DIAG_DATA + (n * ICACHE_DIAG_DATA_INCR)
+
+epkt	EPKTSIZE
+	sysino			PCIERPT_SYSINO
+	sun4v_ehdl		PCIERPT_SUN4V_EHDL
+	sun4v_stick		PCIERPT_SUN4V_STICK
+	sun4v_desc		PCIERPT_SUN4V_DESC
+	sun4v_specfic		PCIERPT_SUN4V_SPECFIC
+	word4			PCIERPT_WORD4
+	HDR1			PCIERPT_HDR1
+	HDR2			PCIERPT_HDR2
+
+
+
+dmu_err	DMU_ERR_SIZE
+	report_type		DMU_ERR_REPORT_TYPE_62
+	fpga_tod		DMU_ERR_FPGA_TOD
+	pciehdl			DMU_ERR_EHDL
+	pcistick		DMU_ERR_STICK
+	cpuver			DMU_ERR_CPUVER
+	agentid			DMU_ERR_AGENTID
+	mondo_num		DMU_ERR_MONDO_NUM
+	dmu_core_and_block_err_status	DMU_ERR_DMU_CORE_AND_BLOCK_ERR_STATUS
+	imu_err_log_enable	DMU_ERR_IMU_ERR_LOG_ENABLE
+	imu_interrupt_enable	DMU_ERR_IMU_INTERRUPT_ENABLE
+	imu_enabled_err_status	DMU_ERR_IMU_ENABLED_ERR_STATUS
+	imu_err_status_set	DMU_ERR_IMU_ERR_STATUS_SET
+	imu_scs_err_log		DMU_ERR_IMU_SCS_ERR_LOG
+	imu_eqs_err_log		DMU_ERR_IMU_EQS_ERR_LOG
+	imu_rds_err_log		DMU_ERR_IMU_RDS_ERR_LOG
+	mmu_err_log_enable	DMU_ERR_MMU_ERR_LOG_ENABLE
+	mmu_intr_enable		DMU_ERR_MMU_INTR_ENABLE
+	mmu_intr_status		DMU_ERR_MMU_INTR_STATUS
+	mmu_err_status_set	DMU_ERR_MMU_ERR_STATUS_SET
+	mmu_translation_fault_address	DMU_ERR_MMU_TRANSLATION_FAULT_ADDRESS
+	mmu_translation_fault_status	DMU_ERR_MMU_TRANSLATION_FAULT_STATUS
+
+
+peu_err	PEU_ERR_SIZE
+	report_type		PCIE_ERR_REPORT_TYPE_63
+	peu_core_and_block_intr_enable	PEU_ERR_PEU_CORE_AND_BLOCK_INTR_ENABLE
+	peu_core_and_block_intr_status	PEU_ERR_PEU_CORE_AND_BLOCK_INTR_STATUS
+	ilu_err_log_enable	PEU_ERR_ILU_ERR_LOG_ENABLE
+	ilu_intr_enable		PEU_ERR_ILU_INTR_ENABLE
+	ilu_intr_status		PEU_ERR_ILU_INTR_STATUS
+	ilu_err_status_set		PEU_ERR_ILU_ERR_STATUS_SET
+	peu_other_event_log_enable	PEU_ERR_PEU_OTHER_EVENT_LOG_ENABLE
+	peu_other_event_intr_enable	PEU_ERR_PEU_OTHER_EVENT_INTR_ENABLE
+	peu_other_event_intr_status	PEU_ERR_PEU_OTHER_EVENT_INTR_STATUS
+	peu_other_event_status_set	PEU_ERR_PEU_OTHER_EVENT_STATUS_SET
+	peu_receive_other_event_header1_log	PEU_ERR_PEU_RECEIVE_OTHER_EVENT_HEADER1_LOG
+	peu_receive_other_event_header2_log	PEU_ERR_PEU_RECEIVE_OTHER_EVENT_HEADER2_LOG
+	peu_transmit_other_event_header1_log	PEU_ERR_PEU_TRANSMIT_OTHER_EVENT_HEADER1_LOG
+	peu_transmit_other_event_header2_log	PEU_ERR_PEU_TRANSMIT_OTHER_EVENT_HEADER2_LOG
+	peu_ue_log_enable	PEU_ERR_PEU_UE_LOG_ENABLE
+	peu_ue_interrupt_enable	PEU_ERR_PEU_UE_INTERRUPT_ENABLE
+	peu_ue_status		PEU_ERR_PEU_UE_STATUS
+	peu_ue_status_set	PEU_ERR_PEU_UE_STATUS_SET
+	peu_receive_ue_header1_log	PEU_ERR_PEU_RECEIVE_UE_HEADER1_LOG
+	peu_receive_ue_header2_log	PEU_ERR_PEU_RECEIVE_UE_HEADER2_LOG
+	peu_transmit_ue_header1_log	PEU_ERR_PEU_TRANSMIT_UE_HEADER1_LOG
+	peu_transmit_ue_header2_log	PEU_ERR_PEU_TRANSMIT_UE_HEADER2_LOG
+	peu_ce_log_enable		PEU_ERR_PEU_CE_LOG_ENABLE
+	peu_ce_interrupt_enable		PEU_ERR_PEU_CE_INTERRUPT_ENABLE
+	peu_ce_interrupt_status		PEU_ERR_PEU_CE_INTERRUPT_STATUS
+	peu_ce_status_set		PEU_ERR_PEU_CE_STATUS_SET
+	PEU_CXPL_event_error_log_enable	PEU_ERR_PEU_CXPL_EVENT_ERROR_LOG_ENABLE
+	PEU_CXPL_event_error_int_enable	PEU_ERR_PEU_CXPL_EVENT_ERROR_INT_ENABLE
+	PEU_CXPL_event_error_int_status	PEU_ERR_PEU_CXPL_EVENT_ERROR_INT_STATUS
+	PEU_CXPL_event_error_status_set	PEU_ERR_PEU_CXPL_EVENT_ERROR_STATUS_SET
+
+pci_erpt PCIERPT_SIZE
+	pciepkt			PCI_ERPT_PCIEPKT
+	_u			PCI_ERPT_U
+	unsent_pkt		PCI_UNSENT_PKT
+
+\#define PCIERPT_REPORT_TYPE_62	(PCI_ERPT_U + DMU_ERR_REPORT_TYPE_62)
+\#define PCIERPT_FPGA_TOD 	(PCI_ERPT_U + DMU_ERR_FPGA_TOD)
+\#define PCIERPT_EHDL		(PCI_ERPT_U + DMU_ERR_EHDL)
+\#define PCIERPT_STICK		(PCI_ERPT_U + DMU_ERR_STICK)
+\#define PCIERPT_CPUVER		(PCI_ERPT_U + DMU_ERR_CPUVER )
+\#define PCIERPT_AGENTID	(PCI_ERPT_U + DMU_ERR_AGENTID)
+\#define PCIERPT_MONDO_NUM	(PCI_ERPT_U + DMU_ERR_MONDO_NUM)
+\#define PCIERPT_DMU_CORE_AND_BLOCK_ERR_STATUS	(PCI_ERPT_U + DMU_ERR_DMU_CORE_AND_BLOCK_ERR_STATUS)
+\#define PCIERPT_IMU_ERR_LOG_ENABLE	(PCI_ERPT_U + DMU_ERR_IMU_ERR_LOG_ENABLE)
+\#define PCIERPT_IMU_INTERRUPT_ENABLE	(PCI_ERPT_U + DMU_ERR_IMU_INTERRUPT_ENABLE)
+\#define PCIERPT_IMU_ENABLED_ERR_STATUS	(PCI_ERPT_U + DMU_ERR_IMU_ENABLED_ERR_STATUS)
+\#define PCIERPT_IMU_ERR_STATUS_SET	(PCI_ERPT_U + DMU_ERR_IMU_ERR_STATUS_SET)
+\#define PCIERPT_IMU_SCS_ERR_LOG	(PCI_ERPT_U + DMU_ERR_IMU_SCS_ERR_LOG)
+\#define PCIERPT_IMU_EQS_ERR_LOG	(PCI_ERPT_U + DMU_ERR_IMU_EQS_ERR_LOG)
+\#define PCIERPT_IMU_RDS_ERR_LOG	(PCI_ERPT_U + DMU_ERR_IMU_RDS_ERR_LOG)
+\#define PCIERPT_MMU_ERR_LOG_ENABLE	(PCI_ERPT_U + DMU_ERR_MMU_ERR_LOG_ENABLE)
+\#define PCIERPT_MMU_INTR_ENABLE	(PCI_ERPT_U + DMU_ERR_MMU_INTR_ENABLE)
+\#define PCIERPT_MMU_INTR_STATUS	(PCI_ERPT_U + DMU_ERR_MMU_INTR_STATUS)
+\#define PCIERPT_MMU_ERR_STATUS_SET	(PCI_ERPT_U + DMU_ERR_MMU_ERR_STATUS_SET)
+\#define PCIERPT_MMU_TRANSLATION_FAULT_ADDRESS	(PCI_ERPT_U + DMU_ERR_MMU_TRANSLATION_FAULT_ADDRESS)
+\#define PCIERPT_MMU_TRANSLATION_FAULT_STATUS	(PCI_ERPT_U + DMU_ERR_MMU_TRANSLATION_FAULT_STATUS)
+\#define PCIERPT_REPORT_TYPE_63	(PCI_ERPT_U + PCIE_ERR_REPORT_TYPE_63)
+\#define PCIERPT_PEU_CORE_AND_BLOCK_INTR_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_CORE_AND_BLOCK_INTR_ENABLE)
+\#define PCIERPT_PEU_CORE_AND_BLOCK_INTR_STATUS	(PCI_ERPT_U + PEU_ERR_PEU_CORE_AND_BLOCK_INTR_STATUS)
+\#define PCIERPT_ILU_ERR_LOG_ENABLE	(PCI_ERPT_U + PEU_ERR_ILU_ERR_LOG_ENABLE)
+\#define PCIERPT_ILU_INTR_ENABLE		(PCI_ERPT_U + PEU_ERR_ILU_INTR_ENABLE)
+\#define PCIERPT_ILU_INTR_STATUS		(PCI_ERPT_U + PEU_ERR_ILU_INTR_STATUS)
+\#define PCIERPT_ILU_ERR_STATUS_SET		(PCI_ERPT_U + PEU_ERR_ILU_ERR_STATUS_SET)
+\#define PCIERPT_PEU_OTHER_EVENT_LOG_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_OTHER_EVENT_LOG_ENABLE)
+\#define PCIERPT_PEU_OTHER_EVENT_INTR_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_OTHER_EVENT_INTR_ENABLE)
+\#define PCIERPT_PEU_OTHER_EVENT_INTR_STATUS	(PCI_ERPT_U + PEU_ERR_PEU_OTHER_EVENT_INTR_STATUS)
+\#define PCIERPT_PEU_OTHER_EVENT_STATUS_SET	(PCI_ERPT_U + PEU_ERR_PEU_OTHER_EVENT_STATUS_SET)
+\#define PCIERPT_PEU_RECEIVE_OTHER_EVENT_HEADER1_LOG	(PCI_ERPT_U + PEU_ERR_PEU_RECEIVE_OTHER_EVENT_HEADER1_LOG)
+\#define PCIERPT_PEU_RECEIVE_OTHER_EVENT_HEADER2_LOG	(PCI_ERPT_U + PEU_ERR_PEU_RECEIVE_OTHER_EVENT_HEADER2_LOG)
+\#define PCIERPT_PEU_TRANSMIT_OTHER_EVENT_HEADER1_LOG	(PCI_ERPT_U + PEU_ERR_PEU_TRANSMIT_OTHER_EVENT_HEADER1_LOG)
+\#define PCIERPT_PEU_TRANSMIT_OTHER_EVENT_HEADER2_LOG	(PCI_ERPT_U + PEU_ERR_PEU_TRANSMIT_OTHER_EVENT_HEADER2_LOG)
+\#define PCIERPT_PEU_UE_LOG_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_UE_LOG_ENABLE)
+\#define PCIERPT_PEU_UE_INTERRUPT_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_UE_INTERRUPT_ENABLE)
+\#define PCIERPT_PEU_UE_STATUS		(PCI_ERPT_U + PEU_ERR_PEU_UE_STATUS)
+\#define PCIERPT_PEU_UE_STATUS_SET	(PCI_ERPT_U + PEU_ERR_PEU_UE_STATUS_SET)
+\#define PCIERPT_PEU_RECEIVE_UE_HEADER1_LOG	(PCI_ERPT_U + PEU_ERR_PEU_RECEIVE_UE_HEADER1_LOG)
+\#define PCIERPT_PEU_RECEIVE_UE_HEADER2_LOG	(PCI_ERPT_U + PEU_ERR_PEU_RECEIVE_UE_HEADER2_LOG)
+\#define PCIERPT_PEU_TRANSMIT_UE_HEADER1_LOG	(PCI_ERPT_U + PEU_ERR_PEU_TRANSMIT_UE_HEADER1_LOG)
+\#define PCIERPT_PEU_TRANSMIT_UE_HEADER2_LOG	(PCI_ERPT_U + PEU_ERR_PEU_TRANSMIT_UE_HEADER2_LOG)
+\#define PCIERPT_PEU_CE_LOG_ENABLE		(PCI_ERPT_U + PEU_ERR_PEU_CE_LOG_ENABLE)
+\#define PCIERPT_PEU_CE_INTERRUPT_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_CE_INTERRUPT_ENABLE)
+\#define PCIERPT_PEU_CE_INTERRUPT_STATUS	(PCI_ERPT_U + PEU_ERR_PEU_CE_INTERRUPT_STATUS)
+\#define PCIERPT_PEU_CE_STATUS_SET		(PCI_ERPT_U + PEU_ERR_PEU_CE_STATUS_SET)
+\#define PCIERPT_PEU_CXPL_EVENT_ERROR_LOG_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_CXPL_EVENT_ERROR_LOG_ENABLE)
+\#define PCIERPT_PEU_CXPL_EVENT_ERROR_INT_ENABLE	(PCI_ERPT_U + PEU_ERR_PEU_CXPL_EVENT_ERROR_INT_ENABLE)
+\#define PCIERPT_PEU_CXPL_EVENT_ERROR_INT_STATUS	(PCI_ERPT_U + PEU_ERR_PEU_CXPL_EVENT_ERROR_INT_STATUS)
+\#define PCIERPT_PEU_CXPL_EVENT_ERROR_STATUS_SET	(PCI_ERPT_U + PEU_ERR_PEU_CXPL_EVENT_ERROR_STATUS_SET)
+
+ldc_conspkt LDC_CONSPKT_SIZE
+	type		LDC_CONS_TYPE
+	size		LDC_CONS_SIZE
+	ctrl_msg	LDC_CONS_CTRL_MSG
+	payload		LDC_CONS_PAYLOAD
+
+console	CONSOLE_SIZE
+	type		CONS_TYPE
+	vintr_arg	CONS_VINTR_ARG
+	svcp		CONS_SVCP
+	pending		CONS_PENDING
+	uartbase	CONS_UARTBASE
+	chars_avail	CONS_CHARS_AVAIL
+	tbsy		CONS_TBSY
+	status		CONS_STATUS
+	endpt		CONS_ENDPT
+	in_head		CONS_INHEAD
+	in_tail		CONS_INTAIL
+	vintr_mapreg	CONS_VINTR_MAPREG
+	scr_orig_head	CONS_SCR_ORIG_HEAD
+	scr_orig_tail	CONS_SCR_ORIG_TAIL
+	in_buf		CONS_INBUF
+
+hvdisk HVDISK_SIZE
+	pa		DISK_PA
+	size		DISK_SIZE
+
+ldc_endpoint	LDC_ENDPOINT_SIZE
+	is_live		LDC_IS_LIVE
+	is_private	LDC_IS_PRIVATE
+	svc_id		LDC_IS_SVC_ID
+	rx_updated	LDC_RX_UPDATED
+	txq_full	LDC_TXQ_FULL
+	tx_block_flag	LDC_TX_BLOCK_FLAG
+	tx_qbase_ra	LDC_TX_QBASE_RA
+	tx_qbase_pa	LDC_TX_QBASE_PA
+	tx_qsize	LDC_TX_QSIZE
+	tx_qhead	LDC_TX_QHEAD
+	tx_qtail	LDC_TX_QTAIL
+	tx_mapreg	LDC_TX_MAPREG
+	tx_cb		LDC_TX_CB
+	tx_cbarg	LDC_TX_CBARG
+	rx_qbase_ra	LDC_RX_QBASE_RA
+	rx_qbase_pa	LDC_RX_QBASE_PA
+	rx_qsize	LDC_RX_QSIZE
+	rx_qhead	LDC_RX_QHEAD
+	rx_qtail	LDC_RX_QTAIL
+	rx_mapreg	LDC_RX_MAPREG
+	rx_vintr_cookie	LDC_RX_VINTR_COOKIE
+	rx_cb		LDC_RX_CB
+	rx_cbarg	LDC_RX_CBARG
+	target_type	LDC_TARGET_TYPE
+	target_guest	LDC_TARGET_GUEST
+	target_channel	LDC_TARGET_CHANNEL
+	map_table_ra	LDC_MAP_TABLE_RA
+	map_table_pa	LDC_MAP_TABLE_PA
+	map_table_nentries	LDC_MAP_TABLE_NENTRIES
+	map_table_sz	LDC_MAP_TABLE_SZ
+
+
+version	VERSION_SIZE
+	version_num	VERSION_NUM
+	verptr		VERSION_PTR
+
+\#define VERSION_MAJOR		(VERSION_NUM+MAJOR_OFF)
+\#define VERSION_MINOR		(VERSION_NUM+MINOR_OFF)
+
+ldc_mapreg LDC_MAPREG_SIZE
+	state		LDC_MAPREG_STATE
+	valid		LDC_MAPREG_VALID
+	ino		LDC_MAPREG_INO
+	pcpup		LDC_MAPREG_CPUP
+	cookie		LDC_MAPREG_COOKIE
+	endpoint	LDC_MAPREG_ENDPOINT
+
+guest_watchdog
+	ticks		WATCHDOG_TICKS
+
+ldc_ino2endpoint LDC_I2E_SIZE
+	endpointp	LDC_I2E_ENDPOINT
+	mapregp		LDC_I2E_MAPREG
+
+sp_ldc_endpoint SP_LDC_ENDPOINT_SIZE
+	channel_idx	LDC_CHANNEL_IDX
+	is_live		SP_LDC_IS_LIVE
+	target_type	SP_LDC_TARGET_TYPE
+	tx_qd_pa	SP_LDC_TX_QD_PA
+	rx_qd_pa	SP_LDC_RX_QD_PA
+	tx_q_data_pa	SP_LDC_TX_Q_DATA_PA
+	rx_q_data_pa	SP_LDC_RX_Q_DATA_PA
+	target_guest	SP_LDC_TARGET_GUEST
+	target_channel	SP_LDC_TARGET_CHANNEL
+	tx_lock		SP_LDC_TX_LOCK
+	rx_lock		SP_LDC_RX_LOCK
+	tx_scr_txhead	SP_LDC_TX_SCR_TXHEAD
+	tx_scr_txtail	SP_LDC_TX_SCR_TXTAIL
+	tx_scr_txsize	SP_LDC_TX_SCR_TXSIZE
+	tx_scr_tx_qpa	SP_LDC_TX_SCR_TX_QPA
+	tx_scr_rxhead	SP_LDC_TX_SCR_RXHEAD
+	tx_scr_rxtail	SP_LDC_TX_SCR_RXTAIL
+	tx_scr_rxsize	SP_LDC_TX_SCR_RXSIZE
+	tx_scr_rx_qpa	SP_LDC_TX_SCR_RX_QPA
+	tx_scr_rx_qdpa	SP_LDC_TX_SCR_RX_QDPA
+	tx_scr_target	SP_LDC_TX_SCR_TARGET
+	rx_scr_txhead	SP_LDC_RX_SCR_TXHEAD
+	rx_scr_txtail	SP_LDC_RX_SCR_TXTAIL
+	rx_scr_txsize	SP_LDC_RX_SCR_TXSIZE
+	rx_scr_tx_qpa	SP_LDC_RX_SCR_TX_QPA
+	rx_scr_tx_qdpa	SP_LDC_RX_SCR_TX_QDPA
+	rx_scr_rxhead	SP_LDC_RX_SCR_RXHEAD
+	rx_scr_rxtail	SP_LDC_RX_SCR_RXTAIL
+	rx_scr_rxsize	SP_LDC_RX_SCR_RXSIZE
+	rx_scr_rx_qpa	SP_LDC_RX_SCR_RX_QPA
+	rx_scr_target	SP_LDC_RX_SCR_TARGET
+	rx_scr_pkt	SP_LDC_RX_SCR_PKT
+
+
+sram_ldc_qentry SRAM_LDC_QENTRY_SIZE
+	pkt_data	SRAM_LDC_PKT_DATA
+
+sram_ldc_qd SRAM_LDC_QD_SIZE
+	head		SRAM_LDC_HEAD
+	tail		SRAM_LDC_TAIL
+	state		SRAM_LDC_STATE
+	state_updated	SRAM_LDC_STATE_UPDATED
+	state_notify	SRAM_LDC_STATE_NOTIFY
+
+ldc_mapin	LDC_MAPIN_SIZE
+	local_endpoint	LDC_MI_LOCAL_ENDPOINT
+	pg_size		LDC_MI_PG_SIZE
+	perms		LDC_MI_PERMS
+	map_table_idx	LDC_MI_MAP_TABLE_IDX
+	pa		LDC_MI_PA
+	va		LDC_MI_VA
+	va_ctx		LDC_MI_VA_CTX
+	io_va		LDC_MI_IO_VA
+	mmu_map		LDC_MI_MMU_MAP
+
+\#define	LDC_MI_NEXT_IDX	0	/* clobber 1st word when free */
+\#define	MIE_VA_MMU_SHIFT	0
+\#define	MIE_RA_MMU_SHIFT	8
+\#define	MIE_IO_MMU_SHIFT	16
+\	offsets for a big-endian architecture
+\#define	LDC_MI_VA_MMU_MAP	(LDC_MI_MMU_MAP + 7)
+\#define	LDC_MI_RA_MMU_MAP	(LDC_MI_MMU_MAP + 6)
+\#define	LDC_MI_IO_MMU_MAP	(LDC_MI_MMU_MAP + 5)
+
+guest_console_queues   GUEST_CONS_QUEUES_SIZE
+	cons_rxq        GUEST_CONS_RXQ
+	cons_txq        GUEST_CONS_TXQ
+
+ra2pa_segment	RA2PA_SEGMENT_SIZE
+	base	RA2PA_SEGMENT_BASE
+	limit	RA2PA_SEGMENT_LIMIT
+	offset	RA2PA_SEGMENT_OFFSET
+	flags	RA2PA_SEGMENT_FLAGS
+
+guest	GUEST_SIZE
+	guestid		GUEST_GID
+	ra2pa_segment	GUEST_RA2PA_SEGMENT
+	configp		GUEST_CONFIGP
+	state		GUEST_STATE
+	state_lock	GUEST_STATE_LOCK
+	soft_state	GUEST_SOFT_STATE
+	soft_state_str	GUEST_SOFT_STATE_STR
+	soft_state_lock	GUEST_SOFT_STATE_LOCK
+	real_base	GUEST_REAL_BASE
+	real_limit	GUEST_REAL_LIMIT
+	mem_offset	GUEST_MEM_OFFSET
+	console		GUEST_CONSOLE
+	tod_offset	GUEST_TOD_OFFSET
+	ttrace_freeze	GUEST_TTRACE_FRZ
+	cpup		GUEST_CPUP
+	vcpus		GUEST_VCPUS
+	cpuset		GUEST_CPUSET
+	perm_mappings_lock	GUEST_PERM_MAPPINGS_LOCK
+	perm_mappings_count	GUEST_PERM_MAPPINGS_COUNT
+	perm_mappings	GUEST_PERM_MAPPINGS GUEST_PERM_MAPPINGS_INCR
+	api_groups	GUEST_API_GROUPS
+	hcall_table	GUEST_HCALL_TABLE
+	dev2inst	GUEST_DEV2INST
+	vino2inst	GUEST_VINO2INST
+	vdev_state	GUEST_VDEV_STATE
+	md_pa		GUEST_MD_PA
+	md_size		GUEST_MD_SIZE
+	maus		GUEST_MAUS GUEST_MAUS_INCR
+	cwqs		GUEST_CWQS GUEST_CWQS_INCR
+	dumpbuf_pa	GUEST_DUMPBUF_PA
+	dumpbuf_ra	GUEST_DUMPBUF_RA
+	dumpbuf_size	GUEST_DUMPBUF_SIZE
+	entry		GUEST_ENTRY
+	rom_base	GUEST_ROM_BASE
+	rom_size	GUEST_ROM_SIZE
+	perfreg_accessible      GUEST_PERFREG_ACCESSIBLE
+        diagpriv        GUEST_DIAGPRIV
+        reset_reason    GUEST_RESET_REASON
+	perfreght_accessible      GUEST_PERFREGHT_ACCESSIBLE
+	rng_ctl_accessible	GUEST_RNG_CTL_ACCESSIBLE
+	disk		GUEST_DISK
+	watchdog	GUEST_WATCHDOG
+	ldc_mapin_free_idx	GUEST_LDC_MAPIN_FREE_IDX
+	ldc_mapin_basera	GUEST_LDC_MAPIN_BASERA
+	ldc_max_channel_idx	GUEST_LDC_MAX_CHANNEL_IDX
+	ldc_mapin_size	GUEST_LDC_MAPIN_SIZE
+	ldc_endpoint	GUEST_LDC_ENDPOINT
+	ldc_mapin	GUEST_LDC_MAPIN
+	ldc_ino2endpoint	GUEST_LDC_I2E
+	start_stick	GUEST_START_STICK
+	util		GUEST_UTIL
+	async_busy	GUEST_ASYNC_BUSY
+	async_lock	GUEST_ASYNC_LOCK
+	async_buf	GUEST_ASYNC_BUF
+	guest_m		GUEST_MGUEST
+
+guest_util		GUEST_UTIL_SIZE
+	stick_last	GUTIL_STICK_LAST
+	stopped_cycles	GUTIL_STOPPED_CYCLES
+
+hvctl_res_status HVCTL_RES_STATUS_SIZE
+        res             HVCTL_RES_STATUS_RES
+        resid           HVCTL_RES_STATUS_RESID
+        infoid          HVCTL_RES_STATUS_INFOID
+        code            HVCTL_RES_STATUS_CODE
+        data            HVCTL_RES_STATUS_DATA
+
+rs_guest_soft_state RS_GUEST_SOFT_STATE_SIZE
+        soft_state      RS_GUEST_SOFT_STATE
+        soft_state_str  RS_GUEST_SOFT_STATE_STR
+
+
+devopsvec DEVOPSVEC_SIZE
+	devino2vino	DEVOPSVEC_DEVINO2VINO
+	mondo_receive	DEVOPSVEC_MONDO_RECEIVE
+	getvalid	DEVOPSVEC_GETVALID
+	setvalid	DEVOPSVEC_SETVALID
+	settarget	DEVOPSVEC_SETTARGET
+	gettarget	DEVOPSVEC_GETTARGET
+	getstate	DEVOPSVEC_GETSTATE
+	setstate	DEVOPSVEC_SETSTATE
+	map		DEVOPSVEC_MAP
+	map_v2		DEVOPSVEC_MAP_V2
+	getmap		DEVOPSVEC_GETMAP
+	getmap_v2	DEVOPSVEC_GETMAP_V2
+	unmap		DEVOPSVEC_UNMAP
+	getbypass	DEVOPSVEC_GETBYPASS
+	configget	DEVOPSVEC_CONFIGGET
+	configput	DEVOPSVEC_CONFIGPUT
+	peek		DEVOPSVEC_IOPEEK
+	poke		DEVOPSVEC_IOPOKE
+	dmasync		DEVOPSVEC_DMASYNC
+	msiq_conf	DEVOPSVEC_MSIQ_CONF
+	msiq_info	DEVOPSVEC_MSIQ_INFO
+	msiq_getvalid	DEVOPSVEC_MSIQ_GETVALID
+	msiq_setvalid	DEVOPSVEC_MSIQ_SETVALID
+	msiq_getstate	DEVOPSVEC_MSIQ_GETSTATE
+	msiq_setstate	DEVOPSVEC_MSIQ_SETSTATE
+	msiq_gethead	DEVOPSVEC_MSIQ_GETHEAD
+	msiq_sethead	DEVOPSVEC_MSIQ_SETHEAD
+	msiq_gettail	DEVOPSVEC_MSIQ_GETTAIL
+	msi_getvalid	DEVOPSVEC_MSI_GETVALID
+	msi_setvalid	DEVOPSVEC_MSI_SETVALID
+	msi_getstate	DEVOPSVEC_MSI_GETSTATE
+	msi_setstate	DEVOPSVEC_MSI_SETSTATE
+	msi_getmsiq	DEVOPSVEC_MSI_GETMSIQ
+	msi_setmsiq	DEVOPSVEC_MSI_SETMSIQ
+	msi_msg_getmsiq	DEVOPSVEC_MSI_MSG_GETMSIQ
+	msi_msg_setmsiq	DEVOPSVEC_MSI_MSG_SETMSIQ
+	msi_msg_getvalid DEVOPSVEC_MSI_MSG_GETVALID
+	msi_msg_setvalid DEVOPSVEC_MSI_MSG_SETVALID
+	getperfreg	DEVOPSVEC_GETPERFREG
+	setperfreg	DEVOPSVEC_SETPERFREG
+	vgetcookie      DEVOPSVEC_VGETCOOKIE
+	vsetcookie	DEVOPSVEC_VSETCOOKIE
+	vgetvalid	DEVOPSVEC_VGETVALID
+	vsetvalid	DEVOPSVEC_VSETVALID
+	vgettarget	DEVOPSVEC_VGETTARGET
+	vsettarget	DEVOPSVEC_VSETTARGET
+	vgetstate	DEVOPSVEC_VGETSTATE
+	vsetstate	DEVOPSVEC_VSETSTATE
+
+
+vino2inst VINO2INST_SIZE
+	vino	VINO2INST_VINO
+
+piu_cookie	PIU_COOKIE_SIZE
+	handle	PIU_COOKIE_HANDLE
+	ncu	PIU_COOKIE_NCU
+	pcie	PIU_COOKIE_PCIE
+	cfg	PIU_COOKIE_CFG
+	perfregs PIU_COOKIE_PERFREGS
+	iotsb0	PIU_COOKIE_IOTSB0
+	iotsb1	PIU_COOKIE_IOTSB1
+	intclr	PIU_COOKIE_INTCLR
+	intmap	PIU_COOKIE_INTMAP
+	virtual_intmap	PIU_COOKIE_VIRTUAL_INTMAP
+	err_lock PIU_COOKIE_ERR_LOCK
+	err_lock_counter PIU_COOKIE_ERR_LOCK_COUNTER
+	tlu_oe_status PIU_COOKIE_OE_STATUS
+	inomax	PIU_COOKIE_INOMAX
+	vino	PIU_COOKIE_VINO
+	mmuflush PIU_COOKIE_MMUFLUSH
+	eqctlset PIU_COOKIE_EQCTLSET
+	eqctlclr PIU_COOKIE_EQCTLCLR
+	eqstate	PIU_COOKIE_EQSTATE
+	eqtail	PIU_COOKIE_EQTAIL
+	eqhead	PIU_COOKIE_EQHEAD
+	msimap	PIU_COOKIE_MSIMAP
+	msiclr	PIU_COOKIE_MSICLR
+	msgmap	PIU_COOKIE_MSGMAP
+	msieqbase PIU_COOKIE_MSIEQBASE
+	msieqs	PIU_COOKIE_MSIEQS
+	msicookie PIU_COOKIE_MSICOOKIE
+	errcookie PIU_COOKIE_ERRCOOKIE
+	dmu_erpt	PIU_COOKIE_DMU_ERPT
+	peu_erpt	PIU_COOKIE_PEU_ERPT
+	blacklist	PIU_COOKIE_BLACKLIST
+
+piu_msieq	PIU_MSIEQ_SIZE
+	eqmask	PIU_MSIEQ_EQMASK
+	base	PIU_MSIEQ_BASE
+	guest	PIU_MSIEQ_GUEST
+	word0	PIU_MSIEQ_WORD0
+	word1	PIU_MSIEQ_WORD1
+
+piu_msi_cookie	PIU_MSI_COOKIE_SIZE
+	piu	PIU_MSI_COOKIE_PIU
+	eq	PIU_MSI_COOKIE_EQ
+
+piu_err_cookie	PIU_ERR_COOKIE_SIZE
+	piu	PIU_ERR_COOKIE_PIU
+	state	PIU_ERR_COOKIE_STATE
+
+vdev_state	VDEV_STATE_SIZE
+	handle	VDEV_STATE_HANDLE
+	mapreg	VDEV_STATE_MAPREG
+	inomax	VDEV_STATE_INOMAX
+	vinobase VDEV_STATE_VINOBASE
+
+svc_link
+	size	SVC_LINK_SIZE
+	pa	SVC_LINK_PA
+	next	SVC_LINK_NEXT
+
+svc_callback
+	rx	SVC_CALLBACK_RX
+	tx	SVC_CALLBACK_TX
+	cookie	SVC_CALLBACK_COOKIE
+
+svc_ctrl SVC_CTRL_SIZE
+	xid		SVC_CTRL_XID
+	sid		SVC_CTRL_SID
+	ino		SVC_CTRL_INO
+        mtu             SVC_CTRL_MTU
+        config          SVC_CTRL_CONFIG
+        state           SVC_CTRL_STATE
+        intr_cookie     SVC_CTRL_INTR_COOKIE
+        lock            SVC_CTRL_LOCK
+        dcount          SVC_CTRL_COUNT
+        dstate          SVC_CTRL_DSTATE
+        callback        SVC_CTRL_CALLBACK
+        link            SVC_CTRL_LINK
+        recv            SVC_CTRL_RECV
+        send            SVC_CTRL_SEND
+
+hv_svc_data HV_SVC_DATA_SIZE
+        rxbase          HV_SVC_DATA_RXBASE
+        txbase          HV_SVC_DATA_TXBASE
+        rxchannel       HV_SVC_DATA_RXCHANNEL
+        txchannel       HV_SVC_DATA_TXCHANNEL
+        scr             HV_SVC_DATA_SCR
+        num_svcs        HV_SVC_DATA_NUM_SVCS
+	sendbusy	HV_SVC_DATA_SENDBUSY
+        sendh           HV_SVC_DATA_SENDH
+        sendt           HV_SVC_DATA_SENDT
+        senddh          HV_SVC_DATA_SENDDH
+        senddt          HV_SVC_DATA_SENDDT
+        lock            HV_SVC_DATA_LOCK
+        svcs            HV_SVC_DATA_SVC
+
+svc_pkt SVC_PKT_SIZE
+	xid		SVC_PKT_XID
+        sid		SVC_PKT_SID
+        sum             SVC_PKT_SUM
+
+vdev_mapreg MAPREG_SIZE MAPREG_SHIFT
+	state		MAPREG_STATE
+	valid		MAPREG_VALID
+	pcpu		MAPREG_PCPU
+	vcpu		MAPREG_VCPU
+	ino		MAPREG_INO
+	data0		MAPREG_DATA0
+	devcookie	MAPREG_DEVCOOKIE
+	getstate	MAPREG_GETSTATE
+	setstate	MAPREG_SETSTATE
+
+md_header DTHDR_SIZE
+	transport_version DTHDR_VER
+	node_blk_sz	DTHDR_NODESZ
+	name_blk_sz	DTHDR_NAMES
+	data_blk_sz	DTHDR_DATA
+
+md_element DTNODE_SIZE
+	tag	DTNODE_TAG
+	d	DTNODE_DATA
+
+trapglobals TRAPGLOBALS_SIZE	TRAPGLOBALS_SHIFT
+
+trapstate TRAPSTATE_SIZE
+	htstate	TRAPSTATE_HTSTATE
+	tstate	TRAPSTATE_TSTATE
+	tt	TRAPSTATE_TT
+	tpc	TRAPSTATE_TPC
+	tnpc	TRAPSTATE_TNPC
+
+dbgerror_payload	DBGERROR_PAYLOAD_SIZE
+	data		DBGERROR_DATA
+
+dbgerror	DBGERROR_SIZE
+	error_svch	DBGERROR_ERROR_SVCH
+	payload		DBGERROR_PAYLOAD
+
+devinst	DEVINST_SIZE DEVINST_SIZE_SHIFT
+	cookie		DEVINST_COOKIE
+	ops		DEVINST_OPS
+
+erpt_svc_pkt ERPT_SVC_PKT_SIZE
+	addr		ERPT_PKT_ADDR
+	size		ERPT_PKT_SIZE
+
+mau_queue MAU_QUEUE_SIZE
+	mq_lock		MQ_LOCK
+	mq_state	MQ_STATE
+	mq_busy		MQ_BUSY
+	mq_base		MQ_BASE
+	mq_base_ra	MQ_BASE_RA
+	mq_end		MQ_END
+	mq_head		MQ_HEAD
+	mq_head_marker	MQ_HEAD_MARKER
+	mq_tail		MQ_TAIL
+	mq_nentries	MQ_NENTRIES
+	mq_cpu_pid	MQ_CPU_PID
+
+cwq_queue CWQ_QUEUE_SIZE
+	cq_lock		CQ_LOCK
+	cq_state	CQ_STATE
+	cq_busy		CQ_BUSY
+	cq_dr_base_ra	CQ_DR_BASE_RA
+	cq_dr_base	CQ_DR_BASE
+	cq_dr_last	CQ_DR_LAST
+	cq_dr_head	CQ_DR_HEAD
+	cq_dr_tail	CQ_DR_TAIL
+	cq_base		CQ_BASE
+	cq_last		CQ_LAST
+	cq_head		CQ_HEAD
+	cq_head_marker	CQ_HEAD_MARKER
+	cq_tail		CQ_TAIL
+	cq_nentries	CQ_NENTRIES
+	cq_cpu_pid	CQ_CPU_PID
+	cq_scr1		CQ_SCR1
+	cq_scr2		CQ_SCR2
+	cq_scr3		CQ_SCR3
+	cq_dr_hv_offset	CQ_DR_HV_OFFSET
+	cq_hv_cws	CQ_HV_CWS
+
+ncs_hvdesc NCS_HVDESC_SIZE NCS_HVDESC_SHIFT
+	nhd_state	NHD_STATE
+	nhd_type	NHD_TYPE
+	nhd_regs	NHD_REGS
+	nhd_errstatus	NHD_ERRSTATUS
+
+ma_regs MA_REGS_SIZE
+	mr_ctl		MR_CTL
+	mr_mpa		MR_MPA
+	mr_ma		MR_MA
+	mr_np		MR_NP
+
+ncs_qconf_arg NCS_QCONF_ARG_SIZE
+	nq_mid		NQ_MID
+	nq_base		NQ_BASE
+	nq_end		NQ_END
+	nq_nentries	NQ_NENTRIES
+
+ncs_qtail_update_arg NCS_QTAIL_UPDATE_ARG_SIZE
+	nu_mid		NU_MID
+	nu_tail		NU_TAIL
+	nu_syncflag	NU_SYNCFLAG
+
+cwq_cw_ret	CWQ_CW_RET_SIZE
+	cw_ret_dst_addr		CW_RET_DST_ADDR
+	cw_ret_csr		CW_RET_CSR
+
+cwq_cw	CWQ_CW_SIZE CWQ_CW_SHIFT
+	cw_ctlbits		CW_CTLBITS
+	cw_src_addr		CW_SRC_ADDR
+	cw_auth_key_addr	CW_AUTH_KEY_ADDR
+	cw_auth_iv_addr		CW_AUTH_IV_ADDR
+	cw_final_auth_state_addr	CW_FINAL_AUTH_STATE_ADDR
+	cw_enc_key_addr		CW_ENC_KEY_ADDR
+	cw_enc_iv_addr		CW_ENC_IV_ADDR
+	cw_ret			CW_RET
+
+\#define CW_DST_ADDR	(CW_RET + CW_RET_DST_ADDR)
+\#define CW_CSR		(CW_RET + CW_RET_DST_ADDR)
+
+crypto_intr	CRYPTO_INTR_SIZE
+	ci_cookie	CI_COOKIE
+	ci_active	CI_ACTIVE
+	ci_data		CI_DATA
+
+rng_ctlregs	RNG_CTLREGS_SIZE
+	reg0		RNG_CTLREGS_REG0
+	reg1		RNG_CTLREGS_REG1
+	reg2		RNG_CTLREGS_REG2
+	reg3		RNG_CTLREGS_REG3
+
+rng_ctldata	RNG_CTLDATA_SIZE
+	rc_regs		RNG_CTLDATA_REGS
+	rc_state	RNG_CTLDATA_STATE
+	rc_guestid	RNG_CTLDATA_GUESTID
+	rc_readytime	RNG_CTLDATA_READYTIME
+
+svccn_packet	SVCCN_PKT_SIZE
+	type		SVCCN_PKT_TYPE
+	len		SVCCN_PKT_LEN
+	data		SVCCN_PKT_DATA
+
+vbsc_ctrl_pkt	VBSC_CTRL_PKT_SIZE
+	cmd		VBSC_PKT_CMD
+	arg0		VBSC_PKT_ARG0
+	arg1		VBSC_PKT_ARG1
+	arg2		VBSC_PKT_ARG2
+
+callback	CB_SIZE
+	tick		CB_TICK
+	handler		CB_HANDLER
+	arg0		CB_ARG0
+	arg1		CB_ARG1
+
+cyclic		CY_SIZE
+	t0		CY_T0
+	cb		CY_CB
+	tick		CY_TICK
+	handler		CY_HANDLER
+	arg0		CY_ARG0
+	arg1		CY_ARG1
+
+\#define STRAND_CY_T0		(STRAND_CYCLIC + CY_T0)
+\#define STRAND_CY_CB		(STRAND_CYCLIC + CY_CB)
+\#define STRAND_CY_TICK		(STRAND_CYCLIC + CY_TICK)
+\#define STRAND_CY_HANDLER	(STRAND_CYCLIC + CY_HANDLER)
+\#define STRAND_CY_ARG0		(STRAND_CYCLIC + CY_ARG0)
+\#define STRAND_CY_ARG1		(STRAND_CYCLIC + CY_ARG1)
+\#define STRAND_CY_CB_TICK	(STRAND_CYCLIC + CY_CB + CB_TICK)
+\#define STRAND_CY_CB_HANDLER	(STRAND_CYCLIC + CY_CB + CB_HANDLER)
+\#define STRAND_CY_CB_ARG0	(STRAND_CYCLIC + CY_CB + CB_ARG0)
+\#define STRAND_CY_CB_ARG1	(STRAND_CYCLIC + CY_CB + CB_ARG1)
+\#define CB_LAST		((N_CB - 1) * CB_SIZE)
+\#define STRAND_CY_CB_LAST_TICK	(STRAND_CY_CB_TICK + CB_LAST)
+
+error_table_entry 		ERROR_TABLE_ENTRY_SIZE
+	err_name		ERR_NAME
+	err_report_fcn		ERR_REPORT_FCN
+	err_guest_report_fcn	ERR_GUEST_REPORT_FCN
+	err_correct_fcn		ERR_CORRECT_FCN
+	err_storm_fcn		ERR_STORM_FCN
+	err_print_fcn		ERR_PRINT_FCN
+	err_flags		ERR_FLAGS
+	err_sun4v_rprt_type	ERR_SUN4V_RPRT_TYPE
+	err_sun4v_edesc		ERR_SUN4V_EDESC
+	err_report_size		ERR_REPORT_SIZE
+
+
+err_way				ERR_WAY_SIZE
+	err_tag_and_ecc		ERR_WAY_TAG_AND_ECC
+	err_data_and_ecc	ERR_WAY_DATA_AND_ECC
+
+err_l2 				ERR_L2_SIZE
+	err_vdbits		ERR_L2_VDBITS
+	err_uabits		ERR_L2_UABITS
+	err_ways		ERR_L2_WAYS
+	dram_contents		ERR_DRAM_CONTENTS
+
+err_tlb 			ERR_TLB_SIZE
+	err_tlb_tag		ERR_TLB_TAG
+	err_tlb_data		ERR_TLB_DATA
+
+
+err_icache_way 			ERR_ICACHE_WAY_SIZE
+	err_icache_instr	ERR_ICACHE_WAY_INSTR
+	err_icache_tag		ERR_ICACHE_WAY_TAG
+
+err_icache 			ERR_ICACHE_SIZE
+	err_icache_way		ERR_ICACHE_WAY
+
+err_dcache_way 			ERR_DCACHE_WAY_SIZE
+	err_dcache_data		ERR_DCACHE_WAY_DATA
+	err_dcache_tag		ERR_DCACHE_WAY_TAG
+
+err_dcache			ERR_DCACHE_SIZE
+	err_dcache_way		ERR_DCACHE_WAY
+
+err_ssi 			ERR_SSI_SIZE
+	err_ssi_timeout		ERR_SSI_TIMEOUT
+	err_ssi_log		ERR_SSI_LOG
+
+err_stb				ERR_STB_SIZE
+	err_stb_data		ERR_STB_DATA
+	err_stb_data_ecc	ERR_STB_DATA_ECC
+	err_stb_parity		ERR_STB_PARITY
+	err_stb_marks		ERR_STB_MARKS
+	err_stb_curr_ptr	ERR_STB_CURR_PTR
+
+err_scratchpad			ERR_SCRATCHPAD_SIZE
+	err_scratchpad_data	ERR_SCRATCHPAD_DATA
+	err_scratchpad_ecc	ERR_SCRATCHPAD_ECC
+
+err_tca				ERR_TCA_SIZE
+	err_tca_data		ERR_TCA_DATA
+	err_tca_ecc		ERR_TCA_ECC
+
+err_reg				ERR_REG_SIZE
+	err_reg_ecc		ERR_REG_ECC
+
+err_tsa				ERR_TSA_SIZE
+	err_tsa_ecc		ERR_TSA_ECC
+	err_tsa_tl		ERR_TSA_TL
+	err_tsa_tt		ERR_TSA_TT
+	err_tsa_tstate		ERR_TSA_TSTATE
+	err_tsa_htstate		ERR_TSA_HTSTATE
+	err_tsa_tpc		ERR_TSA_TPC
+	err_tsa_tnpc		ERR_TSA_TNPC
+	err_tsa_cpu_mondo_qhead	ERR_TSA_CPU_MONDO_QHEAD
+	err_tsa_cpu_mondo_qtail	ERR_TSA_CPU_MONDO_QTAIL
+	err_tsa_dev_mondo_qhead	ERR_TSA_DEV_MONDO_QHEAD
+	err_tsa_dev_mondo_qtail	ERR_TSA_DEV_MONDO_QTAIL
+	err_tsa_res_err_qhead	ERR_TSA_ERR_RES_QHEAD
+	err_tsa_res_err_qtail	ERR_TSA_ERR_RES_QTAIL
+	err_tsa_nonres_err_qhead	ERR_TSA_ERR_NONRES_QHEAD
+	err_tsa_nonres_err_qtail	ERR_TSA_ERR_NONRES_QTAIL
+
+err_mmu_regs 			ERR_MMU_ERR_REGS_SIZE
+	err_mmu_parity		ERR_MMU_PARITY
+	err_mmu_tsb_cfg_ctx0	ERR_MMU_TSB_CFG_CTX0
+	err_mmu_tsb_cfg_ctxnz	ERR_MMU_TSB_CFG_CTXNZ
+	err_mmu_real_range	ERR_MMU_REAL_RANGE
+	err_mmu_phys_offset	ERR_MMU_PHYS_OFFSET
+
+err_mamu			ERR_MAMU_SIZE
+	err_ma_pa		ERR_MA_PA
+	err_ma_addr		ERR_MA_ADDR
+	err_ma_np		ERR_MA_NP
+	err_ma_ctl		ERR_MA_CTL
+	err_ma_sync		ERR_MA_SYNC
+
+err_trap_regs			ERR_TRAP_REGS_SIZE
+	err_tt			ERR_TT
+	err_tpc			ERR_TPC
+	err_tnpc		ERR_TNPC
+	err_tstate		ERR_TSTATE
+	err_htstate		ERR_HTSTATE
+
+err_soc				ERR_SOC_SIZE
+	err_soc_esr		ERR_SOC_ESR
+	err_soc_eler		ERR_SOC_ELER
+	err_soc_eier		ERR_SOC_EIER
+	err_soc_vcid		ERR_SOC_VCID
+	err_soc_feer		ERR_SOC_FEER
+	err_soc_pesr		ERR_SOC_PESR
+	err_soc_eir		ERR_SOC_EIR
+	err_soc_sii_synd	ERR_SOC_SII_SYND
+	err_soc_ncu_synd	ERR_SOC_NCU_SYND
+
+err_diag_data 			ERR_DIAG_DATA_SIZE
+	err_dtlb		ERR_DIAG_DATA_DTLB
+	err_itlb		ERR_DIAG_DATA_ITLB
+	err_icache		ERR_DIAG_DATA_ICACHE
+	err_dcache		ERR_DIAG_DATA_DCACHE
+	err_ssi_info		ERR_DIAG_DATA_SSI_INFO
+	err_stb			ERR_DIAG_DATA_STB
+	err_scratchpad		ERR_DIAG_DATA_SCRATCHPAD
+	err_tsa			ERR_DIAG_DATA_TSA
+	err_mmu_regs		ERR_DIAG_DATA_MMU_REGS
+	err_mamu		ERR_DIAG_DATA_MAMU
+	err_soc			ERR_DIAG_DATA_SOC
+	err_tca			ERR_DIAG_DATA_TCA
+	err_reg			ERR_DIAG_DATA_REG
+	err_l2_cache		ERR_DIAG_DATA_L2_CACHE
+	err_reg_info		ERR_DIAG_DATA_REG_INFO
+	err_trap_registers	ERR_DIAG_DATA_TRAP_REGS
+
+err_abort_data			ERR_ABORT_DATA_SIZE
+	err_version		ERR_ABORT_VERSION
+	err_pc			ERR_ABORT_PC
+	err_cwp			ERR_ABORT_CWP
+	err_trap_registers	ERR_ABORT_TRAP_REGS
+	err_globals		ERR_ABORT_GLOBAL_REGS
+	err_registers		ERR_ABORT_REG_WINDOWS
+	err_config		ERR_ABORT_CONFIG
+	
+
+err_diag_buf 			ERR_DIAG_BUF_SIZE
+	err_sparc_isfsr		ERR_DIAG_BUF_SPARC_ISFSR
+	err_sparc_dsfsr		ERR_DIAG_BUF_SPARC_DSFSR
+	err_sparc_dsfar		ERR_DIAG_BUF_SPARC_DSFAR
+	err_sparc_desr		ERR_DIAG_BUF_SPARC_DESR
+	err_sparc_dfesr		ERR_DIAG_BUF_SPARC_DFESR
+	err_l2_cache_esr	ERR_DIAG_BUF_L2_CACHE_ESR
+	err_l2_cache_ear	ERR_DIAG_BUF_L2_CACHE_EAR
+	err_l2_cache_nd		ERR_DIAG_BUF_L2_CACHE_ND
+	err_dram_esr		ERR_DIAG_BUF_DRAM_ESR
+	err_dram_ear		ERR_DIAG_BUF_DRAM_EAR
+	err_dram_loc		ERR_DIAG_BUF_DRAM_LOC
+	err_dram_cntr		ERR_DIAG_BUF_DRAM_CTR
+	err_dram_fbd		ERR_DIAG_BUF_DRAM_FBD
+	err_dram_retry		ERR_DIAG_BUF_DRAM_RETRY
+	err_l2_bank		ERR_DIAG_L2_BANK
+	err_l2_line_state	ERR_DIAG_L2_LINE_STATE
+	err_l2_pa		ERR_DIAG_L2_PA
+	err_diag_data		ERR_DIAG_BUF_DIAG_DATA
+	err_report_in_use	ERR_DIAG_BUF_RPRT_IN_USE
+	err_report_size		ERR_DIAG_BUF_RPRT_SIZE
+
+sun4v_cpu_erpt 			CPU_SUN4V_RPRT_SIZE
+	g_ehdl			CPU_SUN4V_RPRT_G_EHDL
+	g_stick			CPU_SUN4V_RPRT_G_STICK
+	edesc			CPU_SUN4V_RPRT_EDESC
+	attr			CPU_SUN4V_RPRT_ATTR
+	addr			CPU_SUN4V_RPRT_ADDR
+	sz			CPU_SUN4V_RPRT_SZ
+	g_cpuid			CPU_SUN4V_RPRT_G_CPUID
+	g_secs			CPU_SUN4V_RPRT_G_SECS
+	asi			CPU_SUN4V_RPRT_ASI
+	reg			CPU_SUN4V_RPRT_REG
+	word5			CPU_SUN4V_RPRT_WORD5
+	word6			CPU_SUN4V_RPRT_WORD6
+	word7			CPU_SUN4V_RPRT_WORD7
+	word8			CPU_SUN4V_RPRT_WORD8
+
+\#define	ESUN4V_G_EHDL	CPU_SUN4V_RPRT_G_EHDL
+\#define	ESUN4V_G_STICK	CPU_SUN4V_RPRT_G_STICK
+\#define	ESUN4V_EDESC	CPU_SUN4V_RPRT_EDESC
+\#define	ESUN4V_ATTR	CPU_SUN4V_RPRT_ATTR
+\#define	ESUN4V_ADDR	CPU_SUN4V_RPRT_ADDR
+\#define	ESUN4V_SZ	CPU_SUN4V_RPRT_SZ
+\#define	ESUN4V_G_CPUID	CPU_SUN4V_RPRT_G_CPUID
+\#define	ESUN4V_G_SECS	CPU_SUN4V_RPRT_G_SECS
+
+
+
+err_sun4v_rprt			ERR_SUN4V_RPRT_SIZE
+	sun4v_erpt		ERR_SUN4V_CPU_ERPT
+	in_use			ERR_SUN4V_RPRT_IN_USE
+
+\#define	ERR_SUN4V_PCIE_ERPT	ERR_SUN4V_CPU_ERPT
+
+\#define	ERR_SUN4V_RPRT_G_EHDL	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_G_EHDL)
+\#define	ERR_SUN4V_RPRT_G_STICK	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_G_STICK)
+\#define	ERR_SUN4V_RPRT_EDESC	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_EDESC)
+\#define	ERR_SUN4V_RPRT_ATTR	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_ATTR)
+\#define	ERR_SUN4V_RPRT_ADDR	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_ADDR)
+\#define	ERR_SUN4V_RPRT_SZ	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_SZ)
+\#define	ERR_SUN4V_RPRT_G_CPUID 	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_G_CPUID)
+\#define	ERR_SUN4V_RPRT_G_SECS	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_G_SECS)
+\#define	ERR_SUN4V_RPRT_ASI	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_ASI)
+\#define	ERR_SUN4V_RPRT_REG	(ERR_SUN4V_CPU_ERPT + CPU_SUN4V_RPRT_REG)
+
+\#define	ERR_SUN4V_PCIE_SYSINO	(ERR_SUN4V_PCIE_ERPT + PCIERPT_SYSINO)
+\#define	ERR_SUN4V_PCIE_EHDL	(ERR_SUN4V_PCIE_ERPT + PCIERPT_SUN4V_EHDL)
+\#define	ERR_SUN4V_PCIE_STICK	(ERR_SUN4V_PCIE_ERPT + PCIERPT_SUN4V_STICK)
+\#define	ERR_SUN4V_PCIE_DESC	(ERR_SUN4V_PCIE_ERPT + PCIERPT_SUN4V_DESC)
+\#define	ERR_SUN4V_PCIE_SPECIFIC	(ERR_SUN4V_PCIE_ERPT + PCIERPT_SUN4V_SPECFIC)
+\#define	ERR_SUN4V_PCIE_WORD4	(ERR_SUN4V_PCIE_ERPT + PCIERPT_WORD4)
+\#define	ERR_SUN4V_PCIE_HDR1	(ERR_SUN4V_PCIE_ERPT + PCIERPT_HDR1)
+\#define	ERR_SUN4V_PCIE_HDR2	(ERR_SUN4V_PCIE_ERPT + PCIERPT_HDR2)
+
+err_diag_rprt 			ERR_DIAG_RPRT_SIZE
+	error_type		ERR_DIAG_RPRT_ERROR_TYPE
+	report_type		ERR_DIAG_RPRT_REPORT_TYPE
+	tod			ERR_DIAG_RPRT_TOD
+	ehdl			ERR_DIAG_RPRT_EHDL
+	err_stick		ERR_DIAG_RPRT_ERR_STICK
+	cpuver			ERR_DIAG_RPRT_CPUVER
+	cpuserial		ERR_DIAG_RPRT_SERIAL
+	tstate			ERR_DIAG_RPRT_TSTATE
+	htstate			ERR_DIAG_RPRT_HTSTATE
+	tpc			ERR_DIAG_RPRT_TPC
+	cpuid			ERR_DIAG_RPRT_CPUID
+	tt			ERR_DIAG_RPRT_TT
+	tl			ERR_DIAG_RPRT_TL
+	err_diag_report_data	ERR_DIAG_RPRT_ERR_DIAG
+
+\#define	ERR_DIAG_RPRT_IN_USE	(ERR_DIAG_RPRT_ERR_DIAG + ERR_DIAG_BUF_RPRT_IN_USE)
+\#define	ERR_DIAG_ABORT_DATA	ERR_DIAG_RPRT_ERR_DIAG
+\#define	ERR_DIAG_DATA_OFFSET	(ERR_DIAG_RPRT_ERR_DIAG + ERR_DIAG_BUF_DIAG_DATA)
+\#define	ERR_DIAG_RPRT_REPORT_SIZE	(ERR_DIAG_RPRT_ERR_DIAG + ERR_DIAG_BUF_RPRT_SIZE)
+
+niu_cookie	NIU_COOKIE_SIZE
+	ldg2ldn_table	NIU_LDG2LDN_TABLE
+	vec2ldg_table	NIU_VEC2LDG_TABLE
+
+ecc_syndrome_table_entry	ECC_SYNDROME_TABLE_ENTRY_SIZE
+
+ecc_mask_table_entry		ECC_MASK_TABLE_ENTRY_SIZE
+
+fpga_cookie	FPGA_UART_COOKIE_SIZE
+	status	FPGA_UART_COOKIE_STATUS
+	enable	FPGA_UART_COOKIE_ENABLE
+	disable	FPGA_UART_COOKIE_DISABLE
+	valid	FPGA_UART_COOKIE_VALID
+	state	FPGA_UART_COOKIE_STATE
+	target	FPGA_UART_COOKIE_TARGET
+
+\ Enumerations
+
+hvctl_res_t
+
+hvctl_guest_info_t
+
+machconfig
+	maus	MCONFIG_MAUS
+	cwqs	MCONFIG_CWQS
+	rng	MCONFIG_RNG
+
+\#define	CONFIG_MAUS	(CONFIG_MCONFIG	+ MCONFIG_MAUS)
+\#define	CONFIG_CWQS	(CONFIG_MCONFIG	+ MCONFIG_CWQS)
+\#define	CONFIG_RNG	(CONFIG_MCONFIG	+ MCONFIG_RNG)
+
+machguest
+	niu_statep	MGUEST_NIU_STATEP
+
+\#define	GUEST_NIU_STATEP	(GUEST_MGUEST + MGUEST_NIU_STATEP)
+
+niu_mapreg	NIUMAPREG_SIZE NIUMAPREG_SHIFT
+	state	NIUMAPREG_STATE
+	valid	NIUMAPREG_VALID
+	vcpup	NIUMAPREG_VCPUP
+
+niu_state	NIUSTATE_SIZE
+	mapreg	NIUSTATE_MAPREG
