@@ -535,11 +535,11 @@ slave_thread:
 	save %sp, -(MINFRAME64), %sp
 
 	set	BIST_START, %l1
-	stxa	%l1, [%g0]ASI_NIAGARA
+!	stxa	%l1, [%g0]ASI_NIAGARA
 
-1:	ldxa	[%g0]ASI_NIAGARA, %l0
-	andcc	%l0, BIST_DONE, %l0
-	be,pt	%xcc, 1b
+!1:	ldxa	[%g0]ASI_NIAGARA, %l0
+!	andcc	%l0, BIST_DONE, %l0
+!	be,pt	%xcc, 1b
 	nop
 
 	ret
@@ -557,9 +557,9 @@ slave_thread:
 	set 	(1 << 13), %l1			/* index */ 
 
 
-1:      subcc	%l1, (1 << 3), %l1 
-        stxa    %g0, [%l1+%l2] ASI_ICACHE_INSTR
-        bne,pt  %xcc, 1b
+!1:      subcc	%l1, (1 << 3), %l1
+!        stxa    %g0, [%l1+%l2] ASI_ICACHE_INSTR
+!        bne,pt  %xcc, 1b
 	nop
 
 	set 	(1 << 13), %l1			/* index */ 
@@ -571,9 +571,9 @@ slave_thread:
         set     (1 << 13), %l1                  /* index */
         sllx    %l0, 16, %l2
 
-2:	subcc   %l1, (1 << 6), %l1
-        stxa    %g0, [%l1+%l2] ASI_ICACHE_TAG
-        bne,pt  %xcc, 2b
+!2:	subcc   %l1, (1 << 6), %l1
+!        stxa    %g0, [%l1+%l2] ASI_ICACHE_TAG
+!        bne,pt  %xcc, 2b
         nop
 
         set     (1 << 13), %l1                  /* index */
@@ -595,15 +595,15 @@ slave_thread:
         save    %sp, -(MINFRAME64), %sp
 
         set     (1 << 13), %l0                  /* index */
-1:      subcc   %l0, (1 << 3), %l0
-        stxa    %g0, [%l0]ASI_DC_DATA
-        bne,pt  %xcc, 1b
+!1:      subcc   %l0, (1 << 3), %l0
+!        stxa    %g0, [%l0]ASI_DC_DATA
+!        bne,pt  %xcc, 1b
         nop
 
         set     (1 << 13), %l0                  /* index */
-2:      subcc   %l0, (1 << 4), %l0
-        stxa    %g0, [%l0]ASI_DC_TAG
-        bne,pt  %xcc, 2b
+!2:      subcc   %l0, (1 << 4), %l0
+!        stxa    %g0, [%l0]ASI_DC_TAG
+!        bne,pt  %xcc, 2b
         nop
 
 	ret
