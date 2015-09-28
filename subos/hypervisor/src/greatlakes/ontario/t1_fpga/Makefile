@@ -14,8 +14,8 @@ CP = /bin/cp -f
 OPTIONS = $(PLAT_OPTIONS)
 
 OPTIONS += -DT1_FPGA                 # OpenSPARC T1 implementation in FPGA
-OPTIONS += -DT1_FPGA_SNET            # net support
-OPTIONS += -DT1_FPGA_MEMORY_PREINIT  # memory pre-initialized
+OPTIONS += -UT1_FPGA_SNET            # net support
+OPTIONS += -UT1_FPGA_MEMORY_PREINIT  # memory pre-initialized
 
 
 OPTIONS += -DDEBUG
