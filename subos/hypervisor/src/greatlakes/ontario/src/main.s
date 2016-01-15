@@ -1587,20 +1587,20 @@ bus_failed:
 
 	! get coreid from our register
 	! this code comes from htraps.s - HT0_RdThId_0x18e
-	setx     0xba00000000, %g3, %g6
-    	ldxa     [%g6] 0x15, %g6            ! has coreid
+	setx    0xba00000000, %g3, %g6
+    	ldx     [%g6], %g6            ! has coreid
 
 
     	srlx    %g6, 8, %g3
- 	mulx    %g3, PTON_X_TILES, %g3
+ 	mulx    %g3, 8, %g3	! should be PTON_X_TILES
     	and     %g6, 0xff, %g6
     	add     %g6, %g3, %g6    
 
     	sllx    %g6, 1, %g6
 
-	rd	%STR_STATUS_REG, %g3
+	rd	STR_STATUS_REG, %g3
     	srlx    %g3, STR_STATUS_STRAND_ID_SHIFT, %g3
-    	and	%g3, STR_STATUS_STRAND_ID_MASK, %g3	! %g3 = current cpu
+    	and	%g3, 0x1, %g3	! %g3 = current cpu
     	add     %g3, %g6, %g3
         set     0x007f, %g6
     	and     %g3, %g6, %g3
@@ -1664,20 +1664,20 @@ bus_failed:
 
 	! get coreid from our register
 	! this code comes from htraps.s - HT0_RdThId_0x18e
-	setx     0xba00000000, %g3, %g6
-    	ldxa     [%g6] 0x15, %g6            ! has coreid
+	setx    0xba00000000, %g3, %g6
+    	ldx    	[%g6], %g6            ! has coreid
 
 
     	srlx    %g6, 8, %g3
- 	mulx    %g3, PTON_X_TILES, %g3
+ 	mulx    %g3, 8, %g3	! should be PTON_X_TILES
     	and     %g6, 0xff, %g6
     	add     %g6, %g3, %g6    
 
     	sllx    %g6, 1, %g6
 
-	rd	%STR_STATUS_REG, %g3
+	rd	STR_STATUS_REG, %g3
     	srlx    %g3, STR_STATUS_STRAND_ID_SHIFT, %g3
-    	and	%g3, STR_STATUS_STRAND_ID_MASK, %g3	! %g3 = current cpu
+    	and	%g3, 0x1, %g3	! %g3 = current cpu
     	add     %g3, %g6, %g3
         set     0x007f, %g6
     	and     %g3, %g6, %g3
