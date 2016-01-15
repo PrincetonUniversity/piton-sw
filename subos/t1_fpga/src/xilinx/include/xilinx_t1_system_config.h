@@ -1,23 +1,23 @@
 /*
 * ========== Copyright Header Begin ==========================================
-* 
+*
 * OpenSPARC T2 Processor File: xilinx_t1_system_config.h
 * Copyright (c) 2006 Sun Microsystems, Inc.  All Rights Reserved.
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES.
-* 
+*
 * The above named program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public
 * License version 2 as published by the Free Software Foundation.
-* 
-* The above named program is distributed in the hope that it will be 
+*
+* The above named program is distributed in the hope that it will be
 * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 * General Public License for more details.
-* 
+*
 * You should have received a copy of the GNU General Public
 * License along with this work; if not, write to the Free Software
 * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-* 
+*
 * ========== Copyright Header End ============================================
 */
 /*
@@ -35,7 +35,7 @@
 
 #define T1_FPGA_UART_BASE                 0xfff0c2c000
 
-/* 
+/*
  * OpenSPARC T1 frequency as reported to OS. A higher frequency is reported so that one second of time
  * in the FPGA system (running at 50Mhz) is 10 seconds of wall clock time. There are assumptions made in
  * OS (kernel as well as user) that certain activity will be completed in X amount of time. Otherwise
@@ -43,7 +43,7 @@
  * 10 times to prevent timeouts and/or panics.
  */
 
-#define T1_FPGA_STICK_FREQ                1000000000  /* OpenSPARC T1 frequency as reported to OS */
+#define T1_FPGA_STICK_FREQ                58000000  /* OpenSPARC T1 frequency as reported to OS */
 
 #define T1_FPGA_SNET_BASE                 0xfff0c2c050
 #define T1_FPGA_SNET_INO                  0x3F
@@ -56,7 +56,7 @@
 /*
  * Linux needs memory size to be a multiple of 4MB.
  */
-#define T1_FPGA_TOTAL_MEMSIZE	          0x0AC00000  /* OpenSPARC T1 DRAM size */
+#define T1_FPGA_TOTAL_MEMSIZE	          0x40000000  /* OpenSPARC T1 DRAM size */
 
 
 #define T1_FPGA_GUEST_MEMBASE             (T1_FPGA_HV_MEMBASE + T1_FPGA_HV_MEMSIZE)

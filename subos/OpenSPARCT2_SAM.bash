@@ -1,7 +1,7 @@
 
 # User needs to define these new variables
 
-export SIM_ROOT=$HOME/t2arch
+export SIM_ROOT=$HOME/piton-sw/subos
 
 export SUN_STUDIO=/opt/sunstudio/SUNWspro
 export LD_LIBRARY_PATH="$SIM_ROOT/sam-t2/devtools/v9/lib:$LD_LIBRARY_PATH"
