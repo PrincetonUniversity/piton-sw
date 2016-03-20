@@ -1585,31 +1585,9 @@ bus_failed:
 
 /* skip the current cpu */
 
-	! get coreid from our register
-	! this code comes from htraps.s - HT0_RdThId_0x18e
-	setx    0xba00000000, %g3, %g6
-    	ldx     [%g6], %g6            ! has coreid
-
-
-    	srlx    %g6, 8, %g3
- 	mulx    %g3, 8, %g3	! should be PTON_X_TILES
-    	and     %g6, 0xff, %g6
-    	add     %g6, %g3, %g6    
-
-    	sllx    %g6, 1, %g6
-
 	rd	STR_STATUS_REG, %g3
-    	srlx    %g3, STR_STATUS_STRAND_ID_SHIFT, %g3
-    	and	%g3, 0x1, %g3	! %g3 = current cpu
-    	add     %g3, %g6, %g3
-        set     0x007f, %g6
-    	and     %g3, %g6, %g3
-
-	!rd	STR_STATUS_REG, %g3
-	!srlx	%g3, STR_STATUS_STRAND_ID_SHIFT, %g3
-	!and	%g3, STR_STATUS_STRAND_ID_MASK, %g3	! %g3 = current cpu
-	
-	!or 	%g6, %g3, %g6
+	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
+	and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
 	cmp     %g1, %g3
 	beq,pt  %xcc, 3f                                 ! skip the current cpu
 	nop
@@ -1618,19 +1596,10 @@ bus_failed:
 /* The lowest numbered cpu in a core is the core master */
 
 	mov	INT_VEC_DIS_TYPE_RESET, %g4
-	
 	sllx	%g4, INT_VEC_DIS_TYPE_SHIFT, %g4
 	or      %g4, INT_VEC_DIS_VECTOR_RESET, %g4
 	sllx	%g1, INT_VEC_DIS_VCID_SHIFT, %g3	! target strand
 	or	%g4, %g3, %g3				! int_vec_dis value
-	
-	!srlx	%g6, 2, %g6
-	!sllx	%g6, 18, %g6
-	!or	%g6, %g3, %g3
-	
-	!setx	0x8000000000000000, %g7, %g6
-	!or	%g6, %g3, %g3
-	
 	stx	%g3, [%g5]
 
 3:
@@ -1661,30 +1630,9 @@ bus_failed:
 
 	mov	%l2, %g2				! %g2 = strandstartset
 
-
-	! get coreid from our register
-	! this code comes from htraps.s - HT0_RdThId_0x18e
-	setx    0xba00000000, %g3, %g6
-    	ldx    	[%g6], %g6            ! has coreid
-
-
-    	srlx    %g6, 8, %g3
- 	mulx    %g3, 8, %g3	! should be PTON_X_TILES
-    	and     %g6, 0xff, %g6
-    	add     %g6, %g3, %g6    
-
-    	sllx    %g6, 1, %g6
-
 	rd	STR_STATUS_REG, %g3
-    	srlx    %g3, STR_STATUS_STRAND_ID_SHIFT, %g3
-    	and	%g3, 0x1, %g3	! %g3 = current cpu
-    	add     %g3, %g6, %g3
-        set     0x007f, %g6
-    	and     %g3, %g6, %g3
-
-	!rd	STR_STATUS_REG, %g3
-	!srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
-	!and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
+	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
+	and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
 
 	add	%g3, 1, %g1
 	srlx    %g2, %g1, %g2
@@ -1707,14 +1655,6 @@ bus_failed:
 	or      %g4, INT_VEC_DIS_VECTOR_RESET, %g4
 	sllx	%g1, INT_VEC_DIS_VCID_SHIFT, %g3	! target strand
 	or	%g4, %g3, %g3				! int_vec_dis value
-	
-	!srlx	%g6, 2, %g6
-	!sllx	%g6, 18, %g6
-	!or	%g6, %g3, %g3
-	
-	!setx	0x8000000000000000, %g7, %g6
-	!or	%g6, %g3, %g3
-	
 	stx	%g3, [%g5]
 
 2:	
