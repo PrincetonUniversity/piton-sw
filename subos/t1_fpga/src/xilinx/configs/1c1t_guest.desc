@@ -55,7 +55,7 @@ node tlb  tlb {
 
         level  = 0x1;
         type  = { "instn" };
-        entries  = 0x40;
+        entries  = 0x08;
         associativity  = 0x0;
         page-size-list  = 0x2b;
         back  -> exec-unit;
@@ -66,7 +66,7 @@ node tlb  tlb_1 {
 
         level  = 0x1;
         type  = { "data" };
-        entries  = 0x80;
+        entries  = 0x08;
         associativity  = 0x0;
         page-size-list  = 0x2b;
         back  -> exec-unit_1;
@@ -136,8 +136,8 @@ node cache  cache_2 {
         level  = 0x2;
         type  = { "instn" , "data" };
         line-size  = 0x40;
-        size  = 0x300000;
-        associativity  = 0xC;
+        size  = 0x8000;
+        associativity  = 0x4;
         back  -> cache_1;
         back  -> cache;
 }
