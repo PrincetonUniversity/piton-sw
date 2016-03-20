@@ -535,10 +535,17 @@ slave_thread:
 	save %sp, -(MINFRAME64), %sp
 
 	set	BIST_START, %l1
-        stxa	%l1, [%g0]ASI_NIAGARA
-1:      ldxa	[%g0]ASI_NIAGARA, %l0
-        andcc	%l0, BIST_DONE, %l0
-        be,pt	%xcc, 1b
+!       stxa	%l1, [%g0]ASI_NIAGARA
+        nop
+
+!1:     ldxa	[%g0]ASI_NIAGARA, %l0
+1:      nop
+
+!       andcc	%l0, BIST_DONE, %l0
+        nop
+
+!       be,pt	%xcc, 1b
+        nop
 
 	nop
 
