@@ -103,6 +103,7 @@
 	GROUP_HCALL_ENTRY(MMU_TSB_CTX0_INFO,	hcall_mmu_tsb_ctx0_info)
 	GROUP_HCALL_ENTRY(MMU_TSB_CTXNON0_INFO,	hcall_mmu_tsb_ctxnon0_info)
 	GROUP_HCALL_ENTRY(MMU_FAULT_AREA_INFO,	hcall_mmu_fault_area_info)
+	GROUP_HCALL_ENTRY(MMU_SET_MITTS_REGS,	hcall_mmu_set_mitts_regs)
 	GROUP_HCALL_ENTRY(MEM_SCRUB,		hcall_mem_scrub)
 	GROUP_HCALL_ENTRY(MEM_SYNC,		hcall_mem_sync)
 	GROUP_HCALL_ENTRY(CPU_MONDO_SEND,	hcall_cpu_mondo_send)

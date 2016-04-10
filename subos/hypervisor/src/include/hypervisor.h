@@ -117,6 +117,7 @@ extern "C" {
 #define	MMU_TSB_CTX0_INFO	0x29
 #define	MMU_TSB_CTXNON0_INFO	0x2a
 #define	MMU_FAULT_AREA_INFO	0x2b
+#define	MMU_SET_MITTS_REGS	0x2c
 
 #define	MEM_SCRUB		0x31
 #define	MEM_SYNC		0x32
