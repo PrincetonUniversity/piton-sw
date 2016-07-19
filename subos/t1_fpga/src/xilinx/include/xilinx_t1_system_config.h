@@ -43,7 +43,7 @@
  * 10 times to prevent timeouts and/or panics.
  */
 
-#define T1_FPGA_STICK_FREQ                60000000  /* OpenSPARC T1 frequency as reported to OS */
+#define T1_FPGA_STICK_FREQ                50000000  /* OpenSPARC T1 frequency as reported to OS */
 
 #define T1_FPGA_SNET_BASE                 0xfff0c2c050
 #define T1_FPGA_SNET_INO                  0x3F
@@ -62,6 +62,11 @@
 #define T1_FPGA_GUEST_MEMBASE             (T1_FPGA_HV_MEMBASE + T1_FPGA_HV_MEMSIZE)
 #define T1_FPGA_GUEST_MEMSIZE             (T1_FPGA_TOTAL_MEMSIZE - T1_FPGA_HV_MEMSIZE)
 #define T1_FPGA_GUEST_REALBASE            T1_FPGA_GUEST_MEMBASE
+
+
+#define PITON_IO_MEMBASE             0xfff0c00000
+#define PITON_IO_MEMSIZE             0x400000
+#define PITON_IO_REALBASE            PITON_IO_MEMBASE
 
 
 /*
@@ -102,7 +107,9 @@
 
 
 
-#ifdef T1_FPGA_1C4T
+#ifdef T1_FPGA_1C2T
+#define STRAND_STARTSET   0x3   /* 1c2t configuration */
+#elif defined T1_FPGA_1C4T
 #define STRAND_STARTSET   0xf   /* 1c4t configuration */
 #elif defined T1_FPGA_2C1T
 #define STRAND_STARTSET   0x11   /* 2c1t configuration */

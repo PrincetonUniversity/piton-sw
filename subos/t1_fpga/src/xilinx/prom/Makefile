@@ -28,7 +28,7 @@ TOP = ../..
 include  $(TOP)/Makefile.common
 
 
-CONFIGS = 1c1t 1c4t 2c1t 2c4t
+CONFIGS = 1c1t 1c2t 1c4t 2c1t 2c4t
 
 XILINX_CONFIGS = $(XILINX_TOP)/configs
 XILINX_RESET   = $(XILINX_TOP)/reset
@@ -75,6 +75,12 @@ openboot.bin:
 		    -r $(XILINX_RESET)/1c1t_reset.bin    \
 		    -p $@
 
+1c2t_prom.bin: $(XILINX_RESET)/1c2t_reset.bin $(XILINX_CONFIGS)/1c2t-guest.md $(XILINX_CONFIGS)/1c2t-hv.md
+	$(MAKE_PROM) -g $(XILINX_CONFIGS)/1c2t-guest.md \
+		    -H $(XILINX_CONFIGS)/1c2t-hv.md    \
+		    -r $(XILINX_RESET)/1c2t_reset.bin    \
+		    -p $@
+
 1c4t_prom.bin: $(XILINX_RESET)/1c4t_reset.bin $(XILINX_CONFIGS)/1c4t-guest.md $(XILINX_CONFIGS)/1c4t-hv.md
 	$(MAKE_PROM) -g $(XILINX_CONFIGS)/1c4t-guest.md \
 		    -H $(XILINX_CONFIGS)/1c4t-hv.md    \
@@ -97,6 +103,12 @@ openboot.bin:
 	$(MAKE_PROM) -g $(XILINX_CONFIGS)/1c1t-guest.md \
 		    -H $(XILINX_CONFIGS)/1c1t-obp-hv.md    \
 		    -r $(XILINX_RESET)/1c1t_reset.bin    \
+		    -p $@
+
+1c2t_obp_prom.bin: $(XILINX_RESET)/1c2t_reset.bin $(XILINX_CONFIGS)/1c2t-guest.md $(XILINX_CONFIGS)/1c2t-obp-hv.md
+	$(MAKE_PROM) -g $(XILINX_CONFIGS)/1c2t-guest.md \
+		    -H $(XILINX_CONFIGS)/1c2t-obp-hv.md    \
+		    -r $(XILINX_RESET)/1c2t_reset.bin    \
 		    -p $@
 
 1c4t_obp_prom.bin: $(XILINX_RESET)/1c4t_reset.bin $(XILINX_CONFIGS)/1c4t-guest.md $(XILINX_CONFIGS)/1c4t-obp-hv.md
@@ -122,7 +134,7 @@ clobber:: clean
 	$(RM) $(PROM_BINS) $(OBP_PROM_BINS)
 
 clean::
-	$(RM) openboot.bin q.bin 1c1t_reset.bin 1c4t_reset.bin 2c1t_reset.bin
+	$(RM) openboot.bin q.bin 1c1t_reset.bin 1c2t_reset.bin 1c4t_reset.bin 2c1t_reset.bin 2c4t_reset.bin
 
 
 .KEEP_STATE:
