@@ -1,0 +1,285 @@
+/*
+ * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
+/*
+ * The machine description files are derived from machine description
+ * binaries in OpenSPARC T2 legion simulation directory.
+ */
+
+#include "xilinx_t1_system_config.h"
+
+node root  root {
+
+        content-version  = 0x100000000;
+        stick-frequency  = T1_FPGA_STICK_FREQ;
+        fwd  -> platform;
+        fwd  -> guests;
+        fwd  -> cpus;
+        fwd  -> memory;
+        fwd  -> maus;
+        fwd  -> cwqs;
+        fwd  -> devices;
+        fwd  -> ldc_endpoints;
+        fwd  -> consoles;
+        fwd  -> frag_space;
+        hvuart  = T1_FPGA_UART_BASE;
+        tod  = 0x0;
+}
+
+
+node platform  platform {
+
+        back  -> root;
+        stick-frequency  = T1_FPGA_STICK_FREQ;
+}
+
+
+node guests  guests {
+
+        back  -> root;
+        fwd  -> guest;
+}
+
+
+node cpus  cpus {
+
+        back  -> root;
+        fwd  -> cpu;
+        fwd  -> cpu_1;
+}
+
+
+node memory  memory {
+
+        back  -> root;
+        fwd  -> mblock;
+}
+
+
+node maus  maus {
+
+        back  -> root;
+}
+
+
+node cwqs  cwqs {
+
+        back  -> root;
+}
+
+
+node devices  devices {
+
+        back  -> root;
+        fwd  -> pcie_bus;
+}
+
+
+node ldc_endpoints  ldc_endpoints {
+
+        back  -> root;
+        fwd  -> ldc_endpoint;
+        fwd  -> ldc_endpoint_1;
+        fwd  -> ldc_endpoint_2;
+        fwd  -> ldc_endpoint_3;
+}
+
+
+node consoles  consoles {
+
+        back  -> root;
+        fwd  -> console;
+}
+
+
+node guest  guest {
+
+        back  -> guests;
+        name  = "domain0";
+        gid  = 0x0;
+        resource_id  = 0x0;
+        pid  = 0x1;
+        tod-offset  = 0x0;
+        reset-reason  = 0x0;
+        perfctraccess  = 0x0;
+        perfctrhtaccess  = 0x0;
+        rngctlaccessible  = 0x0;
+        diagpriv  = 0x0;
+        fwd  -> virtual_devices;
+        fwd  -> channel_devices;
+        fwd  -> pcie_bus;
+        fwd  -> cpu;
+        fwd  -> cpu_1;
+        fwd  -> mblock;
+        mdpa  = T1_FPGA_GUEST_MD_ADDR;
+        fwd  -> ldc_endpoint;
+        fwd  -> ldc_endpoint_1;
+        fwd  -> ldc_endpoint_3;
+        rombase  = ROMBASE;
+        romsize  = ROMSIZE;
+        nvbase  = T1_FPGA_NVRAM_ADDR;
+        nvsize  = T1_FPGA_NVRAM_SIZE;
+        diskpa  = T1_FPGA_RAM_DISK_ADDR;
+        fwd  -> console;
+        fwd  -> snet;
+}
+
+
+node virtual_devices  virtual_devices {
+
+        back  -> guest;
+        cfghandle  = 0x100;
+}
+
+
+node channel_devices  channel_devices {
+
+        back  -> guest;
+        cfghandle  = 0x200;
+}
+
+
+node pcie_bus  pcie_bus {
+
+        back  -> guest;
+        back  -> devices;
+        resource_id  = 0x0;
+        cfghandle  = 0x0;
+        gid  = 0x0;
+}
+
+
+node cpu  cpu {
+
+        back  -> cpus;
+        back  -> guest;
+        pid  = 0x0;
+        vid  = 0x0;
+        resource_id  = 0x0;
+        gid  = 0x0;
+        partid  = 0x1;
+}
+
+node cpu  cpu_1 {
+
+        back  -> cpus;
+        back  -> guest;
+        pid  = 0x1;
+        vid  = 0x1;
+        resource_id  = 0x1;
+        gid  = 0x0;
+        partid  = 0x1;
+}
+
+
+node mblock  mblock {
+
+        back  -> memory;
+        back  -> guest;
+        membase  = T1_FPGA_GUEST_MEMBASE;
+        memsize  = T1_FPGA_GUEST_MEMSIZE;
+        realbase  = T1_FPGA_GUEST_REALBASE;
+        resource_id  = 0x0;
+}
+
+
+node ldc_endpoint  ldc_endpoint {
+
+        back  -> ldc_endpoints;
+        back  -> guest;
+        target_type  = 0x1;
+        channel  = 0x0;
+        resource_id  = 0x0;
+        tx-ino  = 0x0;
+        rx-ino  = 0x1;
+        target_channel  = 0x0;
+        server_name  = "hvctl";
+        server_ldom_name  = "domain0";
+        server_instance  = 0x0;
+}
+
+
+node ldc_endpoint  ldc_endpoint_1 {
+
+        back  -> ldc_endpoints;
+        back  -> guest;
+        target_type  = 0x0;
+        channel  = 0x1;
+        resource_id  = 0x2;
+        tx-ino  = 0x2;
+        rx-ino  = 0x3;
+        target_guest  = 0x0;
+        target_channel  = 0x2;
+        server_name  = "vldc";
+        server_ldom_name  = "domain0";
+        server_instance  = 0x0;
+        client_ldom_name  = "domain0";
+}
+
+
+node ldc_endpoint  ldc_endpoint_2 {
+
+        back  -> ldc_endpoints;
+        target_type  = 0x0;
+        channel  = 0x0;
+        resource_id  = 0x1;
+        target_guest  = 0x0;
+        target_channel  = 0x0;
+        server_name  = "hvctl";
+        server_ldom_name  = "domain0";
+        svc_id  = 0x1;
+}
+
+
+node ldc_endpoint  ldc_endpoint_3 {
+
+        back  -> ldc_endpoints;
+        back  -> guest;
+        target_type  = 0x0;
+        channel  = 0x2;
+        resource_id  = 0x3;
+        tx-ino  = 0x4;
+        rx-ino  = 0x5;
+        target_guest  = 0x0;
+        target_channel  = 0x1;
+        server_name  = "vldc";
+        server_ldom_name  = "domain0";
+        server_instance  = 0x0;
+        client_ldom_name  = "domain0";
+}
+
+
+node frag_space  frag_space {
+
+        back  -> root;
+        fragsize  = 0x80000;
+        fwd  -> frag_mblock;
+}
+
+
+node frag_mblock  frag_mblock {
+
+        back  -> frag_space;
+        base  = 0x80000;
+        size  = 0x180000;
+}
+
+
+node console  console {
+
+        back  -> consoles;
+        back  -> guest;
+        ino  = 0x11;
+        resource_id  = 0x0;
+        uartbase  = T1_FPGA_UART_BASE;
+}
+
+
+node snet  snet {
+        back  -> guest;
+        snet_ino  = T1_FPGA_SNET_INO;
+        resource_id  = 0x0;
+        snet_pa  = T1_FPGA_SNET_BASE;
+}
