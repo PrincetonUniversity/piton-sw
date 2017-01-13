@@ -64,6 +64,11 @@
 #define T1_FPGA_GUEST_REALBASE            T1_FPGA_GUEST_MEMBASE
 
 
+#define PITON_IO_MEMBASE             0xfff0c00000
+#define PITON_IO_MEMSIZE             0x400000
+#define PITON_IO_REALBASE            PITON_IO_MEMBASE
+
+
 /*
  * Offsets of various binaries stored in PROM. The first three
  * binaries are reset, hypervisor (q) and openboot (OBP) executables.
