@@ -30,7 +30,7 @@ include  $(TOP)/Makefile.common
 
 ASFLAGS += -xregsym=no -I$(XILINX_TOP)/include
 
-CONFIGS = 1c1t 1c4t 2c1t 2c4t
+CONFIGS = 1c1t 1c2t 1c4t 2c1t 2c4t
 
 RESET_BINS = $(CONFIGS:%=%_reset.bin)
 RESET_OBJS = $(CONFIGS:%=%_reset.o)
@@ -39,6 +39,8 @@ RESET_EXES = $(CONFIGS:%=%_reset)
 
 all install :: $(RESET_BINS)
 
+
+1c2t_reset.o := MP_CFLAGS=-DT1_FPGA_1C2T
 
 1c4t_reset.o := MP_CFLAGS=-DT1_FPGA_1C4T
 
