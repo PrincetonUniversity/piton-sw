@@ -400,6 +400,9 @@ slave_thread:
 
 	save    %sp, -(MINFRAME64), %sp
 
+	!setx    0xba00000000, %l0, %l7
+    !ldx     [%l7], %l7            ! has coreid
+	!sllx	%l7, 2, %l0		! shift left two as if you have thread ids (we don't right now)
 	rd	STR_STATUS_REG, %l0
 	srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
 	and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
@@ -436,6 +439,9 @@ slave_thread:
 
 	save    %sp, -(MINFRAME64), %sp
 
+	!setx    0xba00000000, %l0, %l1
+    !ldx     [%l1], %l1            ! has coreid
+	!sllx	%l1, 2, %l0		! shift left two as if you have thread ids (we don't right now)
 	rd	STR_STATUS_REG, %l0
 	srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
 	and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
@@ -470,6 +476,9 @@ slave_thread:
 
 	save    %sp, -(MINFRAME64), %sp
 
+	!setx    0xba00000000, %l0, %l7
+   	!ldx     [%l7], %l7            ! has coreid
+	!sllx	%l7, 2, %l0		! shift left two as if you have thread ids (we don't right now)
 	rd	STR_STATUS_REG, %l0
 	srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
 	and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id

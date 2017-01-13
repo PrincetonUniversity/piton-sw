@@ -269,6 +269,9 @@
 	stx	%g1, [%i0 + CONFIG_SP_LDCS]
 
 	! Perform some basic setup for this strand.
+	!setx    0xba00000000, %g3, %g4
+    !ldx     [%g4], %g4            ! has coreid
+	!sllx	%g4, 2, %g3		! shift left two as if you have thread ids (we don't right now)
 	rd	STR_STATUS_REG, %g3
 	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
 	and	%g3, STR_STATUS_CPU_ID_MASK, %g3
@@ -540,6 +543,10 @@
 	setx	config, %g4, %g2
 	sub	%g2, %g3, %g2
 	! %g2 = &config
+
+	!setx    0xba00000000, %i3, %g1
+    !ldx     [%g1], %g1            ! has coreid
+	!sllx	%g1, 2, %i3		! shift left two as if you have thread ids (we don't right now)
 
 	rd	STR_STATUS_REG, %g1
 	srlx	%g1, STR_STATUS_CPU_ID_SHIFT, %g1
@@ -1093,6 +1100,8 @@ slow_start:
 	mov	(NUM_RA2PA_SEGMENTS - 1) * RA2PA_SEGMENT_SIZE, %g3
 	set	(-1), %g6
 1:
+	!PRINT(" yes ")
+
 	add	%g3, GUEST_RA2PA_SEGMENT, %g4
 	add	%g4, %g5, %g4				! &guest.ra2pa_segment
 
@@ -1132,6 +1141,8 @@ slow_start:
 2:
 	brgz,pt	%g3, 1b
 	sub	%g3, RA2PA_SEGMENT_SIZE, %g3
+
+	!PRINT(" done \r\n")
 
 .master_guest_scrub_done:
 
@@ -1585,6 +1596,10 @@ bus_failed:
 
 /* skip the current cpu */
 
+	!setx    0xba00000000, %g3, %g6
+    !ldx     [%g6], %g6            ! has coreid
+	!sllx	%g6, 2, %g3		! shift left two as if you have thread ids (we don't right now)
+
 	rd	STR_STATUS_REG, %g3
 	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
 	and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
@@ -1598,6 +1613,7 @@ bus_failed:
 	mov	INT_VEC_DIS_TYPE_RESET, %g4
 	sllx	%g4, INT_VEC_DIS_TYPE_SHIFT, %g4
 	or      %g4, INT_VEC_DIS_VECTOR_RESET, %g4
+	!sllx	%g1, INT_VEC_DIS_VCID_SHIFT-1, %g3	! target strand
 	sllx	%g1, INT_VEC_DIS_VCID_SHIFT, %g3	! target strand
 	or	%g4, %g3, %g3				! int_vec_dis value
 	stx	%g3, [%g5]
@@ -1629,6 +1645,11 @@ bus_failed:
 /* The current cpu wakes up the slave strands in it's own core */
 
 	mov	%l2, %g2				! %g2 = strandstartset
+
+	!setx    0xba00000000, %g3, %g5
+    !ldx     [%g5], %g5            ! has coreid
+	!sllx	%g5, 2, %g3		! shift left two as if you have thread ids (we don't right now)
+
 
 	rd	STR_STATUS_REG, %g3
 	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
