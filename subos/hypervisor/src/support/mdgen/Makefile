@@ -51,7 +51,8 @@ TOP=../..
 include $(TOP)/Makefile.master
 IFLAGS = -I$(SUN_INC) -I$(COMMON_INC)
 CFLAGS = $(IFLAGS) $(DEBUG)
-LEX=env PATH=/pkg/gnu/bin:$$PATH flex
+#LEX=export PATH=/pkg/gnu/bin:$$PATH; flex
+LEX=flex
 LIBS =
 DEBUG=-g
 MDGFLAGS=\

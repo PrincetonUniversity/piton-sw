@@ -200,7 +200,7 @@ DECNUM	("0"|([1-9][0-9]*))
 			}
 
 
-[A-Za-z_#?$][A-Za-z_#\-?$0-9]* {
+[A-Za-z_,#?$][A-Za-z_,#\-?$0-9]* {
 				lex.strp = mdlextext;
 				return T_Token;
 			}
