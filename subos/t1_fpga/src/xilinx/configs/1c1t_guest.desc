@@ -310,6 +310,8 @@ node virtual-devices  virtual-devices {
         fwd  -> channel-devices;
         fwd  -> virtual-device_4;
         fwd  -> virtual-device_5;
+        fwd  -> virtual-device_6;
+        fwd  -> virtual-device_7;
 }
 
 
@@ -331,7 +333,7 @@ node memory  memory {
 
 node platform  platform {
 
-	banner-name = "Sun Fire T1000";
+	banner-name = "OpenPiton";
 	name = "SUNW,Sun-Fire-T1000";
         watchdog-resolution  = 0x3e8;
         watchdog-max-timeout  = 0x757b12c00;
@@ -363,7 +365,7 @@ node virtual-device  virtual-device {
         intr  = 0x1;
         ino  = 0x11;
         channel#  = 0x0;
-        cfg-handle  = 0x1;
+        cfg-handle  = 0x120;
         compatible  = { "qcn" , "SUNW,sun4v-console" };
 }
 
@@ -371,14 +373,14 @@ node virtual-device  virtual-device {
 node devalias  devalias {
 
         back  -> openboot;
-        vdisk  = "/virtual-devices/disk@0";
+        vdisk  = "/virtual-devices/disk@110";
         snet  = "/virtual-devices/network@0";
         ttya  = "/virtual-devices/console@1";
         nvram  = "/virtual-devices/nvram@3";
         ttyb  = "/virtual-devices/console@4";
         scsi  = "/pci@7c0/scsi@1";
         disk  = "/pci@7c0/scsi@1/disk@0";
-        virtual-console  = "/virtual-devices/console@1";
+        virtual-console  = "/virtual-devices/console@120";
 }
 
 
@@ -419,7 +421,7 @@ node virtual-device  virtual-device_1 {
         compatible  = { "SUNW,sun4v-channel" };
         device-type  = "serial";
         name  = "virtual-channel";
-        cfg-handle  = 0x0;
+        cfg-handle  = 0x100;
         fwd  -> virtual-device-port;
         fwd  -> virtual-device-port_1;
 }
@@ -471,7 +473,7 @@ node virtual-device  virtual-device_2 {
         compatible  = { "SUNW,sun4v-console-concentrator" };
         device-type  = "vcc";
         name  = "virtual-console-concentrator";
-        cfg-handle  = 0x0;
+        cfg-handle  = 0x90;
 }
 
 
@@ -481,7 +483,7 @@ node virtual-device  virtual-device_3 {
         compatible  = { "SUNW,sun4v-disk-server" };
         device-type  = "vds";
         name  = "virtual-disk-server";
-        cfg-handle  = 0x0;
+        cfg-handle  = 0x80;
 }
 
 
@@ -493,7 +495,7 @@ node virtual-device  virtual-device_4 {
         my-space  = 0x0;
         intr  = 0x0;
         ino  = 0x0;
-        cfg-handle  = 0x0;
+        cfg-handle  = 0x110;
 }
 
 
@@ -505,5 +507,37 @@ node virtual-device  virtual-device_5 {
         my-space  = 0x0;
         intr  = 0x0;
         ino  = T1_FPGA_SNET_INO;
-        cfg-handle  = 0x2;
+        cfg-handle  = 0x300;
+}
+
+node virtual-device  virtual-device_6 {
+
+	back  -> virtual-devices;
+	name  = "axi_ethernetlite_0";
+	fcode-driver-name  = "net-virtual-device";
+	compatible  = { "xlnx,xps-ethernetlite-3.00.a" };
+	device-type  = "network";
+	intr  = 0x2;
+	ino   = 0x12;
+	cfg-handle  = 0x70;
+	addr  = 0xfff0d00000;
+        local-mac-address  = 0x00E0815F2CAB;
+	reg = { 0xfff0d00000, 0x10000 };
+	xlnx,duplex                    = 0x1;
+	xlnx,include-global-buffers    = 0x1;
+	xlnx,include-internal-loopback = 0x1;
+	xlnx,include-mdio              = 0x1;
+	xlnx,rx-ping-pong              = 0x1;
+	xlnx,s-axi-id-width            = 0x1;
+	xlnx,tx-ping-pong 	       = 0x1;
+	xlnx,use-internal 	       = 0x0;
+}
+
+node virtual-device  virtual-device_7 {
+
+	back  -> virtual-devices;
+	name  = "axi_ethernetlite_0_mdio";
+    compatible  = { "ethernet-phy-id001C.C915" };
+	device-type = "network";
+	cfg-handle = 1;
 }
