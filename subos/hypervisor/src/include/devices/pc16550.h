@@ -96,6 +96,6 @@ extern "C" {
 /*
  * Baud rate settings for Divisor Latch Low (DLL) and Most (DLM)
  */
-#define	DLL_9600	0x20
+#define	DLL_9600	0x1B
 #define	DLM_9600	0x0
 #endif /* _PC16550_H */
