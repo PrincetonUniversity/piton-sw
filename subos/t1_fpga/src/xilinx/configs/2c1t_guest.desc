@@ -138,7 +138,7 @@ node exec-unit  exec-unit_1 {
 node exec-unit  exec-unit_2 {
 
         type  = { "ifetch" };
-        back  -> cpu_4;
+        back  -> cpu_2;
         fwd  -> cache_2;
         fwd  -> tlb_2;
 }
@@ -147,7 +147,7 @@ node exec-unit  exec-unit_2 {
 node exec-unit  exec-unit_3 {
 
         type  = { "integer" , "integer-load" , "integer-store" , "fp-load" , "fp-store" };
-        back  -> cpu_4;
+        back  -> cpu_2;
         fwd  -> cache_3;
         fwd  -> tlb_3;
 }
@@ -179,10 +179,10 @@ node cpu  cpu {
 }
 
 
-node cpu  cpu_4 {
+node cpu  cpu_2 {
 
-        id  = 0x4;
-        pid  = 0x4;
+        id  = 0x2;
+        pid  = 0x2;
         serial#  = 0x0;
         isalist  = { "sparcv9" , "sparcv8plus" , "sparcv8" , "sparcv8-fsmuld" , "sparcv7" , "sparc" };
         clock-frequency  = T1_FPGA_STICK_FREQ;
@@ -215,7 +215,7 @@ node exec-unit  exec-unit_4 {
 node cpus  cpus {
 
         fwd  -> cpu;
-        fwd  -> cpu_4;
+        fwd  -> cpu_2;
         back  -> root;
 }
 
@@ -594,11 +594,12 @@ node virtual-device  virtual-device_5 {
 
         back  -> virtual-devices;
         name  = "snet";
+        compatible = { "SUNW,t1-fpga-snet" };
         fcode-driver-name  = "net-virtual-device";
         my-space  = 0x0;
         intr  = 0x0;
         ino  = T1_FPGA_SNET_INO;
-        cfg-handle  = 0x300;
+        cfg-handle  = 0x2;
 }
 
 node virtual-device  virtual-device_6 {
@@ -631,4 +632,4 @@ node virtual-device  virtual-device_7 {
     compatible  = { "ethernet-phy-id001C.C915" };
 	device-type = "network";
 	cfg-handle = 1;
-}
+} 

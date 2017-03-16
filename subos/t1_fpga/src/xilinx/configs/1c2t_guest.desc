@@ -529,41 +529,42 @@ node virtual-device  virtual-device_5 {
 
         back  -> virtual-devices;
         name  = "snet";
+        compatible = { "SUNW,t1-fpga-snet" };
         fcode-driver-name  = "net-virtual-device";
         my-space  = 0x0;
         intr  = 0x0;
         ino  = T1_FPGA_SNET_INO;
-        cfg-handle  = 0x300;
+        cfg-handle  = 0x2;
 }
 
 node virtual-device  virtual-device_6 {
 
-    back  -> virtual-devices;
-    name  = "axi_ethernetlite_0";
-    fcode-driver-name  = "net-virtual-device";
-    compatible  = { "xlnx,xps-ethernetlite-3.00.a" };
-    device-type  = "network";
-    intr  = 0x2;
-    ino   = 0x12;
-    cfg-handle  = 0x70;
-    addr  = 0xfff0d00000;
+	back  -> virtual-devices;
+	name  = "axi_ethernetlite_0";
+	fcode-driver-name  = "net-virtual-device";
+	compatible  = { "xlnx,xps-ethernetlite-3.00.a" };
+	device-type  = "network";
+	intr  = 0x2;
+	ino   = 0x12;
+	cfg-handle  = 0x70;
+	addr  = 0xfff0d00000;
         local-mac-address  = 0x00E0815F2CAB;
-    reg = { 0xfff0d00000, 0x10000 };
-    xlnx,duplex                    = 0x1;
-    xlnx,include-global-buffers    = 0x1;
-    xlnx,include-internal-loopback = 0x1;
-    xlnx,include-mdio              = 0x1;
-    xlnx,rx-ping-pong              = 0x1;
-    xlnx,s-axi-id-width            = 0x1;
-    xlnx,tx-ping-pong          = 0x1;
-    xlnx,use-internal          = 0x0;
+	reg = { 0xfff0d00000, 0x10000 };
+	xlnx,duplex                    = 0x1;
+	xlnx,include-global-buffers    = 0x1;
+	xlnx,include-internal-loopback = 0x1;
+	xlnx,include-mdio              = 0x1;
+	xlnx,rx-ping-pong              = 0x1;
+	xlnx,s-axi-id-width            = 0x1;
+	xlnx,tx-ping-pong 	       = 0x1;
+	xlnx,use-internal 	       = 0x0;
 }
 
 node virtual-device  virtual-device_7 {
 
-    back  -> virtual-devices;
-    name  = "axi_ethernetlite_0_mdio";
+	back  -> virtual-devices;
+	name  = "axi_ethernetlite_0_mdio";
     compatible  = { "ethernet-phy-id001C.C915" };
-    device-type = "network";
-    cfg-handle = 1;
-}
+	device-type = "network";
+	cfg-handle = 1;
+} 
