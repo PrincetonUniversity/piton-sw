@@ -47,13 +47,7 @@ node cpus  cpus {
 
         back  -> root;
         fwd  -> cpu;
-        fwd  -> cpu_1;
         fwd  -> cpu_2;
-        fwd  -> cpu_3;
-        fwd  -> cpu_4;
-        fwd  -> cpu_5;
-        fwd  -> cpu_6;
-        fwd  -> cpu_7;
 }
 
 
@@ -117,13 +111,7 @@ node guest  guest {
         fwd  -> channel_devices;
         fwd  -> pcie_bus;
         fwd  -> cpu;
-        fwd  -> cpu_1;
         fwd  -> cpu_2;
-        fwd  -> cpu_3;
-        fwd  -> cpu_4;
-        fwd  -> cpu_5;
-        fwd  -> cpu_6;
-        fwd  -> cpu_7;
         fwd  -> mblock;
         mdpa  = T1_FPGA_GUEST_MD_ADDR;
         fwd  -> ldc_endpoint;
@@ -174,18 +162,6 @@ node cpu  cpu {
         partid  = 0x1;
 }
 
-node cpu  cpu_1 {
-
-        back  -> cpus;
-        back  -> guest;
-        pid  = 0x1;
-        vid  = 0x1;
-        resource_id  = 0x1;
-        gid  = 0x0;
-        partid  = 0x1;
-}
-
-
 node cpu  cpu_2 {
 
         back  -> cpus;
@@ -193,62 +169,6 @@ node cpu  cpu_2 {
         pid  = 0x2;
         vid  = 0x2;
         resource_id  = 0x2;
-        gid  = 0x0;
-        partid  = 0x1;
-}
-
-
-node cpu  cpu_3 {
-
-        back  -> cpus;
-        back  -> guest;
-        pid  = 0x3;
-        vid  = 0x3;
-        resource_id  = 0x3;
-        gid  = 0x0;
-        partid  = 0x1;
-}
-
-node cpu  cpu_4 {
-
-        back  -> cpus;
-        back  -> guest;
-        pid  = 0x4;
-        vid  = 0x4;
-        resource_id  = 0x4;
-        gid  = 0x0;
-        partid  = 0x1;
-}
-
-node cpu  cpu_5 {
-
-        back  -> cpus;
-        back  -> guest;
-        pid  = 0x5;
-        vid  = 0x5;
-        resource_id  = 0x5;
-        gid  = 0x0;
-        partid  = 0x1;
-}
-
-node cpu  cpu_6 {
-
-        back  -> cpus;
-        back  -> guest;
-        pid  = 0x6;
-        vid  = 0x6;
-        resource_id  = 0x6;
-        gid  = 0x0;
-        partid  = 0x1;
-}
-
-node cpu  cpu_7 {
-
-        back  -> cpus;
-        back  -> guest;
-        pid  = 0x7;
-        vid  = 0x7;
-        resource_id  = 0x7;
         gid  = 0x0;
         partid  = 0x1;
 }
