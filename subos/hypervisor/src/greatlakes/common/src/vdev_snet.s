@@ -4,7 +4,7 @@
  */
 
 
-#ifdef T1_FPGA_SNET
+#ifdef PITON_NET
 
 #include <sys/asm_linkage.h>
 #include <hypervisor.h>
@@ -54,35 +54,15 @@
 /*
  * snet read
  *
- * arg1 target real address (%o0)
- * arg2 size (%o1)
+ * arg1 source physical address (%o0)
  * --
  * ret0 status (%o0)
- * ret1 size (%o1)
+ * ret1 source data word (%o1)
  *
  */
 	ENTRY_NP(hcall_snet_read)
 
-        btst    PKT_BUF_ADDR_ALIGNMENT - 1, %o0
-        bnz,pn  %xcc, herr_badalign
-          nop
-
-	GUEST_STRUCT(%g1)
-	add     %o1, 0x7, %g4
-	andn    %g4, 0x7, %g4
-	RA2PA_RANGE_CONV_UNK_SIZE(%g1, %o0, %g4, herr_noraddr, %g3, %g2)
-	! %g2	paddr
-
-	set  GUEST_SNET, %g3
-	add  %g1, %g3, %g1
-	ldx  [%g1 + SNET_PA], %g1
-
-1:
-	ldx     [%g1], %g3
-	stx     %g3, [%g2]
-	subcc   %g4, 8, %g4
-	brnz,pt %g4, 1b
-	add     %g2, 8, %g2
+	lduw [%o0], %o1
 
 	HCALL_RET(EOK)
 	SET_SIZE(hcall_snet_read)
@@ -90,34 +70,14 @@
 /*
  * snet write
  *
- * arg1 source real address (%o0)
- * arg2 size (%o1)
+ * arg1 data word (%o0)
+ * arg2 destination physical address (%o1)
  * --
  * ret0 status (%o0)
- * ret1 size (%o1)
  */
 	ENTRY_NP(hcall_snet_write)
 
-        btst    PKT_BUF_ADDR_ALIGNMENT - 1, %o0
-        bnz,pn  %xcc, herr_badalign
-          nop
-
-	GUEST_STRUCT(%g1)
-	add     %o1, 0x7, %g4
-	andn    %g4, 0x7, %g4
-	RA2PA_RANGE_CONV_UNK_SIZE(%g1, %o0, %g4, herr_noraddr, %g3, %g2)
-	! %g2	paddr
-
-	set  GUEST_SNET, %g3
-	add  %g1, %g3, %g1
-	ldx  [%g1 + SNET_PA], %g1
-
-1:
-	ldx     [%g2], %g3
-	stx     %g3, [%g1]
-	subcc   %g4, 8, %g4
-	brnz,pt %g4, 1b
-	add     %g2, 8, %g2
+	stw	%o0, [%o1]
 
 	HCALL_RET(EOK)
 	SET_SIZE(hcall_snet_write)

@@ -134,7 +134,7 @@
 	cmp	%g2, VECINTR_FPGA
 	beq,pt	%xcc, fpga_intr
 #endif
-#ifdef T1_FPGA_SNET
+#ifdef PITON_NET
 	cmp	%g2, VECINTR_SNET
 	beq,pt	%xcc, snet_mondo
 #endif

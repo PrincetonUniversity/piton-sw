@@ -124,7 +124,7 @@
 	GROUP_HCALL_ENTRY(DISK_READ,		hcall_disk_read)
 	GROUP_HCALL_ENTRY(DISK_WRITE,		hcall_disk_write)
 #endif
-#ifdef T1_FPGA_SNET
+#ifdef PITON_NET
 	GROUP_HCALL_ENTRY(SNET_READ,		hcall_snet_read)
 	GROUP_HCALL_ENTRY(SNET_WRITE,		hcall_snet_write)
 #endif

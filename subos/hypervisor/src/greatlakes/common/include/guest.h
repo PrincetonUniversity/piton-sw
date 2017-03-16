@@ -62,7 +62,7 @@ extern "C" {
 #include <vdev_simdisk.h>
 #endif /* CONFIG_DISK */
 
-#ifdef T1_FPGA_SNET
+#ifdef PITON_NET
 #include <vdev_snet.h>
 #endif
 
@@ -349,7 +349,7 @@ struct guest {
 	struct hvdisk	disk;
 #endif
 
-#ifdef T1_FPGA_SNET
+#ifdef PITON_NET
 	/*
 	 * Simulated/Simple network
 	 */

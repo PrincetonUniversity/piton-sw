@@ -85,7 +85,7 @@ typedef struct {
 #ifdef	CONFIG_DISK
 	uint64_t	diskpa;
 #endif
-#ifdef	T1_FPGA_SNET
+#ifdef  PITON_NET
 	uint64_t	snet_pa;
 	uint64_t	snet_ino;
 #endif

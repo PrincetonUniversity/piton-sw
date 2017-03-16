@@ -503,11 +503,12 @@ node virtual-device  virtual-device_5 {
 
         back  -> virtual-devices;
         name  = "snet";
+        compatible = { "SUNW,t1-fpga-snet" };
         fcode-driver-name  = "net-virtual-device";
         my-space  = 0x0;
         intr  = 0x0;
         ino  = T1_FPGA_SNET_INO;
-        cfg-handle  = 0x300;
+        cfg-handle  = 0x2;
 }
 
 node virtual-device  virtual-device_6 {
@@ -540,4 +541,4 @@ node virtual-device  virtual-device_7 {
     compatible  = { "ethernet-phy-id001C.C915" };
 	device-type = "network";
 	cfg-handle = 1;
-}
+} 

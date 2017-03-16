@@ -6,7 +6,7 @@
 #ifndef _VDEV_SNET_H
 #define	_VDEV_SNET_H
 
-#ifdef T1_FPGA_SNET
+#ifdef PITON_NET
 
 
 #ifdef __cplusplus

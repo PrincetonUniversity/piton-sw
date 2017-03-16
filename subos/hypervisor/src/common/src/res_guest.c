@@ -612,7 +612,7 @@ res_guest_commit_modify(guest_t *guestp)
 	guestp->disk.pa = guestp->pip.diskpa;
 #endif
 
-#ifdef	T1_FPGA_SNET
+#ifdef	PITON_NET
 	guestp->snet.ino = guestp->pip.snet_ino;
 	guestp->snet.pa  = guestp->pip.snet_pa;
 #endif

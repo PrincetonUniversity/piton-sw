@@ -1411,7 +1411,7 @@ config_a_guest(bin_md_t *mdp, md_element_t *guest_nodep)
 		c_hvabort();
 	}
 
-#ifdef	T1_FPGA_SNET
+#ifdef	PITON_NET
 	if (NULL != md_find_node_by_arc(mdp, guest_nodep, MDARC(MDNAME(fwd)),
 	    MDNODE(MDNAME(snet)), &snet_nodep)) {
 		if (!md_node_get_val(mdp, snet_nodep, MDNAME(snet_ino),

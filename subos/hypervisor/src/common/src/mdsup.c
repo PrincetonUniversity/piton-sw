@@ -97,7 +97,7 @@ struct {
 #ifdef CONFIG_DISK
 	HDN(diskpa),
 #endif
-#ifdef T1_FPGA_SNET
+#ifdef PITON_NET
 	HDN(snet),
 	HDN(snet_ino),
 	HDN(snet_pa),
