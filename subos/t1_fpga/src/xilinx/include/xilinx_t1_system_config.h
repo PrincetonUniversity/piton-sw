@@ -112,9 +112,11 @@
 #elif defined T1_FPGA_1C4T
 #define STRAND_STARTSET   0xf   /* 1c4t configuration */
 #elif defined T1_FPGA_2C1T
-#define STRAND_STARTSET   0x11   /* 2c1t configuration */
+#define STRAND_STARTSET   0x5   /* 2c1t configuration */
 #elif defined T1_FPGA_2C4T
 #define STRAND_STARTSET   0xff   /* 2c4t configuration */
+#elif defined T1_FPGA_4C1T
+#define STRAND_STARTSET   0x55   /* 4c1t configuration */
 #else
 #define STRAND_STARTSET   0x1
 #endif
