@@ -261,7 +261,14 @@
 	
 	sllx	%g2, INT_VEC_DIS_VCID_SHIFT, %g3
 	or	%g3, VECINTR_VDEV, %g3
-	stxa	%g3, [%g0]ASI_INTR_UDB_W
+
+    ! Can't use setx to set IOBBASE because there's no free registers so do it manually
+    set 0x98, %g4
+    sllx %g4, 32, %g4
+    
+    stx %g3, [%g4 + INT_VEC_DIS]
+
+	!stxa	%g3, [%g0]ASI_INTR_UDB_W
 
 4:
 	add	%g1, CPU_DEVQ_LOCK, %g4

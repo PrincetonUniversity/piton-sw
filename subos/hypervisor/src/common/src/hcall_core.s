@@ -1374,7 +1374,14 @@ qinfo_cpuq:
 	ldub	[%g7 + STRAND_ID], %g7
 	sllx	%g7, INT_VEC_DIS_VCID_SHIFT, %g5
 	or	%g5, VECINTR_XCALL, %g5
-	stxa	%g5, [%g0]ASI_INTR_UDB_W
+
+    ! Can't use setx to set IOBBASE because there's no free registers so do it manually
+    set 0x98, %g7
+    sllx %g7, 32, %g7
+    
+    stx %g5, [%g7 + INT_VEC_DIS]
+
+	!stxa	%g5, [%g0]ASI_INTR_UDB_W
 
 	ba,pt	%xcc, .cpu_mondo_continue
 	  inc	CPULIST_ENTRYSIZE, %g1 ! next entry in list
@@ -1410,7 +1417,14 @@ qinfo_cpuq:
 	ldub	[%g7 + STRAND_ID], %g7
 	sllx	%g7, INT_VEC_DIS_VCID_SHIFT, %g5
 	or	%g5, VECINTR_XCALL, %g5
-	stxa	%g5, [%g0]ASI_INTR_UDB_W
+
+    ! Can't use setx to set IOBBASE because there's no free registers so do it manually
+    set 0x98, %g7
+    sllx %g7, 32, %g7
+    
+    stx %g5, [%g7 + INT_VEC_DIS]
+
+	!stxa	%g5, [%g0]ASI_INTR_UDB_W
 
 	mov	CPULIST_ENTRYDONE, %g7
 	sth	%g7, [%g1]

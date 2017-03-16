@@ -136,7 +136,14 @@
 	! send a ssi intr to other cpu so we don't miss any intrs
 	sllx	%g2, INT_VEC_DIS_VCID_SHIFT, %g5
 	or	%g5, VECINTR_FPGA, %g5
-	stxa	%g5, [%g0]ASI_INTR_UDB_W
+
+    ! Can't use setx to set IOBBASE because there's no free registers so do it manually
+    set 0x98, %g3
+    sllx %g3, 32, %g3
+    
+    stx %g5, [%g7 + INT_VEC_DIS]
+
+	!stxa	%g5, [%g0]ASI_INTR_UDB_W
 .mondo_errs_intr_change_cpu:
 
 	STRAND_POP(%g7, %g3)

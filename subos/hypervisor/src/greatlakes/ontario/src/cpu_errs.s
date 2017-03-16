@@ -4058,7 +4058,14 @@ ue_err_notrap:
 	ldub	[%g2 + STRAND_ID], %g6			! tgt strand id
 	sllx	%g6, INT_VEC_DIS_VCID_SHIFT, %g5
 	or	%g5, VECINTR_CPUINERR, %g5
-	stxa	%g5, [%g0]ASI_INTR_UDB_W
+
+    ! Can't use setx to set IOBBASE because there's no free registers so do it manually
+    set 0x98, %g6
+    sllx %g6, 32, %g6
+    
+    stx %g5, [%g6 + INT_VEC_DIS]
+    
+	!stxa	%g5, [%g0]ASI_INTR_UDB_W
 
 .skip_sending_erpt:
 	STRAND_STRUCT(%g6)
@@ -4191,7 +4198,14 @@ ue_err_notrap:
 	sllx    %g3, IVDR_THREAD, %g3
 	mov     VECINTR_ERROR_XCALL, %g5
 	or      %g3, %g5, %g3
-	stxa    %g3, [%g0]ASI_INTR_UDB_W
+
+    ! Can't use setx to set IOBBASE because there's no free registers so do it manually
+    set 0x98, %g6
+    sllx %g6, 32, %g6
+    
+    stx %g3, [%g6 + INT_VEC_DIS]
+
+	!stxa    %g3, [%g0]ASI_INTR_UDB_W
 cpu_reroute_error_exit:
 	! error is re-routed, get out of here
 	STRAND_STRUCT(%g6)

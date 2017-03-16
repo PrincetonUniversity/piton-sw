@@ -135,7 +135,11 @@
 	sllx	%g3, INT_VEC_DIS_VCID_SHIFT, %g3
 	mov	VECINTR_HVXCALL, %g4
 	or	%g3, %g4, %g3
-	stxa	%g3, [%g0]ASI_INTR_UDB_W
+
+    setx IOBBASE + INT_VEC_DIS, %g4, %g5
+    stx %g3, [%g5]
+
+	!stxa	%g3, [%g0]ASI_INTR_UDB_W
 	HVRET
 	SET_SIZE(hvmondo_send)
 
