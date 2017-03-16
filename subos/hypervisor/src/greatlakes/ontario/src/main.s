@@ -269,12 +269,12 @@
 	stx	%g1, [%i0 + CONFIG_SP_LDCS]
 
 	! Perform some basic setup for this strand.
-	!setx    0xba00000000, %g3, %g4
-    !ldx     [%g4], %g4            ! has coreid
-	!sllx	%g4, 2, %g3		! shift left two as if you have thread ids (we don't right now)
-	rd	STR_STATUS_REG, %g3
-	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
-	and	%g3, STR_STATUS_CPU_ID_MASK, %g3
+	setx    0xba00000000, %g3, %g4
+    ldx     [%g4], %g4            ! has coreid
+	sllx	%g4, 1, %g3		! shift left two as if you have thread ids (we don't right now)
+	!rd	STR_STATUS_REG, %g3
+	!srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
+	!and	%g3, STR_STATUS_CPU_ID_MASK, %g3
 
 	! %g3 = strand id
 
@@ -544,13 +544,13 @@
 	sub	%g2, %g3, %g2
 	! %g2 = &config
 
-	!setx    0xba00000000, %i3, %g1
-    !ldx     [%g1], %g1            ! has coreid
-	!sllx	%g1, 2, %i3		! shift left two as if you have thread ids (we don't right now)
+	setx    0xba00000000, %i3, %g1
+    ldx     [%g1], %g1            ! has coreid
+	sllx	%g1, 1, %i3		! shift left two as if you have thread ids (we don't right now)
 
-	rd	STR_STATUS_REG, %g1
-	srlx	%g1, STR_STATUS_CPU_ID_SHIFT, %g1
-	and	%g1, STR_STATUS_CPU_ID_MASK, %i3
+	!rd	STR_STATUS_REG, %g1
+	!srlx	%g1, STR_STATUS_CPU_ID_SHIFT, %g1
+	!and	%g1, STR_STATUS_CPU_ID_MASK, %i3
 	! %i3 = current cpu id
 
 	! Set up the scratchpad registers
@@ -624,10 +624,15 @@
 	set	STRAND_SCRUB_BASEPA, %g3
 	ldx	[%g1 + %g3], %g1
 
+	PRINT("Slave about to memscrub\r\n")
 	HVCALL(memscrub)
+	PRINT("Slave memscrub complete\r\n")
 
 	STRAND_STRUCT(%g1)
 	ldub	[%g1 + STRAND_ID], %i3
+	PRINT("Slave strand ID is = 0x")
+	PRINTX(%i3)
+	PRINT("\r\n")
 	mov	1, %i0
 	sllx	%i0, %i3, %i0
 	add	%g4, CONFIG_SCRUB_SYNC, %g4
@@ -1596,13 +1601,13 @@ bus_failed:
 
 /* skip the current cpu */
 
-	!setx    0xba00000000, %g3, %g6
-    !ldx     [%g6], %g6            ! has coreid
-	!sllx	%g6, 2, %g3		! shift left two as if you have thread ids (we don't right now)
+	setx    0xba00000000, %g3, %g4
+    ldx     [%g4], %g4            ! has coreid
+	sllx	%g4, 1, %g3		! shift left two as if you have thread ids (we don't right now)
 
-	rd	STR_STATUS_REG, %g3
-	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
-	and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
+	!rd	STR_STATUS_REG, %g3
+	!srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
+	!and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
 	cmp     %g1, %g3
 	beq,pt  %xcc, 3f                                 ! skip the current cpu
 	nop
@@ -1616,13 +1621,21 @@ bus_failed:
 	!sllx	%g1, INT_VEC_DIS_VCID_SHIFT-1, %g3	! target strand
 	sllx	%g1, INT_VEC_DIS_VCID_SHIFT, %g3	! target strand
 	or	%g4, %g3, %g3				! int_vec_dis value
+
+    !srlx    %g1, 2, %g6
+    !sllx    %g6, 18, %g6
+    !or  %g6, %g3, %g3
+
+    !setx    0x8000000000000000, %g7, %g6
+    !or  %g6, %g3, %g3
+
 	stx	%g3, [%g5]
 
 3:
 /* skip the slave strands in a core. the core master wakes up the other strands in reset code.  */
 	srlx    %g2, 1, %g2
 	inc	%g1
-	and     %g1, 3, %g3
+	and     %g1, 1, %g3
 	brnz,pt %g3, 3b
 	nop
 	cmp     %g1, (NSTRANDS-1)
@@ -1646,21 +1659,21 @@ bus_failed:
 
 	mov	%l2, %g2				! %g2 = strandstartset
 
-	!setx    0xba00000000, %g3, %g5
-    !ldx     [%g5], %g5            ! has coreid
-	!sllx	%g5, 2, %g3		! shift left two as if you have thread ids (we don't right now)
+	setx    0xba00000000, %g3, %g5
+    ldx     [%g5], %g5            ! has coreid
+	sllx	%g5, 1, %g3		! shift left two as if you have thread ids (we don't right now)
 
 
-	rd	STR_STATUS_REG, %g3
-	srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
-	and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
+	!rd	STR_STATUS_REG, %g3
+	!srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
+	!and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
 
 	add	%g3, 1, %g1
 	srlx    %g2, %g1, %g2
 	setx	IOBBASE + INT_VEC_DIS, %g4, %g5
 
 1:	
-	and     %g1, 3, %g3
+	and     %g1, 1, %g3
 	brz,pt  %g3, 3f                                 ! reached next core
 	nop
 
@@ -1676,6 +1689,14 @@ bus_failed:
 	or      %g4, INT_VEC_DIS_VECTOR_RESET, %g4
 	sllx	%g1, INT_VEC_DIS_VCID_SHIFT, %g3	! target strand
 	or	%g4, %g3, %g3				! int_vec_dis value
+
+    !srlx    %g1, 2, %g6
+    !sllx    %g6, 18, %g6
+    !or  %g6, %g3, %g3
+
+    !setx    0x8000000000000000, %g7, %g6
+    !or  %g6, %g3, %g3
+
 	stx	%g3, [%g5]
 
 2:	

@@ -55,14 +55,14 @@
 extern "C" {
 #endif
 
-#define	NCORES			8		/* #cores/chip */
-#define	NSTRANDS_PER_CORE	4		/* Must be power of 2 */
+#define	NCORES			16		/* #cores/chip */
+#define	NSTRANDS_PER_CORE	2		/* Must be power of 2 */
 #define	NSTRANDS_PER_CORE_MASK	(NSTRANDS_PER_CORE - 1)
 #define	NSTRANDS		(NCORES * NSTRANDS_PER_CORE)
 #define	LOG2_NSTRANDS		5		/* log2(NSTRANDS) */
-#define	STRANDID_2_COREID_SHIFT	2		/* log2(NSTRANDS_PER_CORE) */
-#define	STRANDID_2_CORE_IDX_MASK	0x3	/* Idx offset of cpu in core */
-#define	CPUID_2_COREID_SHIFT	2		/* log2(NCPUS_PER_CORE) */
+#define	STRANDID_2_COREID_SHIFT	1		/* log2(NSTRANDS_PER_CORE) */
+#define	STRANDID_2_CORE_IDX_MASK	0x1	/* Idx offset of cpu in core */
+#define	CPUID_2_COREID_SHIFT	1		/* log2(NCPUS_PER_CORE) */
 #define	CORE_MASK		0xf
 
 /*

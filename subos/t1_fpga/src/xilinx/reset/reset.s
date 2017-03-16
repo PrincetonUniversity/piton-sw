@@ -63,17 +63,17 @@
 
 #define STR_STATUS_STRAND_ACTIVE	1
 #define STR_STATUS_STRAND_ID_SHIFT	8
-#define STR_STATUS_STRAND_ID_MASK	0x3
-#define STR_STATUS_CORE_ID_SHIFT	10
-#define STR_STATUS_CORE_ID_MASK		0x7
+#define STR_STATUS_STRAND_ID_MASK	0x1
+#define STR_STATUS_CORE_ID_SHIFT	9
+#define STR_STATUS_CORE_ID_MASK		0xf
 
-#define CPU_ID_STRAND_MASK              0x3
+#define CPU_ID_STRAND_MASK              0x1
 #define CPU_ID_STRAND_SHIFT             0x0
-#define CPU_ID_CORE_MASK                0x7
-#define CPU_ID_CORE_SHIFT               0x2
+#define CPU_ID_CORE_MASK                0xf
+#define CPU_ID_CORE_SHIFT               0x1
 #define CPU_ID_MASK                     0x1f
 
-#define N_THREADS_PER_CORE              0x4
+#define N_THREADS_PER_CORE              0x2
 #define N_THREADS                       0x20
 
 
@@ -153,6 +153,20 @@ ertraptable:
 	! tick needs to be initialized, this is a hack for SAS
 	wrpr	%g0, 0, %tick
 #endif
+
+    ! Set L2 to use middle bits for striping
+
+    ! Register is at 0xba00000600
+    mov 0xba, %l0
+    sllx %l0, 32, %l0
+    add %l0, 0x600, %l0
+
+    ! Register value is 0x1 for middle bits
+    clr %l1
+    inc %l1
+
+    stx %l1, [%l0]
+    membar #Sync
 
 	wrpr	%g0, 1, %gl
 	wrpr	%g0, 1, %tl
@@ -400,12 +414,12 @@ slave_thread:
 
 	save    %sp, -(MINFRAME64), %sp
 
-	!setx    0xba00000000, %l0, %l7
-    !ldx     [%l7], %l7            ! has coreid
-	!sllx	%l7, 2, %l0		! shift left two as if you have thread ids (we don't right now)
-	rd	STR_STATUS_REG, %l0
-	srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
-	and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
+	setx    0xba00000000, %l0, %l7
+    ldx     [%l7], %l7            ! has coreid
+	sllx	%l7, 1, %l0		! shift left two as if you have thread ids (we don't right now)
+	!rd	STR_STATUS_REG, %l0
+	!srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
+	!and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
 
 	mov     CPU_ID_STRAND_MASK, %l7
 	andn    %l0, %l7, %l1                           ! id of the first cpu in the core
@@ -439,12 +453,12 @@ slave_thread:
 
 	save    %sp, -(MINFRAME64), %sp
 
-	!setx    0xba00000000, %l0, %l1
-    !ldx     [%l1], %l1            ! has coreid
-	!sllx	%l1, 2, %l0		! shift left two as if you have thread ids (we don't right now)
-	rd	STR_STATUS_REG, %l0
-	srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
-	and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
+	setx    0xba00000000, %l0, %l1
+    ldx     [%l1], %l1            ! has coreid
+	sllx	%l1, 1, %l0		! shift left two as if you have thread ids (we don't right now)
+	!rd	STR_STATUS_REG, %l0
+	!srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
+	!and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
 
 	mov     0, %l1
 	mov    %i0, %l2
@@ -476,12 +490,12 @@ slave_thread:
 
 	save    %sp, -(MINFRAME64), %sp
 
-	!setx    0xba00000000, %l0, %l7
-   	!ldx     [%l7], %l7            ! has coreid
-	!sllx	%l7, 2, %l0		! shift left two as if you have thread ids (we don't right now)
-	rd	STR_STATUS_REG, %l0
-	srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
-	and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
+	setx    0xba00000000, %l0, %l7
+   	ldx     [%l7], %l7            ! has coreid
+	sllx	%l7, 1, %l0		! shift left two as if you have thread ids (we don't right now)
+	!rd	STR_STATUS_REG, %l0
+	!srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
+	!and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
 
 	mov     CPU_ID_STRAND_MASK, %l7
 	andn    %l0, %l7, %l1                           ! id of the first cpu in the core
@@ -509,6 +523,14 @@ slave_thread:
 
         sllx    %l0, INT_VEC_DIS_VCID_SHIFT, %g3
         or      %g4, %g3, %g3                          
+
+    !srlx    %l0, 2, %l0
+    !sllx    %l0, 18, %l0
+    !or  %l0, %g3, %g3
+
+    !setx    0x8000000000000000, %g4, %l0
+    !or  %l0, %g3, %g3
+
         stx     %g3, [%g5]
 
 	brz,pt  %g0, 1b
