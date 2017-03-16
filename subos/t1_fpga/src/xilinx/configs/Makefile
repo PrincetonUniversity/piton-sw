@@ -32,7 +32,7 @@ CPPFLAGS += -I$(XILINX_TOP)/include
 STAND_ALONE_CPPFLAGS = -DT1_FPGA_STAND_ALONE
 
 
-CONFIGS = 1c1t 1c2t 1c4t 2c1t 2c4t
+CONFIGS = 1c1t 1c2t 1c4t 2c1t 2c4t 4c1t
 
 DBIN_CFGS  = $(CONFIGS:%=%-guest.md)
 DTXT_CFGS  = $(CONFIGS:%=%-guest.txt)
