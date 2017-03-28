@@ -154,6 +154,20 @@ ertraptable:
 	wrpr	%g0, 0, %tick
 #endif
 
+	! Set L2 to use middle bits for striping
+
+	! Register is at 0xba00000600
+	mov 0xba, %l0
+	sllx %l0, 32, %l0
+	add %l0, 0x600, %l0
+
+	! Register value is 0x1 for middle bits
+	clr %l1
+	inc %l1
+
+	stx %l1, [%l0]
+	membar #Sync
+
 	wrpr	%g0, 1, %gl
 	wrpr	%g0, 1, %tl
 	wrpr	%g0, 7, %cleanwin
