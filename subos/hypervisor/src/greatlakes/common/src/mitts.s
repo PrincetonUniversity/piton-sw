@@ -34,15 +34,15 @@
 	ENTRY_NP(hcall_mmu_set_mitts_regs)
 
 	/* Clear R1 Entirely to turn off MITTS */
-        setx	MITTS_REG1_ADDR, %g7, %g1
+        setx	MITTS_REG1_ADDR, %g6, %g1
         stx	%g0, [%g1]
 
         /* Write R2 */
-        setx	MITTS_REG2_ADDR, %g7, %g2
+        setx	MITTS_REG2_ADDR, %g6, %g2
         stx	%o1, [%g2]
 
         /* Write upper bits of R1 */
-        setx	MITTS_BINS_MASK, %g7, %g5
+        setx	MITTS_BINS_MASK, %g6, %g5
         and	%o0, %g5, %g2
         stx	%g2, [%g1]
 
@@ -68,3 +68,24 @@
 	HCALL_RET(EOK)
 	SET_SIZE(hcall_mmu_set_mitts_regs)
 
+
+/*
+ * mmu start mitts
+ * --
+ * ret0 status (%o0)
+ *
+ */
+	ENTRY_NP(hcall_mmu_start_mitts)
+
+	/* Load in R1 */
+	setx	MITTS_REG1_ADDR, %g6, %g1
+	ldx	[%g1], %g2
+
+	/* Mask in func_en */
+	or	%g2, MITTS_FS_EN_BIT, %g2
+
+	/* Write R1 */
+	stx	%g2, [%g1]
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_mmu_start_mitts)

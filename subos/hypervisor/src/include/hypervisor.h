@@ -118,6 +118,7 @@ extern "C" {
 #define	MMU_TSB_CTXNON0_INFO	0x2a
 #define	MMU_FAULT_AREA_INFO	0x2b
 #define	MMU_SET_MITTS_REGS	0x2c
+#define	MMU_START_MITTS		0x2d
 
 #define CPU_START_EXECD 0x2d
 

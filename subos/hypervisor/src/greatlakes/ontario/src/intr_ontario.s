@@ -57,6 +57,7 @@
 #include <vdev_intr.h>
 #include <util.h>
 #include <iob.h>
+#include <mitts.h>
 
 /*
  * cpu_in_error_finish - invoked from a cpu about to enter the error
@@ -124,6 +125,8 @@
 	! %g1	cpup
 	! %g2	intr-type
 	ENTRY_NP(vecintr)
+	/* Turn of MITTS configuration registers immediately */
+	DISABLE_MITTS(%g4, %g5)
 	cmp	%g2, VECINTR_XCALL
 	beq,pt	%xcc, cpu_mondo
 	cmp	%g2, VECINTR_HVXCALL
