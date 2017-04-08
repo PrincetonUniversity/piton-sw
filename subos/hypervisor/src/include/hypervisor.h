@@ -119,6 +119,9 @@ extern "C" {
 #define	MMU_FAULT_AREA_INFO	0x2b
 #define	MMU_SET_MITTS_REGS	0x2c
 
+#define CPU_START_EXECD 0x2d
+
+
 #define	MEM_SCRUB		0x31
 #define	MEM_SYNC		0x32
 

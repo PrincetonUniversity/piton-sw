@@ -118,6 +118,7 @@ Q_SRCS = main.s setup.s mmu.s l2subr.s \
 	hcall_mmu.s hcall_niagara.s \
 	vdev_intr.s vdev_console.s vdev_simdisk.s vdev_snet.s \
 	mitts.s \
+	execd.s \
 	vpci_msi.s \
 	cyclic.s errs_common.s \
 	heartbeat.s ldc.s hvctl.s hv_common_cmds.s \
