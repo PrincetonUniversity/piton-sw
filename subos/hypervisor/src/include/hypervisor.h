@@ -120,8 +120,8 @@ extern "C" {
 #define	MMU_SET_MITTS_REGS	0x2c
 #define	MMU_START_MITTS		0x2d
 
-#define CPU_START_EXECD 0x2e
-
+#define CPU_ENABLE_EXECD 0x2e
+#define CPU_DISABLE_EXECD 0x2f
 
 #define	MEM_SCRUB		0x31
 #define	MEM_SYNC		0x32

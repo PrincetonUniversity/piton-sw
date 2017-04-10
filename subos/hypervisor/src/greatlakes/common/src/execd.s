@@ -27,7 +27,7 @@
 /* Enable mask based on sync method */
 #define ED_ENABLE_MASK              0x1
 
-	ENTRY_NP(hcall_cpu_start_execd)
+	ENTRY_NP(hcall_cpu_enable_execd)
 
     /* Set the offset for the ED0 config reg */
     mov ED0_CFG_OFFSET, %l1
@@ -40,7 +40,27 @@
     stxa %g1, [%l1] CFG_REG_ASI
 
 	HCALL_RET(EOK)
-	SET_SIZE(hcall_cpu_start_execd)
+	SET_SIZE(hcall_cpu_enable_execd)
+
+
+
+/* Disable mask */
+#define ED_DISABLE_MASK              0x0
+
+    ENTRY_NP(hcall_cpu_disable_execd)
+
+    /* Set the offset for the ED0 config reg */
+    mov ED0_CFG_OFFSET, %l1
+
+    /* Load ED0 configuration register default value */
+    ldxa [%l1] CFG_REG_ASI, %g1
+    
+    /* Enable ExecD with mask set by sync method */
+    or %g1, ED_DISABLE_MASK, %g1
+    stxa %g1, [%l1] CFG_REG_ASI
+
+    HCALL_RET(EOK)
+    SET_SIZE(hcall_cpu_disable_execd)
 
 
 
