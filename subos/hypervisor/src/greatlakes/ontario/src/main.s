@@ -270,11 +270,12 @@
 
 	! Perform some basic setup for this strand.
 	setx    0xba00000000, %g3, %g4
-    ldx     [%g4], %g4            ! has coreid
+        ldx     [%g4], %g4            ! has coreid
 	sllx	%g4, 1, %g3		! shift left two as if you have thread ids (we don't right now)
-	!rd	STR_STATUS_REG, %g3
-	!srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
-	!and	%g3, STR_STATUS_CPU_ID_MASK, %g3
+	rd	STR_STATUS_REG, %g4
+	srlx	%g4, STR_STATUS_CPU_ID_SHIFT, %g4
+	and	%g4, 1, %g4
+        or      %g4, %g3, %g3
 
 	! %g3 = strand id
 
@@ -545,12 +546,13 @@
 	! %g2 = &config
 
 	setx    0xba00000000, %i3, %g1
-    ldx     [%g1], %g1            ! has coreid
+        ldx     [%g1], %g1            ! has coreid
 	sllx	%g1, 1, %i3		! shift left two as if you have thread ids (we don't right now)
 
-	!rd	STR_STATUS_REG, %g1
-	!srlx	%g1, STR_STATUS_CPU_ID_SHIFT, %g1
-	!and	%g1, STR_STATUS_CPU_ID_MASK, %i3
+	rd	STR_STATUS_REG, %g1
+	srlx	%g1, STR_STATUS_CPU_ID_SHIFT, %g1
+	and	%g1, 1, %g1
+        or      %g1, %i3, %i3
 	! %i3 = current cpu id
 
 	! Set up the scratchpad registers
@@ -1602,12 +1604,14 @@ bus_failed:
 /* skip the current cpu */
 
 	setx    0xba00000000, %g3, %g4
-    ldx     [%g4], %g4            ! has coreid
+        ldx     [%g4], %g4            ! has coreid
 	sllx	%g4, 1, %g3		! shift left two as if you have thread ids (we don't right now)
 
-	!rd	STR_STATUS_REG, %g3
-	!srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
-	!and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
+	rd	STR_STATUS_REG, %g4
+	srlx	%g4, STR_STATUS_CPU_ID_SHIFT, %g4
+	and	%g4, 1, %g4	! %g3 = current cpu
+        or      %g4, %g3, %g3
+                
 	cmp     %g1, %g3
 	beq,pt  %xcc, 3f                                 ! skip the current cpu
 	nop
@@ -1660,13 +1664,14 @@ bus_failed:
 	mov	%l2, %g2				! %g2 = strandstartset
 
 	setx    0xba00000000, %g3, %g5
-    ldx     [%g5], %g5            ! has coreid
+        ldx     [%g5], %g5            ! has coreid
 	sllx	%g5, 1, %g3		! shift left two as if you have thread ids (we don't right now)
 
 
-	!rd	STR_STATUS_REG, %g3
-	!srlx	%g3, STR_STATUS_CPU_ID_SHIFT, %g3
-	!and	%g3, STR_STATUS_CPU_ID_MASK, %g3	! %g3 = current cpu
+	rd	STR_STATUS_REG, %g5
+	srlx	%g5, STR_STATUS_CPU_ID_SHIFT, %g5
+	and	%g5, 1, %g5	! %g3 = current cpu
+        or      %g5, %g3, %g3
 
 	add	%g3, 1, %g1
 	srlx    %g2, %g1, %g2

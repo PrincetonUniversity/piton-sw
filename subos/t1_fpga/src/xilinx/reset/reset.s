@@ -415,11 +415,12 @@ slave_thread:
 	save    %sp, -(MINFRAME64), %sp
 
 	setx    0xba00000000, %l0, %l7
-    ldx     [%l7], %l7            ! has coreid
+        ldx     [%l7], %l7            ! has coreid
 	sllx	%l7, 1, %l0		! shift left two as if you have thread ids (we don't right now)
-	!rd	STR_STATUS_REG, %l0
-	!srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
-	!and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
+	rd	STR_STATUS_REG, %l7
+	srlx	%l7, STR_STATUS_CPU_ID_SHIFT, %l7
+	and	%l7, 1, %l7
+	or      %l7, %l0, %l0           ! cpu_id
 
 	mov     CPU_ID_STRAND_MASK, %l7
 	andn    %l0, %l7, %l1                           ! id of the first cpu in the core
@@ -454,11 +455,12 @@ slave_thread:
 	save    %sp, -(MINFRAME64), %sp
 
 	setx    0xba00000000, %l0, %l1
-    ldx     [%l1], %l1            ! has coreid
+        ldx     [%l1], %l1            ! has coreid
 	sllx	%l1, 1, %l0		! shift left two as if you have thread ids (we don't right now)
-	!rd	STR_STATUS_REG, %l0
-	!srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
-	!and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
+	rd	STR_STATUS_REG, %l1
+	srlx	%l1, STR_STATUS_CPU_ID_SHIFT, %l1
+	and	%l1, 1, %l1
+	or      %l1, %l0, %l0           ! cpu_id
 
 	mov     0, %l1
 	mov    %i0, %l2
@@ -493,9 +495,10 @@ slave_thread:
 	setx    0xba00000000, %l0, %l7
    	ldx     [%l7], %l7            ! has coreid
 	sllx	%l7, 1, %l0		! shift left two as if you have thread ids (we don't right now)
-	!rd	STR_STATUS_REG, %l0
-	!srlx	%l0, STR_STATUS_CPU_ID_SHIFT, %l0
-	!and	%l0, STR_STATUS_CPU_ID_MASK, %l0	! cpu_id
+	rd	STR_STATUS_REG, %l7
+	srlx	%l7, STR_STATUS_CPU_ID_SHIFT, %l7
+	and	%l7, 1, %l7	
+        or      %l7, %l0, %l0                   ! cpu_id
 
 	mov     CPU_ID_STRAND_MASK, %l7
 	andn    %l0, %l7, %l1                           ! id of the first cpu in the core
