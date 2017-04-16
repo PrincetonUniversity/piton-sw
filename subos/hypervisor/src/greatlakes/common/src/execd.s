@@ -63,5 +63,29 @@
     SET_SIZE(hcall_cpu_disable_execd)
 
 
+/* check whether execd register is enable or not */
+
+    ENTRY_NP(hcall_cpu_check_execd_register)
+
+    /* Set the offset for the ED0 config reg */
+    mov ED0_CFG_OFFSET, %l1
+
+    /* Load ED0 configuration register value */
+    ldxa [%l1] CFG_REG_ASI, %o1
+
+    HCALL_RET(EOK)
+    SET_SIZE(hcall_cpu_check_execd_register)
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -93,6 +93,7 @@
 	GROUP_HCALL_ENTRY(CPU_GET_RTBA,		hcall_cpu_get_rtba)
 	GROUP_HCALL_ENTRY(CPU_ENABLE_EXECD,	 hcall_cpu_enable_execd)
 	GROUP_HCALL_ENTRY(CPU_DISABLE_EXECD, hcall_cpu_disable_execd)
+	GROUP_HCALL_ENTRY(CPU_CHECK_EXECD_REGISTER, hcall_cpu_check_execd_register)
 	GROUP_HCALL_ENTRY(MMU_TSB_CTX0,		hcall_mmu_tsb_ctx0)
 	GROUP_HCALL_ENTRY(MMU_TSB_CTXNON0,	hcall_mmu_tsb_ctxnon0)
 	GROUP_HCALL_ENTRY(MMU_DEMAP_PAGE,	hcall_mmu_demap_page)

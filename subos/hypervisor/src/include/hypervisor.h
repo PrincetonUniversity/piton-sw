@@ -122,6 +122,7 @@ extern "C" {
 
 #define CPU_ENABLE_EXECD 0x2e
 #define CPU_DISABLE_EXECD 0x2f
+#define CPU_CHECK_EXECD_REGISTER 0x30
 
 #define	MEM_SCRUB		0x31
 #define	MEM_SYNC		0x32
