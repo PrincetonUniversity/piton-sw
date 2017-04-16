@@ -159,13 +159,13 @@ extern "C" {
 #endif
 
 #define	HALT_STRAND()						\
-	CHECK_NIAGARA_VERSION()					;\
+	/*CHECK_NIAGARA_VERSION()					;\
 	rd      STR_STATUS_REG, %g1				;\
-	/*							;\
+	*//*							;\
 	 * xor ACTIVE to clear it on current strand		;\
 	 */							;\
-	wr      %g1, STR_STATUS_STRAND_ACTIVE, STR_STATUS_REG	;\
-	/* skid */						;\
+	/*wr      %g1, STR_STATUS_STRAND_ACTIVE, STR_STATUS_REG	;\
+	*//* skid */						;\
 	nop							;\
 	nop							;\
 	nop							;\
