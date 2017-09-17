@@ -31,7 +31,7 @@
 
 
 #define T1_FPGA_PROM_BASE_ADDR            0xfff0000000
-#define T1_FPGA_RAM_DISK_ADDR             0xff01000000
+#define T1_FPGA_RAM_DISK_ADDR             0xf001000000
 
 #define T1_FPGA_UART_BASE                 0xfff0c2c000
 
