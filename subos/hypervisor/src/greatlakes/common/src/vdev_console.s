@@ -88,6 +88,28 @@
 
 
 /*
+ * Propagate an interrupt received from an snet device to the
+ * snet device driver.
+ */
+	ENTRY_NP(uart_mondo)
+	GUEST_STRUCT(%g2)
+
+    ! Write 'z' to console
+    ! setx 0xfff0c2c000, %g3, %g7
+    ! set 0x7A, %g3
+    ! stb %g3, [%g7]
+
+    set 0x11, %g3 ! 0x11 is the ino for uart
+	GUEST2VDEVSTATE(%g2, %g1)
+	!! %g1 = &guestp->vdev_state
+	VINO2MAPREG(%g1, %g3, %g2)
+	mov     %g2, %g1
+	brz,pt	%g0, vdev_intr_generate
+	  rd	%pc, %g7
+	retry
+	SET_SIZE(uart_mondo)
+
+/*
  * cons_putchar
  *
  * arg0 char (%o0)
@@ -531,9 +553,11 @@
 	ldx	[%g1 + GUEST_CONSOLE + CONS_UARTBASE], %g2
 	! %g2 = uartp
 
-	ldub	[%g2 + LSR_ADDR], %g3 ! line status register
+    clr %g4
+
+1:  ldub	[%g2 + LSR_ADDR], %g3 ! line status register
 	btst	LSR_BINT, %g3	! BREAK?
-	bz,pt	%xcc, 1f
+	bz,pt	%xcc, 2f
 	nop
 
 	! BREAK
@@ -542,18 +566,35 @@
 	mov	CONS_BREAK, %o1
 	HCALL_RET(EOK)
 
-1:	btst	LSR_DRDY, %g3	! character ready?
-	bz,pt	%xcc, herr_wouldblock
+2:	btst	LSR_DRDY, %g3	! character ready?
+	bz,pt	%xcc, 3f
 	nop
 
 	RA2PA_RANGE_CONV_UNK_SIZE(%g1, %o0, %o1, herr_noraddr, %g5, %g6)
-	mov	%g6, %o0
-	! %o0 buf PA
+	!mov	%g6, %o0
+	!! %o0 buf PA
 
 	ldub	[%g2], %g3	! input data register
-	stb	%g3, [%o0]
-	mov	1, %o1		! Always one character
+	stb	%g3, [%g6]
+
+    inc %o0
+    dec %o1
+    inc %g4
+
+    cmp %o1, %g0
+    ble,pt %xcc, 1b
+    nop
+
+	mov	%g4, %o1		! Always one character
 	HCALL_RET(EOK)
+
+3:  cmp %g4, %g0
+    ble,pt	%xcc, herr_wouldblock
+    nop
+
+    mov %g4, %o1
+    HCALL_RET(EOK)
+
 
 #endif	/* } CONFIG_CN_UART */
 

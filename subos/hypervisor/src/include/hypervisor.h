@@ -244,6 +244,9 @@ extern "C" {
 #define	SNET_WRITE		0xf3
 #endif
 
+#define BYTE_READ       0xf4
+#define BYTE_WRITE      0xf5
+
 #ifdef DEBUG /* Not yet FWARCd */
 #define	MMU_PERM_ADDR_INFO	0xfd
 #endif

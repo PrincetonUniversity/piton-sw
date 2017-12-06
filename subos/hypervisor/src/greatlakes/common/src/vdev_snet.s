@@ -4,7 +4,6 @@
  */
 
 
-#ifdef PITON_NET
 
 #include <sys/asm_linkage.h>
 #include <hypervisor.h>
@@ -14,6 +13,9 @@
 #include <guest.h>
 #include <offsets.h>
 #include <util.h>
+
+#ifdef PITON_NET
+
 #include <vdev_snet.h>
 #include <vdev_intr.h>
 
@@ -83,3 +85,34 @@
 	SET_SIZE(hcall_snet_write)
 
 #endif /* ifdef T1_FPGA_SNET */
+
+/*
+ * byte read
+ *
+ * arg1 source physical address (%o0)
+ * --
+ * ret0 status (%o0)
+ * ret1 source data word (%o1)
+ *
+ */
+	ENTRY_NP(hcall_byte_read)
+
+	ldub [%o0], %o1
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_byte_read)
+
+/*
+ * byte write
+ *
+ * arg1 data word (%o0)
+ * arg2 destination physical address (%o1)
+ * --
+ * ret0 status (%o0)
+ */
+	ENTRY_NP(hcall_byte_write)
+
+	stb	%o0, [%o1]
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_byte_write)

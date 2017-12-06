@@ -365,7 +365,7 @@ node virtual-device  virtual-device {
         intr  = 0x1;
         ino  = 0x11;
         channel#  = 0x0;
-        cfg-handle  = 0x120;
+        cfg-handle  = 0x0;
         compatible  = { "qcn" , "SUNW,sun4v-console" };
 }
 
@@ -380,7 +380,7 @@ node devalias  devalias {
         ttyb  = "/virtual-devices/console@4";
         scsi  = "/pci@7c0/scsi@1";
         disk  = "/pci@7c0/scsi@1/disk@0";
-        virtual-console  = "/virtual-devices/console@120";
+        virtual-console  = "/virtual-devices/console@0";
 }
 
 

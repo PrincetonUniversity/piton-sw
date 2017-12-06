@@ -144,6 +144,7 @@ extern "C" {
 #define	VECINTR_FPGA		16
 #define	VECINTR_VDEV		30
 #define	VECINTR_SNET		29
+#define	VECINTR_CONSOLE     28
 
 /* BEGIN CSTYLED */
 #ifdef NIAGARA_ERRATUM_39

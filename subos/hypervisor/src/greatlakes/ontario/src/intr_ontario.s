@@ -138,6 +138,10 @@
 	cmp	%g2, VECINTR_SNET
 	beq,pt	%xcc, snet_mondo
 #endif
+#ifdef PITON_UART_INTR
+	cmp	%g2, VECINTR_CONSOLE
+	beq,pt	%xcc, uart_mondo
+#endif
 	cmp	%g2, VECINTR_VDEV
 	bne,pt	%xcc, 1f
 	nop

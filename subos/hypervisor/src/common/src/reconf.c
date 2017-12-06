@@ -1430,6 +1430,9 @@ config_a_guest(bin_md_t *mdp, md_element_t *guest_nodep)
 	}
 #endif /* ifdef	T1_FPGA_SNET */
 
+#ifdef PITON_UART_INTR
+    config_a_guest_device_vino(guestp, 0x11, DEVOPS_VDEV);
+#endif
 
 #ifdef	CONFIG_SVC
 	/*
