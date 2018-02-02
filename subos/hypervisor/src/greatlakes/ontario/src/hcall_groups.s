@@ -128,6 +128,7 @@
 	GROUP_HCALL_ENTRY(SNET_READ,		hcall_snet_read)
 	GROUP_HCALL_ENTRY(SNET_WRITE,		hcall_snet_write)
 #endif
+	GROUP_HCALL_ENTRY(PICO_START,           hcall_pico_start)
 #ifdef CONFIG_BRINGUP
 	GROUP_HCALL_ENTRY(VDEV_GENINTR,		hcall_vdev_genintr)
 #endif
