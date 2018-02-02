@@ -56,7 +56,7 @@
 /*
  * Linux needs memory size to be a multiple of 4MB.
  */
-#define T1_FPGA_TOTAL_MEMSIZE	          0x40000000  /* OpenSPARC T1 DRAM size */
+#define T1_FPGA_TOTAL_MEMSIZE	          0x3F000000  /* OpenSPARC T1 DRAM size */
 
 
 #define T1_FPGA_GUEST_MEMBASE             (T1_FPGA_HV_MEMBASE + T1_FPGA_HV_MEMSIZE)
