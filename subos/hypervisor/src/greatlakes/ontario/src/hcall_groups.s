@@ -124,12 +124,14 @@
 	GROUP_HCALL_ENTRY(DISK_READ,		hcall_disk_read)
 	GROUP_HCALL_ENTRY(DISK_WRITE,		hcall_disk_write)
 #endif
-#ifdef PITON_NET
-	GROUP_HCALL_ENTRY(SNET_READ,		hcall_snet_read)
-	GROUP_HCALL_ENTRY(SNET_WRITE,		hcall_snet_write)
-#endif
-	GROUP_HCALL_ENTRY(BYTE_READ,		hcall_byte_read)
-	GROUP_HCALL_ENTRY(BYTE_WRITE,		hcall_byte_write)
+	GROUP_HCALL_ENTRY(OS_READB,		hcall_readb)
+	GROUP_HCALL_ENTRY(OS_WRITEB,		hcall_writeb)
+	GROUP_HCALL_ENTRY(OS_READH,		hcall_readh)
+	GROUP_HCALL_ENTRY(OS_WRITEH,		hcall_writeh)
+	GROUP_HCALL_ENTRY(OS_READW,		hcall_readw)
+	GROUP_HCALL_ENTRY(OS_WRITEW,		hcall_writew)
+	GROUP_HCALL_ENTRY(OS_READX,		hcall_readx)
+	GROUP_HCALL_ENTRY(OS_WRITEX,		hcall_writex)
 #ifdef CONFIG_BRINGUP
 	GROUP_HCALL_ENTRY(VDEV_GENINTR,		hcall_vdev_genintr)
 #endif
