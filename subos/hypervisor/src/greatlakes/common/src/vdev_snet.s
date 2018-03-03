@@ -39,6 +39,8 @@
 	retry
 	SET_SIZE(snet_mondo)
 
+#endif /* ifdef T1_FPGA_SNET */
+
 /*
  * The hypervisor simply provides a mechanism for the device driver
  * to communicate with the snet device. The hypervisor doesn't
@@ -60,12 +62,12 @@
  * ret1 source data word (%o1)
  *
  */
-	ENTRY_NP(hcall_snet_read)
+	ENTRY_NP(hcall_readb)
 
-	lduw [%o0], %o1
+	ldub [%o0], %o1
 
 	HCALL_RET(EOK)
-	SET_SIZE(hcall_snet_read)
+	SET_SIZE(hcall_readb)
 
 /*
  * snet write
@@ -75,11 +77,104 @@
  * --
  * ret0 status (%o0)
  */
-	ENTRY_NP(hcall_snet_write)
+	ENTRY_NP(hcall_writeb)
+
+	stb	%o0, [%o1]
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_writeb)
+
+/*
+ * snet read
+ *
+ * arg1 source physical address (%o0)
+ * --
+ * ret0 status (%o0)
+ * ret1 source data word (%o1)
+ *
+ */
+	ENTRY_NP(hcall_readh)
+
+	lduh [%o0], %o1
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_readh)
+
+/*
+ * snet write
+ *
+ * arg1 data word (%o0)
+ * arg2 destination physical address (%o1)
+ * --
+ * ret0 status (%o0)
+ */
+	ENTRY_NP(hcall_writeh)
+
+	sth	%o0, [%o1]
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_writeh)
+
+/*
+ * snet read
+ *
+ * arg1 source physical address (%o0)
+ * --
+ * ret0 status (%o0)
+ * ret1 source data word (%o1)
+ *
+ */
+	ENTRY_NP(hcall_readw)
+
+	lduw [%o0], %o1
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_readw)
+
+/*
+ * snet write
+ *
+ * arg1 data word (%o0)
+ * arg2 destination physical address (%o1)
+ * --
+ * ret0 status (%o0)
+ */
+	ENTRY_NP(hcall_writew)
 
 	stw	%o0, [%o1]
 
 	HCALL_RET(EOK)
-	SET_SIZE(hcall_snet_write)
+	SET_SIZE(hcall_writew)
+
+/*
+ * snet read
+ *
+ * arg1 source physical address (%o0)
+ * --
+ * ret0 status (%o0)
+ * ret1 source data word (%o1)
+ *
+ */
+	ENTRY_NP(hcall_readx)
+
+	ldx [%o0], %o1
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_readx)
+
+/*
+ * snet write
+ *
+ * arg1 data word (%o0)
+ * arg2 destination physical address (%o1)
+ * --
+ * ret0 status (%o0)
+ */
+	ENTRY_NP(hcall_writex)
+
+	stx	%o0, [%o1]
+
+	HCALL_RET(EOK)
+	SET_SIZE(hcall_writex)
 
 #endif /* ifdef T1_FPGA_SNET */

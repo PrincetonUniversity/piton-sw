@@ -239,10 +239,14 @@ extern "C" {
 #define	DISK_WRITE		0xf1
 #endif
 
-#ifdef PITON_NET
-#define	SNET_READ		0xf2
-#define	SNET_WRITE		0xf3
-#endif
+#define	OS_READB		0xf2
+#define	OS_WRITEB		0xf3
+#define	OS_READH		0xf4
+#define	OS_WRITEH		0xf5
+#define	OS_READW		0xf6
+#define	OS_WRITEW		0xf7
+#define	OS_READX		0xf8
+#define	OS_WRITEX		0xf9
 
 #ifdef DEBUG /* Not yet FWARCd */
 #define	MMU_PERM_ADDR_INFO	0xfd
