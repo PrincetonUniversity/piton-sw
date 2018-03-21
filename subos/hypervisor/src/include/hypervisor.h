@@ -243,7 +243,7 @@ extern "C" {
 #define	SNET_READ		0xf2
 #define	SNET_WRITE		0xf3
 #endif
-#define PICO_START              0xf4
+#define PICO_START              0xf6
 #ifdef DEBUG /* Not yet FWARCd */
 #define	MMU_PERM_ADDR_INFO	0xfd
 #endif
