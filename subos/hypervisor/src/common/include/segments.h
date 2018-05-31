@@ -268,7 +268,7 @@ typedef struct ra2pa_segment ra2pa_segment_t;
 	.poplocals
 /* END CSTYLED */
 
-#ifdef CONFIG_PCIE
+#ifdef PITON_IO
 
 /*
  * Note: Could just use RA2PA_RANGE_CONV_UNK_SIZE() macro, but that would

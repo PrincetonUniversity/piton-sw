@@ -177,4 +177,3 @@
 	HCALL_RET(EOK)
 	SET_SIZE(hcall_writex)
 
-#endif /* ifdef T1_FPGA_SNET */

@@ -761,9 +761,9 @@ setntsbsN:
 	! %g5 = page size mask
 	! %g6 = guest struct
 
-	RA2PA_RANGE_CONV_UNK_SIZE(%g6, %g2, %g4, herr_noraddr, %g5, %g7)
+	RA2PA_RANGE_CONV_UNK_SIZE(%g6, %g2, %g4, perm_io_map_check, %g5, %g7)
 	mov	%g7, %g2	! %g2 	paddr
-	or	%g3, %g2, %o2
+4:	or	%g3, %g2, %o2
 
 	! Force clear TTE lock bit
 	CLEAR_TTE_LOCK_BIT(%o2, %g5)
@@ -920,6 +920,15 @@ setntsbsN:
 	
 	SPINLOCK_EXIT(%g7)
 	HCALL_RET(EOK)
+
+	! Check for I/O
+perm_io_map_check:
+	RANGE_CHECK_IO(%g6, %g2, %g4, .hcall_mmu_perm_map_addr_io_found,
+	    herr_noraddr, %g1, %g5)
+.hcall_mmu_perm_map_addr_io_found:
+	ba,a	4b
+	  nop
+
 	SET_SIZE(hcall_mmu_map_perm_addr)
 
 

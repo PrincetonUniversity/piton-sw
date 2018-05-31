@@ -118,6 +118,8 @@ init_guest(int i)
 		init_ra2pa_segment(&(gp->ra2pa_segment[j]));
 	}
 
+    assign_ra2pa_segments(gp, 0xfff0c00000, 0x400000, 0, IO_SEGMENT);
+
 	asmsg = (hvctl_msg_t *)gp->async_buf;
 	asmsg->hdr.op = HVctl_op_new_res_stat;
 
