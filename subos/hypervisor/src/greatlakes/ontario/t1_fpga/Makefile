@@ -16,7 +16,7 @@ OPTIONS = $(PLAT_OPTIONS)
 OPTIONS += -DT1_FPGA                 # OpenSPARC T1 implementation in FPGA
 OPTIONS += -DPITON_NET
 OPTIONS += -DPITON_IO
-OPTIONS += -UT1_FPGA_MEMORY_PREINIT  # memory pre-initialized
+OPTIONS += -DT1_FPGA_MEMORY_PREINIT  # memory pre-initialized
 
 
 OPTIONS += -DDEBUG
