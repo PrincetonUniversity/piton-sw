@@ -312,6 +312,7 @@ node virtual-devices  virtual-devices {
         fwd  -> virtual-device_5;
         fwd  -> virtual-device_6;
         fwd  -> virtual-device_7;
+        fwd  -> virtual-device_8;
 }
 
 
@@ -542,3 +543,14 @@ node virtual-device  virtual-device_7 {
 	device-type = "network";
 	cfg-handle = 1;
 } 
+
+node virtual-device  virtual-device_8 {
+
+        back  -> virtual-devices;
+        name  = "piton-kbd";
+        compatible = { "piton-ps2-1.00.a" };
+        intr  = 0x0;
+/*        ino  = T1_FPGA_SNET_INO;*/
+        cfg-handle  = 0x3;
+}
+
