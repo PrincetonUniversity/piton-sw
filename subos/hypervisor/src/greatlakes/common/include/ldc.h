@@ -493,7 +493,6 @@ struct ldc_ino2endpoint {
 
 
 extern ldc_endpoint_t			hv_ldcs[];
-extern struct guest_console_queues	cons_queues[];
 
 /*
  * LDC shared memory mapin entry
@@ -525,6 +524,8 @@ struct guest_console_queues {
 	uint8_t	cons_rxq[Q_EL_SIZE * LDC_CONS_QSIZE];
 	uint8_t	cons_txq[Q_EL_SIZE * LDC_CONS_QSIZE];
 };
+
+extern struct guest_console_queues	cons_queues[];
 
 /*
  * XXX - For the moment the offsets generation

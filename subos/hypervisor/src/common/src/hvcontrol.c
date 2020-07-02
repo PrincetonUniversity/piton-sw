@@ -85,7 +85,7 @@ hvctl_status_t op_get_hvconfig(hvctl_msg_t *replyp);
 hvctl_status_t op_guest_start(hvctl_msg_t *cmdp, hvctl_msg_t *replyp);
 hvctl_status_t op_guest_stop(hvctl_msg_t *cmdp, hvctl_msg_t *replyp);
 hvctl_status_t op_guest_panic(hvctl_msg_t *cmdp, hvctl_msg_t *replyp);
-hvctl_status_t op_get_res_stat(hvctl_msg_t *cmdp, hvctl_msg_t *replyp);
+static hvctl_status_t op_get_res_stat(hvctl_msg_t *cmdp, hvctl_msg_t *replyp);
 
 void get_guest_utilisation(guest_t *guestp, rs_guest_util_t *statp);
 
@@ -1025,22 +1025,20 @@ dump_control_pkt()
 	DBGHL(c_printf("\tCommand op 0x%x : seq# 0x%x : chksum # 0x%x\n",
 	    rcptp->hdr.op, rcptp->hdr.seqn, rcptp->hdr.chksum));
 
-#define	OP(_s, _n)	case _s : sp = #_s##" : "##_n; break;
 	switch (rcptp->hdr.op) {
-	OP(HVctl_op_hello, "Initial request to open hvctl channel")
-	OP(HVctl_op_challenge, "challenge returned from HV to Zeus")
-	OP(HVctl_op_response, "Response from Zeus")
-	OP(HVctl_op_get_hvconfig, "Get the HV config pointers")
-	OP(HVctl_op_reconfigure, "Reconfigure request")
-	OP(HVctl_op_guest_start, "Start a guest")
-	OP(HVctl_op_guest_stop, "Stop a guest")
-	OP(HVctl_op_guest_delayed_reconf, "Delayed reconfigure on guest exit")
-	OP(HVctl_op_guest_suspend, "Suspend a guest")
-	OP(HVctl_op_guest_resume, "Resume a guest")
-	OP(HVctl_op_guest_panic, "Panic a guest")
-	OP(HVctl_op_get_res_stat, "Get resource status if supported")
-	OP(HVctl_op_new_res_stat, "Async resource status update if supported")
-#undef	OP
+	case HVctl_op_hello : sp = "HVctl_op_hello : Initial request to open hvctl channel"; break;
+	case HVctl_op_challenge : sp = "HVctl_op_challenge : challenge returned from HV to Zeus"; break;
+	case HVctl_op_response : sp = "HVctl_op_response : Response from Zeus"; break;
+	case HVctl_op_get_hvconfig : sp = "HVctl_op_get_hvconfig : Get the HV config pointers"; break;
+	case HVctl_op_reconfigure : sp = "HVctl_op_reconfigure : Reconfigure request"; break;
+	case HVctl_op_guest_start : sp = "HVctl_op_guest_start : Start a guest"; break;
+	case HVctl_op_guest_stop : sp = "HVctl_op_guest_stop : Stop a guest"; break;
+	case HVctl_op_guest_delayed_reconf : sp = "HVctl_op_guest_delayed_reconf : Delayed reconfigure on guest exit"; break;
+	case HVctl_op_guest_suspend : sp = "HVctl_op_guest_suspend : Suspend a guest"; break;
+	case HVctl_op_guest_resume : sp = "HVctl_op_guest_resume : Resume a guest"; break;
+	case HVctl_op_guest_panic : sp = "HVctl_op_guest_panic : Panic a guest"; break;
+	case HVctl_op_get_res_stat : sp = "HVctl_op_get_res_stat : Get resource status if supported"; break;
+	case HVctl_op_new_res_stat : sp = "HVctl_op_new_res_stat : Async resource status update if supported"; break;
 	default:
 		sp = "Unknown command";
 		break;

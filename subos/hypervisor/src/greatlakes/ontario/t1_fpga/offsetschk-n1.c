@@ -1,0 +1,32 @@
+#pragma	ident	"@(#)offsets.in	1.87	07/07/09 SMI"
+#ifndef _OFFSETS_H
+#define	_OFFSETS_H
+#endif
+#include <sys/htypes.h>
+#include <sun4v/mmu.h>
+#include <sun4v/errs_defs.h>
+#include <support.h>
+#include <traps.h>
+#include <mmu.h>
+#include <cache.h>
+#include <cpu_errs_defs.h>
+#include <vpci_errs_defs.h>
+#include <hypervisor.h>
+#include <svc.h>
+#include <vdev_ops.h>
+#include <vdev_intr.h>
+#include <fire.h>
+#include <cpu_errs.h>
+#include <svc_vbsc.h>
+#include <ncs.h>
+#include <cyclic.h>
+#include <vcpu.h>
+#include <strand.h>
+#include <guest.h>
+#include <ldc.h>
+#include <pcie.h>
+#include <hvctl.h>
+#include <md.h>
+#include <md/md_impl.h>
+#include <vdev_simdisk.h>
+#include <vdev_snet.h>

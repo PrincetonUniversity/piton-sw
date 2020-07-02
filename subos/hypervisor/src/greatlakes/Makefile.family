@@ -58,8 +58,8 @@ QINFO = $(FAMILY):$(PLATFORM):$(VARIANT)
 
 ALL_INC = -I$(PLATFORM_INC) -I$(FAMILY_INC) -I$(COMMON_INC) -I$(SUN_INC) -I.
 CPPFLAGS = $(ALL_INC) $(OPTIONS)
-CFLAGS = -xarch=v9a -KPIC -xO3 -errwarn=%all
-ASFLAGS = -xarch=v9d -D_ASM -P -xregsym=no $(CPPFLAGS)
+CFLAGS = -mcpu=v9 -fPIC -O3 -errwarn=%all
+ASFLAGS = -xarch=v9b -D_ASM -P $(CPPFLAGS)
 
 FAMILYC_SRCS = svc_init.c
 FAMILYC_LINT_SRCS = $(FAMILY_SRC)/svc_init.c

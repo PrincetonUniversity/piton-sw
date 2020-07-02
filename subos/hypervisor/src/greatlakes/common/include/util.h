@@ -248,9 +248,9 @@ extern "C" {
 
 
 /* the VCPUID2CPUP macro below assumes the array step is 8 */
-#if GUEST_VCPUS_INCR != 8
-#error "GUEST_VCPUS_INCR is not 8"
-#endif
+//#if GUEST_VCPUS_INCR != 8
+//#error "GUEST_VCPUS_INCR is not 8"
+//#endif
 
 #define	GUEST_VCPUS_SHIFT	3
 

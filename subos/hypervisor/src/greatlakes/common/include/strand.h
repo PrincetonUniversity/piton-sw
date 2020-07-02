@@ -158,11 +158,11 @@ struct mini_stack {
 	uint64_t	val[MINI_STACK_DEPTH];	/* value */
 };
 
-extern strand_t strands[];
-
 #endif /* !_ASM */
 
 #include <platform/strand.h>
+
+extern strand_t strands[];
 
 #ifdef __cplusplus
 }

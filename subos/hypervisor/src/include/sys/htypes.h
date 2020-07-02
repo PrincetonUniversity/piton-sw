@@ -70,9 +70,9 @@ typedef unsigned char		uint8_t;
 typedef unsigned short		uint16_t;
 typedef unsigned int		uint32_t;
 
-#if !defined(__sparcv9)
-#error "__sparcv9 compilation environment required"
-#endif
+//#if !defined(__sparcv9)
+//#error "__sparcv9 compilation environment required"
+//#endif
 
 typedef unsigned long		uint64_t;
 

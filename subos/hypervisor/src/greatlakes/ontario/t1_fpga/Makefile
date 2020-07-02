@@ -40,7 +40,7 @@ OPTIONS += -DCONFIG_HVUART
 OPTIONS += -DCONFIG_CN_UART	# UART console capability for a guest
 OPTIONS += -UCONFIG_VERSION_TEST
 OPTIONS += -UCONFIG_LDC_BRIDGE   # Compile with support for XDC Bridge
-OPTIONS += -DCONFIG_CRYPTO       # Crypto support
+OPTIONS += -UCONFIG_CRYPTO       # Crypto support
 OPTIONS += -DSIMULATION
 OPTIONS += -UFOR_ZEUS
 
